@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getCategoryBySlug, DIFFICULTIES } from '@/lib/categories'
+import AwsServiceIcon from '@/components/AwsServiceIcon'
 
 export default async function CategoryPage({
   params,
@@ -22,7 +23,9 @@ export default async function CategoryPage({
 
       {/* Header */}
       <div className={`${cat.bgColor} rounded-3xl p-8 mb-10`}>
-        <div className="text-6xl mb-3">{cat.icon}</div>
+        <div className="mb-3" aria-label={`${cat.name} アイコン`}>
+          <AwsServiceIcon service={cat.slug} size={72} />
+        </div>
         <h1 className={`text-3xl font-extrabold ${cat.color} mb-2`}>{cat.name}</h1>
         <p className="text-sm font-medium text-gray-500 mb-2">{cat.nameEn}</p>
         <p className="text-gray-700 leading-relaxed max-w-xl">{cat.description}</p>

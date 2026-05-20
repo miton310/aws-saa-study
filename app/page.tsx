@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { CATEGORIES, DIFFICULTIES } from '@/lib/categories'
+import AwsServiceIcon from '@/components/AwsServiceIcon'
+import { ArchitectureGroupAWSCloudlogo } from 'aws-react-icons'
 
 export default function HomePage() {
   return (
@@ -7,13 +9,15 @@ export default function HomePage() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="text-6xl mb-4">☁️</div>
+          <div className="mb-4 flex justify-center" aria-label="AWS Cloud ロゴ">
+            <ArchitectureGroupAWSCloudlogo size={86} aria-hidden />
+          </div>
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
-            AWS SAA を<br className="md:hidden" />
+            AWS SAA を<br />
             <span className="text-orange-400">図解アニメーション</span>で学ぼう
           </h1>
-          <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-            AWS認定ソリューションアーキテクト-アソシエイト（SAA-C03）の合格を目指す方へ。
+          <p className="text-lg text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+            AWS認定ソリューションアーキテクト-アソシエイト（SAA-C03）の合格を目指す方へ。<br />
             VPC・EC2・S3など主要サービスを、動くビジュアルで直感的に理解できます。
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -54,25 +58,25 @@ export default function HomePage() {
       <section id="howto" className="py-16 px-4 bg-white">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-center text-gray-800 mb-10">
-            📖 このサイトの使い方
+            このサイトの使い方
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
                 step: '1',
-                icon: '🗂️',
+                service: 'vpc',
                 title: 'カテゴリを選ぶ',
                 desc: 'VPC、EC2、S3 など学びたいAWSサービスのカテゴリを選択します。',
               },
               {
                 step: '2',
-                icon: '📊',
+                service: 'elb',
                 title: '難易度を選ぶ',
                 desc: '初級（基本概念）・中級（設計パターン）・上級（試験対策）から選べます。',
               },
               {
                 step: '3',
-                icon: '✅',
+                service: 'lambda',
                 title: 'アニメーションで学ぶ',
                 desc: 'p5.jsアニメーションで動きを視覚的に理解し、練習問題で定着させましょう。',
               },
@@ -81,7 +85,9 @@ export default function HomePage() {
                 <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-3">
                   {item.step}
                 </div>
-                <div className="text-4xl mb-2">{item.icon}</div>
+                <div className="mb-2 flex justify-center" aria-label={`${item.title} アイコン`}>
+                  <AwsServiceIcon service={item.service} size={52} />
+                </div>
                 <h3 className="font-semibold text-gray-800 mb-2">{item.title}</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
               </div>
@@ -94,7 +100,7 @@ export default function HomePage() {
       <section id="categories" className="py-16 px-4 bg-gray-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
-            🎯 学習カテゴリ
+            学習カテゴリ
           </h2>
           <p className="text-center text-gray-500 text-sm mb-10">
             AWSサービス別に体系的に学習できます。各カテゴリに初級・中級・上級のコンテンツがあります。
@@ -106,7 +112,9 @@ export default function HomePage() {
                 href={`/${cat.slug}`}
                 className={`group block ${cat.bgColor} rounded-2xl p-5 border-2 border-transparent hover:shadow-md transition-all duration-200`}
               >
-                <div className="text-4xl mb-3">{cat.icon}</div>
+                <div className="mb-3" aria-label={`${cat.name} アイコン`}>
+                  <AwsServiceIcon service={cat.slug} size={52} />
+                </div>
                 <h3 className={`font-bold text-lg mb-1 ${cat.color}`}>
                   {cat.name}
                 </h3>
@@ -131,7 +139,7 @@ export default function HomePage() {
       <section className="py-16 px-4 bg-white">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-center text-gray-800 mb-10">
-            📈 難易度ガイド
+            難易度ガイド
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {DIFFICULTIES.map((d) => (
@@ -172,7 +180,7 @@ export default function HomePage() {
       {/* CTA / Affiliate */}
       <section className="py-16 px-4 bg-slate-800 text-white">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl font-bold mb-4">📚 参考書でさらに深く学ぼう</h2>
+          <h2 className="text-2xl font-bold mb-4">参考書でさらに深く学ぼう</h2>
           <p className="text-slate-300 mb-8 leading-relaxed">
             本サイトと合わせて参考書や問題集を活用することで、SAA合格の可能性がさらに高まります。
             Amazonで人気のSAA対策本をチェックしてみてください。

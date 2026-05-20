@@ -186,6 +186,11 @@ export default function VPCAdvancedStepper() {
   const pkts     = useRef<Packet[]>([])
   const phaseRef = useRef(0)
   const waitRef  = useRef(0)
+  const imgEc2 = useRef<unknown>(null)
+  const imgVpc = useRef<unknown>(null)
+  const imgPrivateSubnet = useRef<unknown>(null)
+  const imgTgw = useRef<unknown>(null)
+  const imgS3 = useRef<unknown>(null)
 
   useEffect(() => {
     stepRef.current  = step
@@ -211,17 +216,24 @@ export default function VPCAdvancedStepper() {
   function ec2Box(p5: any, cx: number, cy: number, label: string, col: [number, number, number]) {
     p5.strokeWeight(1.5); p5.stroke(...col)
     p5.fill(col[0], col[1], col[2], 35)
-    p5.rect(cx - 38, cy - 26, 76, 52, 8)
+    p5.rect(cx - 38, cy - 26, 76, 52, 0)
+    if (imgEc2.current) {
+      p5.image(imgEc2.current, cx - 13, cy - 23, 26, 26)
+    }
     p5.noStroke(); p5.fill(...col)
-    p5.textSize(13); p5.textAlign(p5.CENTER, p5.CENTER)
-    p5.text('💻', cx, cy - 9)
     p5.textSize(8)
+    p5.textAlign(p5.CENTER, p5.CENTER)
     label.split('\n').forEach((ln: string, i: number) => p5.text(ln, cx, cy + 8 + i * 12))
   }
 
   const setup = (p5: any, ref: any) => {
     p5.createCanvas(W, H).parent(ref)
     p5.frameRate(40)
+    p5.loadImage('/icons/aws/ec2.svg', (img: unknown) => { imgEc2.current = img })
+    p5.loadImage('/icons/aws/vpc.svg', (img: unknown) => { imgVpc.current = img })
+    p5.loadImage('/icons/aws/privateSubnet.svg', (img: unknown) => { imgPrivateSubnet.current = img })
+    p5.loadImage('/icons/aws/tgw.svg', (img: unknown) => { imgTgw.current = img })
+    p5.loadImage('/icons/aws/s3.svg', (img: unknown) => { imgS3.current = img })
   }
 
   const draw = (p5: any) => {
@@ -246,7 +258,7 @@ export default function VPCAdvancedStepper() {
         // "複雑！" label in center
         p5.noStroke(); p5.fill(239, 68, 68, 200)
         p5.textSize(13); p5.textAlign(p5.CENTER, p5.CENTER)
-        p5.text('😵 6本の接続が必要！', W / 2, H / 2)
+        p5.text('6本の接続が必要！', W / 2, H / 2)
         p5.textSize(9); p5.fill(150, 60, 60)
         p5.text('（VPCが増えるほど爆発的に増加）', W / 2, H / 2 + 20)
       }
@@ -254,16 +266,20 @@ export default function VPCAdvancedStepper() {
       if (s >= 2) {
         // TGW hub & spoke: draw 4 lines from VPCs to TGW
         const tgwGlow = s === 2 ? 0.5 + Math.sin(t * 0.08) * 0.5 : 0.8
+        const tgwCol: [number, number, number] = [140, 79, 255]
         p5.stroke(245, 158, 11, 160); p5.strokeWeight(1.5)
         positions.forEach(pos => p5.line(pos.x, pos.y, TGW.x, TGW.y))
 
         // TGW box
-        p5.strokeWeight(2.5); p5.stroke(245, 158, 11, 200 * tgwGlow)
-        p5.fill(254, 243, 199, 80 + tgwGlow * 100)
-        p5.rect(TGW.x - 52, TGW.y - 20, 104, 40, 10)
-        p5.noStroke(); p5.fill(160, 100, 0)
-        p5.textSize(9.5); p5.textAlign(p5.CENTER, p5.CENTER)
-        p5.text('🔀 Transit Gateway', TGW.x, TGW.y)
+        p5.strokeWeight(2.5); p5.stroke(...tgwCol, 200 * tgwGlow)
+        p5.noFill()
+        p5.rect(TGW.x - 66, TGW.y - 18, 132, 36, 0)
+        if (imgTgw.current) {
+          p5.image(imgTgw.current, TGW.x - 64, TGW.y - 16, 24, 24)
+        }
+        p5.noStroke(); p5.fill(...tgwCol)
+        p5.textSize(9.5); p5.textAlign(p5.LEFT, p5.CENTER)
+        p5.text('Transit Gateway', TGW.x - 36, TGW.y + 1)
 
         if (s === 2) {
           p5.noStroke(); p5.fill(16, 130, 60, 200)
@@ -281,18 +297,24 @@ export default function VPCAdvancedStepper() {
       // VPC box
       p5.strokeWeight(2.5); p5.stroke(99, 102, 241)
       p5.fill(238, 242, 255, 180)
-      p5.rect(EP_VPC.x, EP_VPC.y, EP_VPC.w, EP_VPC.h, 12)
+      p5.rect(EP_VPC.x, EP_VPC.y, EP_VPC.w, EP_VPC.h, 0)
+      if (imgVpc.current) {
+        p5.image(imgVpc.current, EP_VPC.x + 10, EP_VPC.y + 4, 24, 24)
+      }
       p5.noStroke(); p5.fill(99, 102, 241)
       p5.textSize(9); p5.textAlign(p5.LEFT)
-      p5.text('VPC  10.0.0.0/16', EP_VPC.x + 10, EP_VPC.y + 16)
+      p5.text('VPC  10.0.0.0/16', EP_VPC.x + 36, EP_VPC.y + 16)
 
       // Private subnet
       p5.strokeWeight(1.5); p5.stroke(16, 185, 129)
-      p5.fill(209, 250, 229, 160)
-      p5.rect(EP_PRIV.x, EP_PRIV.y, EP_PRIV.w, EP_PRIV.h, 8)
+      p5.fill(255, 255, 255, 160)
+      p5.rect(EP_PRIV.x, EP_PRIV.y, EP_PRIV.w, EP_PRIV.h, 0)
+      if (imgPrivateSubnet.current) {
+        p5.image(imgPrivateSubnet.current, EP_PRIV.x + 0, EP_PRIV.y + 0, 18, 18)
+      }
       p5.noStroke(); p5.fill(5, 150, 105)
-      p5.textSize(8); p5.textAlign(p5.CENTER)
-      p5.text('プライベートサブネット', EP_PRIV.x + EP_PRIV.w / 2, EP_PRIV.y + 13)
+      p5.textSize(9); p5.textAlign(p5.LEFT, p5.CENTER)
+      p5.text('プライベートサブネット', EP_PRIV.x + 22, EP_PRIV.y + 10)
 
       // EC2
       ec2Box(p5, EP_EC2.x, EP_EC2.y, 'EC2', [37, 99, 235])
@@ -304,7 +326,7 @@ export default function VPCAdvancedStepper() {
         p5.rect(EP_GW.x - 52, EP_GW.y - 20, 104, 40, 8)
         p5.noStroke(); p5.fill(37, 99, 235)
         p5.textSize(8.5); p5.textAlign(p5.CENTER, p5.CENTER)
-        p5.text('🎯 Gateway EP', EP_GW.x, EP_GW.y - 5)
+        p5.text('Gateway Endpoint', EP_GW.x, EP_GW.y - 5)
         p5.textSize(7.5); p5.fill(100, 100, 200)
         p5.text('（S3 / DynamoDB）', EP_GW.x, EP_GW.y + 9)
 
@@ -316,9 +338,12 @@ export default function VPCAdvancedStepper() {
         p5.strokeWeight(2); p5.stroke(16, 185, 129)
         p5.fill(209, 250, 229, 200)
         p5.rect(EP_S3.x - 50, EP_S3.y - 20, 100, 40, 8)
+        if (imgS3.current) {
+          p5.image(imgS3.current, EP_S3.x - 47, EP_S3.y - 17, 16, 16)
+        }
         p5.noStroke(); p5.fill(5, 150, 105)
-        p5.textSize(9); p5.textAlign(p5.CENTER, p5.CENTER)
-        p5.text('🗄 Amazon S3', EP_S3.x, EP_S3.y)
+        p5.textSize(9); p5.textAlign(p5.LEFT, p5.CENTER)
+        p5.text('Amazon S3', EP_S3.x - 26, EP_S3.y)
 
         // Line GW EP → S3
         p5.stroke(180, 200, 220); p5.strokeWeight(1)
@@ -327,7 +352,7 @@ export default function VPCAdvancedStepper() {
         // "Internet不要" label
         p5.noStroke(); p5.fill(239, 68, 68, 160)
         p5.textSize(8); p5.textAlign(p5.CENTER)
-        p5.text('🚫 インターネット不使用', EP_S3.x, EP_S3.y + 35)
+        p5.text('インターネット不使用', EP_S3.x, EP_S3.y + 35)
 
         // Legend
         p5.fill(59, 130, 246); p5.circle(14, H - 20, 8)
@@ -344,7 +369,7 @@ export default function VPCAdvancedStepper() {
         p5.rect(EP_ENI.x - 38, EP_ENI.y - 18, 76, 36, 8)
         p5.noStroke(); p5.fill(109, 40, 217)
         p5.textSize(8); p5.textAlign(p5.CENTER, p5.CENTER)
-        p5.text('🔌 ENI', EP_ENI.x, EP_ENI.y - 5)
+        p5.text('ENI', EP_ENI.x, EP_ENI.y - 5)
         p5.textSize(7); p5.fill(130, 60, 200)
         p5.text('(PrivateLink)', EP_ENI.x, EP_ENI.y + 8)
 
@@ -358,7 +383,7 @@ export default function VPCAdvancedStepper() {
         p5.rect(EP_SVC.x - 55, EP_SVC.y - 25, 110, 50, 8)
         p5.noStroke(); p5.fill(109, 40, 217)
         p5.textSize(9); p5.textAlign(p5.CENTER, p5.CENTER)
-        p5.text('☁️ AWS Service', EP_SVC.x, EP_SVC.y - 8)
+        p5.text('AWS Service', EP_SVC.x, EP_SVC.y - 8)
         p5.textSize(7.5); p5.fill(130, 60, 200)
         p5.text('(CloudWatch, SNS…)', EP_SVC.x, EP_SVC.y + 8)
 
@@ -388,13 +413,13 @@ export default function VPCAdvancedStepper() {
       p5.rect(ONPREM.x, ONPREM.y, ONPREM.w, ONPREM.h, 10)
       p5.noStroke(); p5.fill(60, 60, 60)
       p5.textSize(9); p5.textAlign(p5.CENTER)
-      p5.text('🏢 オンプレミス', ONPREM.x + ONPREM.w / 2, ONPREM.y + 20)
+      p5.text('オンプレミス', ONPREM.x + ONPREM.w / 2, ONPREM.y + 20)
       p5.textSize(8); p5.fill(100, 100, 100)
       p5.text('データセンター', ONPREM.x + ONPREM.w / 2, ONPREM.y + 34)
-      // Router icon
+      // Router label
       p5.fill(80, 80, 80)
-      p5.textSize(20); p5.textAlign(p5.CENTER, p5.CENTER)
-      p5.text('🖥', ONPREM.x + ONPREM.w / 2, ONPREM.y + ONPREM.h / 2 + 15)
+      p5.textSize(10); p5.textAlign(p5.CENTER, p5.CENTER)
+      p5.text('Router', ONPREM.x + ONPREM.w / 2, ONPREM.y + ONPREM.h / 2 + 16)
 
       // AWS VPC box
       p5.strokeWeight(2.5); p5.stroke(99, 102, 241)
@@ -429,7 +454,7 @@ export default function VPCAdvancedStepper() {
         // Internet cloud label
         p5.noStroke(); p5.fill(245, 158, 11, 180)
         p5.textSize(9); p5.textAlign(p5.CENTER)
-        p5.text('🌍 インターネット経由', INET_CLOUD.x, INET_CLOUD.y - 12)
+        p5.text('インターネット経由', INET_CLOUD.x, INET_CLOUD.y - 12)
         p5.textSize(8); p5.fill(180, 120, 0)
         p5.text('IPsec 暗号化トンネル', INET_CLOUD.x, INET_CLOUD.y + 4)
 
@@ -440,7 +465,7 @@ export default function VPCAdvancedStepper() {
         p5.rect(nx, ny, nw, nh, 8)
         p5.noStroke(); p5.textAlign(p5.LEFT); p5.textSize(8.5)
         p5.fill(130, 90, 0)
-        p5.text('📋 Site-to-Site VPN', nx + 10, ny + 16)
+        p5.text('Site-to-Site VPN', nx + 10, ny + 16)
         p5.fill(80, 80, 80)
         p5.text('✅ 設定：数時間で完了　✅ コスト：低い　⚠️ 帯域：インターネットに依存（不安定）', nx + 10, ny + 34)
         p5.text('⚠️ レイテンシー：インターネット経由のため不安定', nx + 10, ny + 52)
@@ -459,7 +484,7 @@ export default function VPCAdvancedStepper() {
         // DX label
         p5.noStroke(); p5.fill(37, 99, 235, 200)
         p5.textSize(9); p5.textAlign(p5.CENTER)
-        p5.text('⚡ 専用回線（Direct Connect）', INET_CLOUD.x, INET_CLOUD.y - 12)
+        p5.text('専用回線（Direct Connect）', INET_CLOUD.x, INET_CLOUD.y - 12)
         p5.textSize(8); p5.fill(30, 60, 160)
         p5.text('低レイテンシー・安定帯域', INET_CLOUD.x, INET_CLOUD.y + 4)
 
@@ -470,7 +495,7 @@ export default function VPCAdvancedStepper() {
         p5.rect(nx, ny, nw, nh, 8)
         p5.noStroke(); p5.textAlign(p5.LEFT); p5.textSize(8.5)
         p5.fill(30, 60, 150)
-        p5.text('📋 Direct Connect (DX)', nx + 10, ny + 16)
+        p5.text('Direct Connect (DX)', nx + 10, ny + 16)
         p5.fill(80, 80, 80)
         p5.text('✅ 帯域：安定・高スループット　✅ レイテンシー：低い　⚠️ 開通：数週間かかる', nx + 10, ny + 34)
         p5.text('⚠️ コスト：高い（VPNより）　→ 大容量・ミッションクリティカルな用途に最適', nx + 10, ny + 52)

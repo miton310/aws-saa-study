@@ -116,302 +116,437 @@ const STEPS = [
 
 const TOTAL = STEPS.length
 
-// ── Canvas layout constants ────────────────────────────────────────────────
+// ── キャンバスのレイアウト定数 ────────────────────────────────────────────
+// p5.js が描画するキャンバスのサイズ（ピクセル）
+const W = 660  // キャンバス幅
+const H = 340  // キャンバス高さ
 
-const W = 660
-const H = 340
+// 各ノードの「中心座標」。描画時はここを基準にボックスやラベルを配置する。
+// y が小さいほど上（インターネット側）、大きいほど下（VPC内部側）
+const INET    = { x: 330, y: 12  }  // 「インターネット」ラベルの位置
+const IGW     = { x: 330, y: 40  }  // インターネットゲートウェイ（IGW）の中心
+const VPC     = { x: 10,  y: 62, w: 640, h: 268 }  // VPC 外枠の左上座標・幅・高さ
+const PUB     = { x: 48,  y: 110, w: 238, h: 186 } // パブリックサブネット
+const PRI     = { x: 374, y: 110, w: 238, h: 186 } // プライベートサブネット
+const NAT     = { x: 300, y: 236 }  // NAT ゲートウェイの中心（VPC 内、サブネット境界付近）
+const EC2_PUB = { x: 148, y: 216 }  // パブリック EC2（Webサーバー）の中心
+const EC2_PRI = { x: 478, y: 216 }  // プライベート EC2（DBサーバー）の中心
 
-const INET = { x: 330, y: 12 }
-const IGW  = { x: 330, y: 40 }
-const VPC  = { x: 10,  y: 62, w: 640, h: 268 }
-const PUB  = { x: 48,  y: 110, w: 238, h: 186 }
-const PRI  = { x: 374, y: 110, w: 238, h: 186 }
-const NAT  = { x: 300, y: 236 }
-const EC2_PUB = { x: 148, y: 216 }
-const EC2_PRI = { x: 478, y: 216 }
-
+// パケットアニメーション 1 個分のデータ型
+// progress が 0→1 に増えるにつれて (x,y)→(tx,ty) を直線移動する
 interface Packet {
-  x: number; y: number; tx: number; ty: number
-  progress: number; speed: number
-  color: [number, number, number]
-  active: boolean; blocked: boolean
+  x: number          // 現在の描画 X 座標（lerp で計算）
+  y: number          // 現在の描画 Y 座標
+  tx: number         // 目標 X 座標
+  ty: number         // 目標 Y 座標
+  progress: number   // 移動進捗 0.0〜1.0
+  speed: number      // 1フレームあたりの進捗増加量（ランダムにぶれる）
+  color: [number, number, number]  // RGB 描画色
+  active: boolean    // false になったフレームで配列から除去される
+  blocked: boolean   // true = ブロックパケット（途中で消滅し赤×を表示する）
 }
 
+// パケット経路の 1 セグメント: [出発ノード, 到着ノード, 色, ブロック?]
 type Seg = [{ x: number; y: number }, { x: number; y: number }, [number, number, number], boolean?]
 
+// ステップ番号に応じてパケットが通る経路（セグメント列）を返す
+// 経路は 1 セグメントずつ順番に再生され、全部終わると最初に戻る（ループ）
 function getSequence(s: number): Seg[] {
   if (s === 5) return [
+    // インターネット → IGW → パブリック EC2（インバウンド/青）
     [INET, IGW,     [59, 130, 246]],
     [IGW,  EC2_PUB, [59, 130, 246]],
   ]
   if (s === 6) return [
+    // ① インバウンド（青）: Internet → IGW → Web EC2
     [INET,    IGW,     [59, 130, 246]],
     [IGW,     EC2_PUB, [59, 130, 246]],
+    // ② 内部問い合わせ（紫）: Web ↔ DB
     [EC2_PUB, EC2_PRI, [139, 92, 246]],
     [EC2_PRI, EC2_PUB, [139, 92, 246]],
+    // ③ アウトバウンド（緑）: Web EC2 → IGW → Internet
     [EC2_PUB, IGW,     [16, 185, 129]],
     [IGW,     INET,    [16, 185, 129]],
   ]
   if (s >= 7) return [
+    // ① アウトバウンド（緑）: プライベート EC2 → NAT → IGW → Internet
     [EC2_PRI, NAT,  [16, 185, 129]],
     [NAT,     IGW,  [16, 185, 129]],
     [IGW,     INET, [16, 185, 129]],
+    // ② ブロック（赤）: Internet → IGW → （プライベート EC2 には届かない）
     [INET,    IGW,  [239, 68, 68], true],
+    // IGW とプライベート EC2 の中間点で消滅させる（blocked=true のため途中で止まる）
     [IGW,     { x: (IGW.x + EC2_PRI.x) / 2, y: (IGW.y + EC2_PRI.y) / 2 }, [239, 68, 68], true],
   ]
-  return []
+  return []  // ステップ 1〜4 はパケットアニメーションなし
 }
 
-// ── Component ─────────────────────────────────────────────────────────────
+// ── コンポーネント ─────────────────────────────────────────────────────────
 
 export default function VPCBeginnerStepper() {
+  // 現在表示中のステップ番号（1〜8）。UI のボタン操作で更新される
   const [step, setStep] = useState(1)
+
+  // p5 の draw() はクロージャなので useState の最新値を参照できない。
+  // useRef に同期コピーを持つことで draw() 内から常に最新ステップを読める
   const stepRef = useRef(1)
+
+  // draw() が呼ばれた累計フレーム数。sin() に渡してグロー・フェードアニメに使う
   const timerRef = useRef(0)
+
+  // 現在アクティブなパケット一覧。Ref なので更新しても再レンダリングは起きない
   const pkts = useRef<Packet[]>([])
+
+  // getSequence() で返ったセグメント列のうち「次に流す番号」
   const phaseRef = useRef(0)
+
+  // 全セグメント完了後、次のループ開始まで待つフレーム数のカウントダウン
   const waitRef = useRef(0)
 
+  // p5.loadImage() でロードした AWS SVG アイコン画像を保持する Ref
+  // （p5.Image 型の定義が react-p5 に存在しないため any を使用）
+  const imgEc2 = useRef<any>(null)  // EC2 アイコン
+  const imgIgw = useRef<any>(null)  // インターネットゲートウェイ アイコン
+  const imgNat = useRef<any>(null)  // NAT ゲートウェイ アイコン
+  const imgVpc = useRef<any>(null)  // VPC アイコン
+  const imgPublicSubnet = useRef<any>(null)  // パブリックサブネット アイコン
+  const imgPrivateSubnet = useRef<any>(null)  // プライベートサブネット アイコン
+
+  // step が変わるたびにアニメーション状態をリセットする
   useEffect(() => {
-    stepRef.current = step
-    pkts.current = []
-    timerRef.current = 0
-    phaseRef.current = 0
-    waitRef.current = 0
+    stepRef.current = step  // draw() から参照できる Ref にも即時反映
+    pkts.current = []       // 飛んでいたパケットをすべて消去
+    timerRef.current = 0    // タイマーをゼロに戻す
+    phaseRef.current = 0    // パケット経路を最初のセグメントに戻す
+    waitRef.current = 0     // 待機カウンタをリセット
   }, [step])
 
-  // ── p5 helpers ────────────────────────────────────────────────────────
+  // ── p5 ヘルパー関数 ────────────────────────────────────────────────────
 
+  // パケットを 1 個生成して pkts に追加する
+  // from/to: 出発・到着ノードの座標オブジェクト
+  // col:     RGB 3 要素の色配列
+  // blocked: true にするとパケットが途中（progress=0.75）で消滅し赤×を表示
   function spawn(from: { x: number; y: number }, to: { x: number; y: number }, col: [number, number, number], blocked = false) {
-    pkts.current.push({ x: from.x, y: from.y, tx: to.x, ty: to.y, progress: 0, speed: 0.018 + Math.random() * 0.007, color: col, active: true, blocked })
+    pkts.current.push({
+      x: from.x, y: from.y,
+      tx: to.x,  ty: to.y,
+      progress: 0,
+      speed: 0.018 + Math.random() * 0.007,  // 速度にランダムなばらつきを付けて自然に見せる
+      color: col,
+      active: true,
+      blocked,
+    })
   }
 
+  // EC2 インスタンスを表すボックスを描画するヘルパー
+  // cx/cy: ボックス中心座標
+  // label: ボックス下部に表示するテキスト（'\n' で改行可）
+  // col:   枠・テキストの RGB 色
   function ec2Box(p5: any, cx: number, cy: number, label: string, col: [number, number, number]) {
+    // 外枠（角丸矩形）
     p5.strokeWeight(1.5)
     p5.stroke(...col)
-    p5.fill(col[0], col[1], col[2], 35)
-    p5.rect(cx - 38, cy - 26, 76, 52, 8)
+    p5.fill(col[0], col[1], col[2], 35)  // 半透明の塗り（アルファ 35）
+    p5.rect(cx - 38, cy - 26, 76, 52, 0) // 角丸なし
+    // EC2 SVG アイコン（ロード完了後に描画）
+    if (imgEc2.current) {
+      p5.image(imgEc2.current, cx - 13, cy - 23, 26, 26)  // 上部中央に 26×26 で配置
+    }
+    // ラベルテキスト（アイコン下）
     p5.noStroke()
     p5.fill(...col)
-    p5.textSize(14)
-    p5.textAlign(p5.CENTER, p5.CENTER)
-    p5.text('💻', cx, cy - 9)
     p5.textSize(8)
-    label.split('\n').forEach((ln: string, i: number) => p5.text(ln, cx, cy + 8 + i * 12))
+    p5.textAlign(p5.CENTER, p5.CENTER)
+    // '\n' で分割して 1 行ずつ、12px 間隔で描画する
+    label.split('\n').forEach((ln: string, i: number) => p5.text(ln, cx, cy + 10 + i * 12))
   }
 
-  // ── p5 setup / draw ───────────────────────────────────────────────────
+  // ── p5 セットアップ / 描画 ──────────────────────────────────────────────
 
+  // p5 の setup() コールバック — キャンバス初期化時に 1 回だけ呼ばれる
+  // ref: キャンバスを挿入する DOM 要素（react-p5 が渡してくる）
   const setup = (p5: any, ref: any) => {
-    p5.createCanvas(W, H).parent(ref)
-    p5.frameRate(40)
+    p5.createCanvas(W, H).parent(ref)  // 指定サイズのキャンバスを ref の中に作成
+    p5.frameRate(40)                    // 1 秒あたりのフレーム数を 40 に制限（省電力）
+
+    // AWS 公式 SVG アイコンを非同期ロード。ロード完了後に Ref へ保存する。
+    // public/icons/aws/ 以下のファイルは scripts/extract-aws-icons.cjs で生成する
+    p5.loadImage('/icons/aws/ec2.svg', (img: any) => { imgEc2.current = img })
+    p5.loadImage('/icons/aws/igw.svg', (img: any) => { imgIgw.current = img })
+    p5.loadImage('/icons/aws/nat.svg', (img: any) => { imgNat.current = img })
+    p5.loadImage('/icons/aws/vpc.svg', (img: any) => { imgVpc.current = img })
+    p5.loadImage('/icons/aws/publicSubnet.svg', (img: any) => { imgPublicSubnet.current = img })
+    p5.loadImage('/icons/aws/privateSubnet.svg', (img: any) => { imgPrivateSubnet.current = img })
   }
 
   const draw = (p5: any) => {
     const s = stepRef.current
     timerRef.current++
     const t = timerRef.current
-    p5.background(248, 250, 252)
+    p5.background(248, 250, 252) // 薄いグレーの背景
 
-    // ─── Step 1+: VPC box ─────────────────────────────────────────────
+    // ─── ステップ 1〜: VPC 外枠 ────────────────────────────────────────
+    // ステップ 1 のときだけ枠をゆっくり点滅させて「これが VPC です」と強調する
+    // vpcPulse: 0.3〜1.0 の間を sin でゆっくり往復する係数
     const vpcPulse = s === 1 ? 0.65 + Math.sin(t * 0.07) * 0.35 : 1
     p5.strokeWeight(2.5)
-    p5.stroke(99, 102, 241, 255 * vpcPulse)
-    p5.fill(238, 242, 255, s === 1 ? 140 * vpcPulse : 180)
-    p5.rect(VPC.x, VPC.y, VPC.w, VPC.h, 12)
+    p5.stroke(99, 102, 241, 255 * vpcPulse)           // インディゴ系の枠線
+    p5.fill(238, 242, 255, s === 1 ? 140 * vpcPulse : 180)  // 薄紫の塗り
+    p5.rect(VPC.x, VPC.y, VPC.w, VPC.h, 0)           // 角丸なし
+    // 左上に CIDR ラベルを描く
     p5.noStroke()
     p5.fill(99, 102, 241)
     p5.textSize(10)
     p5.textAlign(p5.LEFT)
-    p5.text('VPC  10.0.0.0/16', VPC.x + 10, VPC.y + 16)
+    // VPC アイコン（左上、CIDRラベルの左隣）
+    if (imgVpc.current) {
+      p5.image(imgVpc.current, VPC.x + 10, VPC.y + 4, 24, 24)  // 上部中央に 24×24 で配置
+    }
+    p5.noStroke()
+    p5.fill(99, 102, 241)
+    p5.textSize(10)
+    p5.textAlign(p5.LEFT)
+    p5.text('VPC  10.0.0.0/16', VPC.x + 36, VPC.y + 16)
     if (s === 1) {
-      // Label center
+      // ステップ 1 限定: VPC の中央に大きく名前を表示する
       p5.textSize(13)
       p5.textAlign(p5.CENTER)
       p5.fill(99, 102, 241, 180 * vpcPulse)
       p5.text('Virtual Private Cloud', W / 2, VPC.y + VPC.h / 2)
     }
 
-    // ─── Step 2+: Subnets ────────────────────────────────────────────
+    // ─── ステップ 2〜: サブネット ─────────────────────────────────────
     if (s >= 2) {
+      // ステップ 2 の初回だけ t*5 でフェードイン。以降は常に alpha=255
       const alpha = s === 2 ? Math.min(255, t * 5) : 255
 
+      // ── パブリックサブネット（アイコン色 #7aa116）
       p5.strokeWeight(1.5)
-      p5.stroke(59, 130, 246, alpha)
-      p5.fill(219, 234, 254, alpha * 0.75)
-      p5.rect(PUB.x, PUB.y, PUB.w, PUB.h, 8)
+      p5.stroke(122, 161, 22, alpha)
+      p5.fill(255, 255, 255, alpha)
+      p5.rect(PUB.x, PUB.y, PUB.w, PUB.h, 0)
+      if (imgPublicSubnet.current) {
+        p5.image(imgPublicSubnet.current, PUB.x + 0, PUB.y + 0, 18, 18)
+      }
       p5.noStroke()
       p5.fill(59, 130, 246, alpha)
-      p5.textSize(9); p5.textAlign(p5.CENTER)
-      p5.text('パブリックサブネット', PUB.x + PUB.w / 2, PUB.y + 14)
+      p5.textSize(9); p5.textAlign(p5.LEFT, p5.CENTER)
+      p5.text('パブリックサブネット', PUB.x + 30, PUB.y + 14)
       p5.textSize(8)
-      p5.text('10.0.1.0/24', PUB.x + PUB.w / 2, PUB.y + 26)
+      p5.text('10.0.1.0/24', PUB.x + 30, PUB.y + 26)  // CIDR 表記
 
+      // ── プライベートサブネット（緑）
       p5.strokeWeight(1.5)
       p5.stroke(16, 185, 129, alpha)
-      p5.fill(209, 250, 229, alpha * 0.75)
-      p5.rect(PRI.x, PRI.y, PRI.w, PRI.h, 8)
+      p5.fill(255, 255, 255, alpha)
+      p5.rect(PRI.x, PRI.y, PRI.w, PRI.h, 0)
+      if (imgPrivateSubnet.current) {
+        p5.image(imgPrivateSubnet.current, PRI.x + 0, PRI.y + 0, 18, 18)
+      }
       p5.noStroke()
       p5.fill(16, 185, 129, alpha)
-      p5.textSize(9); p5.textAlign(p5.CENTER)
-      p5.text('プライベートサブネット', PRI.x + PRI.w / 2, PRI.y + 14)
+      p5.textSize(9); p5.textAlign(p5.LEFT, p5.CENTER)
+      p5.text('プライベートサブネット', PRI.x + 24, PRI.y + 14)
       p5.textSize(8)
-      p5.text('10.0.2.0/24', PRI.x + PRI.w / 2, PRI.y + 26)
+      p5.text('10.0.2.0/24', PRI.x + 24, PRI.y + 26)  // CIDR 表記
     }
 
-    // ─── Step 3+: IGW ────────────────────────────────────────────────
+    // ─── ステップ 3〜: インターネットゲートウェイ（IGW）────────────────
     if (s >= 3) {
+      // ステップ 3 のときだけ枠を点灯させて IGW の存在を強調する
+      // glow: 0.2〜1.0 を sin で往復（ステップ 3 以外は常に 1 = 最大輝度）
       const glow = s === 3 ? 0.6 + Math.sin(t * 0.1) * 0.4 : 1
-      const igwCol: [number, number, number] = [59, 130, 246]
+      // IGW アイコンの公式カラー (#8c4fff = RGB 140, 79, 255)
+      const igwCol: [number, number, number] = [140, 79, 255]
 
-      // Connector line IGW → VPC top
+      // IGW ボックス下辺（IGW.y + 14）から VPC 上辺（VPC.y = 62）への縦線
       p5.stroke(...igwCol, 160)
       p5.strokeWeight(1.5)
-      p5.line(IGW.x, IGW.y + 13, IGW.x, VPC.y)
+      p5.line(IGW.x, IGW.y + 14, IGW.x, VPC.y)
 
-      // IGW box
+      // IGW ボックス本体: 幅 120 × 高さ 28px（アイコン左 + テキスト右の横並び）
+      // ボックスの縦中心は IGW.y なので、上辺 = IGW.y - 14、下辺 = IGW.y + 14
+      // → INET ラベル（y=12）や VPC 上辺（y=62）と被らない高さに収まる
       p5.strokeWeight(2)
       p5.stroke(...igwCol)
-      p5.fill(igwCol[0], igwCol[1], igwCol[2], 50 + glow * 80)
-      p5.rect(IGW.x - 44, IGW.y - 13, 88, 26, 7)
+      p5.noFill()  // 塗りなし（背景を透かす）
+      p5.rect(IGW.x - 60, IGW.y - 14, 120, 28, 0)  // 角丸なし
+      // SVG アイコン（22×22px、ボックス左端から配置）
+      if (imgIgw.current) {
+        p5.image(imgIgw.current, IGW.x - 58, IGW.y - 12, 22, 22)
+      }
+      // アイコン右側にテキストを左揃えで描画
       p5.noStroke()
       p5.fill(...igwCol)
-      p5.textSize(9); p5.textAlign(p5.CENTER)
-      p5.text('🌐 インターネットGW (IGW)', IGW.x, IGW.y + 4)
+      p5.textSize(10); p5.textAlign(p5.LEFT, p5.CENTER)
+      p5.text('インターネットGW', IGW.x - 30, IGW.y + 1)
     }
 
-    // ─── Step 4+: Internet + Public EC2 (no packets yet) ────────────
+    // ─── ステップ 4〜: インターネット + パブリック EC2（パケットなし）──
     if (s >= 4) {
-      // Internet label
+      // キャンバス最上部に「インターネット」ラベルを表示
       p5.noStroke()
       p5.fill(80, 80, 80)
       p5.textSize(11); p5.textAlign(p5.CENTER)
       p5.text('🌍 インターネット', INET.x, INET.y)
 
-      // Lines
+      // インターネット → IGW → EC2 の接続経路を薄い灰色の線で表示
       p5.stroke(180, 200, 220); p5.strokeWeight(1)
-      p5.line(INET.x, INET.y + 6, IGW.x, IGW.y - 13)
-      p5.line(IGW.x, IGW.y + 13, EC2_PUB.x, EC2_PUB.y - 26)
+      p5.line(INET.x, INET.y + 6, IGW.x, IGW.y - 13)        // Internet → IGW 上辺
+      p5.line(IGW.x, IGW.y + 13, EC2_PUB.x, EC2_PUB.y - 26) // IGW 下辺 → EC2 上辺
 
-      // Public EC2 box
+      // パブリックサブネット内の EC2 ボックスを描画（ヘルパー関数を使用）
       ec2Box(p5, EC2_PUB.x, EC2_PUB.y, 'EC2\n(Webサーバー)', [37, 99, 235])
     }
 
-    // ─── Step 6+: Private EC2 + internal connection line ─────────────
+    // ─── ステップ 6〜: プライベート EC2 ＋ 内部接続ライン ────────────
     if (s >= 6) {
+      // パブリック EC2 とプライベート EC2 の間の内部通信経路（薄紫の線）
       p5.stroke(180, 180, 220); p5.strokeWeight(1)
       p5.line(EC2_PUB.x + 38, EC2_PUB.y, EC2_PRI.x - 38, EC2_PRI.y)
+      // プライベートサブネット内の EC2（DBサーバー）を描画
       ec2Box(p5, EC2_PRI.x, EC2_PRI.y, 'EC2\n(DBサーバー)', [5, 150, 105])
     }
 
-    // ─── Step 7+: NAT GW ─────────────────────────────────────────────
+    // ─── ステップ 7〜: NAT ゲートウェイ ──────────────────────────────
     if (s >= 7) {
+      // ステップ 7 のみグロー点灯で NAT GW の存在を強調
       const glow = s === 7 ? 0.6 + Math.sin(t * 0.1) * 0.4 : 1
 
-      // Lines to NAT
+      // NAT GW への接続経路（薄灰色の線）
       p5.stroke(200, 200, 200); p5.strokeWeight(1)
-      p5.line(NAT.x, NAT.y - 14, IGW.x, IGW.y + 13)
-      p5.line(EC2_PRI.x, EC2_PRI.y - 26, NAT.x + 44, NAT.y)
+      p5.line(NAT.x, NAT.y - 14, IGW.x, IGW.y + 13)          // NAT 上辺 → IGW 下辺
+      p5.line(EC2_PRI.x, EC2_PRI.y - 26, NAT.x + 44, NAT.y)  // プライベート EC2 → NAT 右端
 
-      // NAT box
+      // NAT ゲートウェイ ボックス（NAT アイコン色 #8c4fff）
+      const natCol: [number, number, number] = [140, 79, 255]
       p5.strokeWeight(2)
-      p5.stroke(245, 158, 11)
-      p5.fill(254, 243, 199, 60 + glow * 80)
-      p5.rect(NAT.x - 44, NAT.y - 14, 88, 28, 7)
+      p5.stroke(...natCol)
+      p5.noFill()
+      p5.rect(NAT.x - 44, NAT.y - 14, 88, 28, 0)
+      if (imgNat.current) {
+        p5.image(imgNat.current, NAT.x - 42, NAT.y - 12, 24, 24)
+      }
       p5.noStroke()
-      p5.fill(160, 100, 0)
+      p5.fill(...natCol)
       p5.textSize(9); p5.textAlign(p5.CENTER)
-      p5.text('⚡ NAT Gateway', NAT.x, NAT.y + 4)
+      p5.text('NAT Gateway', NAT.x + 12, NAT.y + 1)
     }
 
 
-    // ─── Step 8: Route table overlay ─────────────────────────────────
+    // ─── ステップ 8: ルートテーブル オーバーレイ ──────────────────────
+    // パブリックサブネットのルートテーブル内容を白いカードとして重ねて表示する
     if (s >= 8) {
-      const rx = 400, ry = 100, rw = 220, rh = 80
+      // カードの座標とサイズ
+      const rx = 500, ry = 100, rw = 150, rh = 80
       p5.strokeWeight(1); p5.stroke(160, 160, 200)
-      p5.fill(255, 255, 255, 230)
-      p5.rect(rx, ry, rw, rh, 8)
+      p5.fill(255, 255, 255, 230)  // 半透明の白（下の図が透ける）
+      p5.rect(rx, ry, rw, rh, 0)   // 角丸なし
       p5.noStroke()
       p5.textAlign(p5.LEFT); p5.textSize(8.5)
+      // タイトル行
       p5.fill(50, 50, 160)
       p5.text('📋 パブリック用 ルートテーブル', rx + 8, ry + 14)
+      // ヘッダー行
       p5.fill(100, 100, 100)
       p5.text('送信先              ターゲット', rx + 8, ry + 28)
+      // ルート 1: VPC 内部は「local」へ
       p5.fill(60, 60, 60)
       p5.text('10.0.0.0/16      local', rx + 8, ry + 42)
+      // ルート 2: それ以外（0.0.0.0/0）はすべて IGW へ → インターネット接続のカギ
       p5.fill(37, 99, 235)
       p5.text('0.0.0.0/0          IGW', rx + 8, ry + 56)
+      // 補足コメント
       p5.fill(100, 100, 100)
       p5.text('← これがインターネット接続の設定', rx + 8, ry + 70)
     }
 
-    // ─── Single-packet phase spawning ────────────────────────────────
-    const seq = getSequence(s)
+    // ─── パケット発生ロジック ────────────────────────────────────────
+    // 「前のパケットが消えたら次を出す」というシーケンシャル方式
+    const seq = getSequence(s)  // 今のステップの経路リスト（空 = アニメなし）
     if (seq.length > 0 && !pkts.current.some(p => p.active)) {
       if (waitRef.current > 0) {
+        // ループ待機中: カウントダウンして次のループ開始を待つ
         waitRef.current--
       } else if (phaseRef.current >= seq.length) {
+        // 全セグメント完了 → 最初に戻してウェイトを設定（約 1.25 秒 = 50f ÷ 40fps）
         phaseRef.current = 0
         waitRef.current = 50
       } else {
+        // 次のセグメントのパケットを spawn する
         const [from, to, col, blocked] = seq[phaseRef.current]
         spawn(from, to, col, blocked ?? false)
-        phaseRef.current++
+        phaseRef.current++  // 次回は 1 つ後のセグメントへ進む
       }
     }
 
-    // ─── Draw packets ─────────────────────────────────────────────────
+    // ─── パケットの移動と描画 ────────────────────────────────────────
+    // 非アクティブになったパケットを除去してからループする
     pkts.current = pkts.current.filter((pk) => pk.active)
     for (const pk of pkts.current) {
-      pk.progress += pk.speed
+      pk.progress += pk.speed  // progress を進める（0→1 で経路を完走）
+
+      // ブロックパケットは progress=0.75（75%地点）で消滅させる
       if (pk.blocked && pk.progress >= 0.75) { pk.active = false; continue }
+      // 通常パケットは progress=1（到着）で消滅
       if (!pk.blocked && pk.progress >= 1)   { pk.active = false; continue }
 
+      // lerp で現在の座標を線形補間（出発点と到着点の間を progress 割合で進む）
       const px = p5.lerp(pk.x, pk.tx, pk.progress)
       const py = p5.lerp(pk.y, pk.ty, pk.progress)
 
       p5.noStroke()
+      // 外側の大きめ円（パケット本体の色）
       p5.fill(...pk.color)
       p5.circle(px, py, 11)
+
       if (!pk.blocked) {
+        // 通常パケット: 中央に白い小円を重ねてドーナツ状に見せる
         p5.fill(255); p5.circle(px, py, 4)
       } else {
-        // Fading X
+        // ブロックパケット: 残り距離に応じてフェードアウトしながら赤×を表示
+        // progress が 0.75 に近づくほど alpha が 0 に近づく
         const alpha = Math.max(0, (0.75 - pk.progress) * 4 * 255)
-        p5.fill(239, 68, 68, alpha)
+        p5.fill(239, 68, 68, alpha)      // 赤い円
         p5.circle(px, py, 14)
-        p5.fill(255, 255, 255, alpha)
+        p5.fill(255, 255, 255, alpha)    // 白い「✕」テキスト
         p5.textSize(9); p5.textAlign(p5.CENTER, p5.CENTER)
         p5.text('✕', px, py)
       }
     }
 
-    // ─── Packet legend (steps 5+) ────────────────────────────────────
+    // ─── パケット凡例（ステップ 5〜）────────────────────────────────
+    // キャンバス左下に色と意味の対応を表示する
     if (s >= 5) {
-      p5.noStroke(); p5.textSize(8.5); p5.textAlign(p5.LEFT)
-      p5.fill(59, 130, 246); p5.circle(14, H - 20, 8)
-      p5.fill(70, 70, 70); p5.text('インバウンド', 22, H - 16)
-      p5.fill(16, 185, 129); p5.circle(110, H - 20, 8)
-      p5.fill(70, 70, 70); p5.text('アウトバウンド', 118, H - 16)
+      p5.noStroke(); p5.textSize(14); p5.textAlign(p5.LEFT)
+      // 青 = インバウンド（外→内）
+      p5.fill(59, 130, 246); p5.circle(20, H - 20, 8)
+      p5.fill(70, 70, 70); p5.text('インバウンド', 28, H - 20)
+      // 緑 = アウトバウンド（内→外）
+      p5.fill(16, 185, 129); p5.circle(126, H - 20, 8)
+      p5.fill(70, 70, 70); p5.text('アウトバウンド', 134, H - 20)
       if (s === 6) {
-        p5.fill(139, 92, 246); p5.circle(220, H - 20, 8)
-        p5.fill(70, 70, 70); p5.text('内部通信(Web↔DB)', 228, H - 16)
+        // ステップ 6 のみ: 紫 = VPC 内部通信（Web ↔ DB）
+        p5.fill(139, 92, 246); p5.circle(240, H - 20, 8)
+        p5.fill(70, 70, 70); p5.text('内部通信(Web↔DB)', 248, H - 20)
       }
       if (s >= 7) {
-        p5.fill(239, 68, 68); p5.circle(220, H - 20, 8)
-        p5.fill(70, 70, 70); p5.text('ブロック', 228, H - 16)
+        // ステップ 7〜: 赤 = ブロック（プライベート EC2 への外部アクセス不可）
+        p5.fill(239, 68, 68); p5.circle(240, H - 20, 8)
+        p5.fill(70, 70, 70); p5.text('ブロック', 248, H - 20)
       }
     }
   }
 
-  // ── UI ────────────────────────────────────────────────────────────────────
-
+  // ── UI（JSX） ────────────────────────────────────────────────────────────
+  // step は 1 始まりなので、配列インデックスは step - 1
   const cur = STEPS[step - 1]
 
   return (
     <div className="space-y-5 mb-10">
 
-      {/* Progress bar */}
+      {/* ステップ進捗バー: クリックで任意ステップへジャンプできる */}
       <div className="flex items-center gap-3">
         <span className="text-xs font-semibold text-gray-500 shrink-0">
           STEP {step} / {TOTAL}

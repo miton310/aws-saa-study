@@ -178,6 +178,10 @@ export default function VPCIntermediateStepper() {
   const pkts = useRef<Packet[]>([])
   const phaseRef = useRef(0)
   const waitRef = useRef(0)
+  const imgEc2 = useRef<unknown>(null)
+  const imgIgw = useRef<unknown>(null)
+  const imgVpc = useRef<unknown>(null)
+  const imgPublicSubnet = useRef<unknown>(null)
 
   useEffect(() => {
     stepRef.current = step
@@ -194,10 +198,11 @@ export default function VPCIntermediateStepper() {
   function ec2Box(p5: any, cx: number, cy: number, label: string, col: [number, number, number]) {
     p5.strokeWeight(1.5); p5.stroke(...col)
     p5.fill(col[0], col[1], col[2], 35)
-    p5.rect(cx - 38, cy - 26, 76, 52, 8)
+    p5.rect(cx - 38, cy - 26, 76, 52, 0)
+    if (imgEc2.current) {
+      p5.image(imgEc2.current, cx - 13, cy - 23, 26, 26)
+    }
     p5.noStroke(); p5.fill(...col)
-    p5.textSize(14); p5.textAlign(p5.CENTER, p5.CENTER)
-    p5.text('💻', cx, cy - 9)
     p5.textSize(8)
     label.split('\n').forEach((ln: string, i: number) => p5.text(ln, cx, cy + 8 + i * 12))
   }
@@ -205,6 +210,10 @@ export default function VPCIntermediateStepper() {
   const setup = (p5: any, ref: any) => {
     p5.createCanvas(W, H).parent(ref)
     p5.frameRate(40)
+    p5.loadImage('/icons/aws/ec2.svg', (img: unknown) => { imgEc2.current = img })
+    p5.loadImage('/icons/aws/igw.svg', (img: unknown) => { imgIgw.current = img })
+    p5.loadImage('/icons/aws/vpc.svg', (img: unknown) => { imgVpc.current = img })
+    p5.loadImage('/icons/aws/publicSubnet.svg', (img: unknown) => { imgPublicSubnet.current = img })
   }
 
   const draw = (p5: any) => {
@@ -219,10 +228,13 @@ export default function VPCIntermediateStepper() {
       // VPC box
       p5.strokeWeight(2.5); p5.stroke(99, 102, 241)
       p5.fill(238, 242, 255, 180)
-      p5.rect(VPC_B.x, VPC_B.y, VPC_B.w, VPC_B.h, 12)
+      p5.rect(VPC_B.x, VPC_B.y, VPC_B.w, VPC_B.h, 0)
+      if (imgVpc.current) {
+        p5.image(imgVpc.current, VPC_B.x + 10, VPC_B.y + 4, 24, 24)
+      }
       p5.noStroke(); p5.fill(99, 102, 241)
       p5.textSize(10); p5.textAlign(p5.LEFT)
-      p5.text('VPC  10.0.0.0/16', VPC_B.x + 10, VPC_B.y + 16)
+      p5.text('VPC  10.0.0.0/16', VPC_B.x + 34, VPC_B.y + 16)
 
       // NACL dashed border (steps 5-6, 8)
       if (s >= 5) {
@@ -232,33 +244,39 @@ export default function VPCIntermediateStepper() {
         p5.rect(PUB.x - 4, PUB.y - 4, PUB.w + 8, PUB.h + 8, 10)
         p5.drawingContext.setLineDash([])
         p5.noStroke(); p5.fill(245, 158, 11)
-        p5.textSize(8); p5.textAlign(p5.LEFT)
-        p5.text('NACL', PUB.x - 4, PUB.y - 8)
+        p5.textSize(14); p5.textAlign(p5.LEFT)
+        p5.text('NACL', PUB.x - 4, PUB.y - 10)
       }
 
-      // Public subnet
-      p5.strokeWeight(1.5); p5.stroke(59, 130, 246)
-      p5.fill(219, 234, 254, 180)
-      p5.rect(PUB.x, PUB.y, PUB.w, PUB.h, 8)
-      p5.noStroke(); p5.fill(59, 130, 246)
-      p5.textSize(9); p5.textAlign(p5.CENTER)
-      p5.text('パブリックサブネット', PUB.x + PUB.w / 2, PUB.y + 14)
+      // Public subnet (icon color #7aa116)
+      p5.strokeWeight(1.5); p5.stroke(122, 161, 22)
+      p5.fill(255, 255, 255, 100)
+      p5.rect(PUB.x, PUB.y, PUB.w, PUB.h, 0)
+      if (imgPublicSubnet.current) {
+        p5.image(imgPublicSubnet.current, PUB.x + 0, PUB.y + 0, 18, 18)
+      }
+      p5.noStroke(); p5.fill(122, 161, 22)
+      p5.textSize(9); p5.textAlign(p5.LEFT, p5.CENTER)
+      p5.text('パブリックサブネット', PUB.x + 22, PUB.y + 10)
 
       // IGW
-      const igwCol: [number, number, number] = [59, 130, 246]
+      const igwCol: [number, number, number] = [140, 79, 255]
       p5.stroke(...igwCol, 160); p5.strokeWeight(1.5)
-      p5.line(IGW.x, IGW.y + 13, IGW.x, VPC_B.y)
+      p5.line(IGW.x, IGW.y + 14, IGW.x, VPC_B.y)
       p5.strokeWeight(2); p5.stroke(...igwCol)
-      p5.fill(igwCol[0], igwCol[1], igwCol[2], 80)
-      p5.rect(IGW.x - 44, IGW.y - 13, 88, 26, 7)
+      p5.noFill()
+      p5.rect(IGW.x - 60, IGW.y - 14, 120, 28, 0)
+      if (imgIgw.current) {
+        p5.image(imgIgw.current, IGW.x - 58, IGW.y - 12, 22, 22)
+      }
       p5.noStroke(); p5.fill(...igwCol)
-      p5.textSize(9); p5.textAlign(p5.CENTER)
-      p5.text('🌐 インターネットGW (IGW)', IGW.x, IGW.y + 4)
+      p5.textSize(10); p5.textAlign(p5.LEFT, p5.CENTER)
+      p5.text('インターネットGW', IGW.x - 30, IGW.y + 1)
 
       // Internet label
       p5.noStroke(); p5.fill(80, 80, 80)
       p5.textSize(11); p5.textAlign(p5.CENTER)
-      p5.text('🌍 インターネット', INET.x, INET.y)
+      p5.text('インターネット', INET.x, INET.y)
 
       // Connection lines
       p5.stroke(180, 200, 220); p5.strokeWeight(1)
@@ -420,20 +438,20 @@ export default function VPCIntermediateStepper() {
 
       // Legend
       if (s >= 2 && s <= 6) {
-        p5.noStroke(); p5.textSize(8.5); p5.textAlign(p5.LEFT)
+        p5.noStroke(); p5.textSize(10); p5.textAlign(p5.LEFT)
         p5.fill(59, 130, 246); p5.circle(14, H - 20, 8)
-        p5.fill(70, 70, 70); p5.text('許可（インバウンド）', 22, H - 16)
+        p5.fill(70, 70, 70); p5.text('許可（インバウンド）', 22, H - 20)
         if (s === 4) {
           p5.fill(16, 185, 129); p5.circle(164, H - 20, 8)
-          p5.fill(70, 70, 70); p5.text('レスポンス（自動）', 172, H - 16)
+          p5.fill(70, 70, 70); p5.text('レスポンス（自動）', 172, H - 20)
         }
         if (s === 3 || s === 6) {
           p5.fill(239, 68, 68); p5.circle(164, H - 20, 8)
-          p5.fill(70, 70, 70); p5.text(s === 3 ? 'ブロック（SG）' : 'ブロック（NACL）', 172, H - 16)
+          p5.fill(70, 70, 70); p5.text(s === 3 ? 'ブロック（SG）' : 'ブロック（NACL）', 172, H - 20)
         }
         if (s === 6) {
           p5.fill(16, 185, 129); p5.circle(296, H - 20, 8)
-          p5.fill(70, 70, 70); p5.text('通過', 304, H - 16)
+          p5.fill(70, 70, 70); p5.text('通過', 304, H - 20)
         }
       }
 
@@ -443,7 +461,10 @@ export default function VPCIntermediateStepper() {
       // VPC-A
       p5.strokeWeight(2.5); p5.stroke(99, 102, 241)
       p5.fill(238, 242, 255, 200)
-      p5.rect(VPC1.x, VPC1.y, VPC1.w, VPC1.h, 12)
+      p5.rect(VPC1.x, VPC1.y, VPC1.w, VPC1.h, 0)
+      if (imgVpc.current) {
+        p5.image(imgVpc.current, VPC1.x + 10, VPC1.y + 4, 20, 20)
+      }
       p5.noStroke(); p5.fill(99, 102, 241)
       p5.textSize(9); p5.textAlign(p5.CENTER)
       p5.text('VPC-A  10.0.0.0/16', VPC1.x + VPC1.w / 2, VPC1.y + 16)
@@ -452,7 +473,10 @@ export default function VPCIntermediateStepper() {
       // VPC-B
       p5.strokeWeight(2.5); p5.stroke(16, 185, 129)
       p5.fill(209, 250, 229, 200)
-      p5.rect(VPC2.x, VPC2.y, VPC2.w, VPC2.h, 12)
+      p5.rect(VPC2.x, VPC2.y, VPC2.w, VPC2.h, 0)
+      if (imgVpc.current) {
+        p5.image(imgVpc.current, VPC2.x + 10, VPC2.y + 4, 20, 20)
+      }
       p5.noStroke(); p5.fill(16, 185, 129)
       p5.textSize(9); p5.textAlign(p5.CENTER)
       p5.text('VPC-B  10.1.0.0/16', VPC2.x + VPC2.w / 2, VPC2.y + 16)

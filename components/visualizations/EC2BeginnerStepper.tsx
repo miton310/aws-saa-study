@@ -139,6 +139,8 @@ export default function EC2BeginnerStepper() {
   const pkts     = useRef<Packet[]>([])
   const phaseRef = useRef(0)
   const waitRef  = useRef(0)
+  const imgAmi = useRef<unknown>(null)
+  const imgEbs = useRef<unknown>(null)
 
   useEffect(() => {
     stepRef.current  = step
@@ -157,13 +159,16 @@ export default function EC2BeginnerStepper() {
   function awsIcon(p5: any, cx: number, cy: number, sz: number,
     bg: [number,number,number], type: string, label?: string) {
     const r = sz * 0.18
+    const withBg = type !== 'ami'
     p5.noStroke()
-    // Shadow
-    p5.fill(0, 0, 0, 18)
-    p5.rect(cx - sz/2 + 2, cy - sz/2 + 3, sz, sz, r + 2)
-    // Background
-    p5.fill(...bg)
-    p5.rect(cx - sz/2, cy - sz/2, sz, sz, r)
+    if (withBg) {
+      // Shadow
+      p5.fill(0, 0, 0, 18)
+      p5.rect(cx - sz/2 + 2, cy - sz/2 + 3, sz, sz, r + 2)
+      // Background
+      p5.fill(...bg)
+      p5.rect(cx - sz/2, cy - sz/2, sz, sz, r)
+    }
     // White icon inside
     p5.fill(255)
     const s = sz * 0.55
@@ -177,20 +182,28 @@ export default function EC2BeginnerStepper() {
         p5.fill(255)
       }
     } else if (type === 'ebs') {
-      const cw = s * 0.72, ch = s * 0.52, ew = cw, eh = ch * 0.28
-      p5.ellipse(cx, cy - ch*0.25, ew, eh)
-      p5.rect(cx - cw/2, cy - ch*0.25, cw, ch * 0.72)
-      p5.ellipse(cx, cy + ch*0.48, ew, eh)
-      p5.fill(bg[0], bg[1], bg[2], 120)
-      p5.ellipse(cx, cy - ch*0.25, ew * 0.6, eh * 0.6)
+      if (imgEbs.current) {
+        p5.image(imgEbs.current, cx - s * 0.46, cy - s * 0.46, s * 0.92, s * 0.92)
+      } else {
+        const cw = s * 0.72, ch = s * 0.52, ew = cw, eh = ch * 0.28
+        p5.ellipse(cx, cy - ch*0.25, ew, eh)
+        p5.rect(cx - cw/2, cy - ch*0.25, cw, ch * 0.72)
+        p5.ellipse(cx, cy + ch*0.48, ew, eh)
+        p5.fill(bg[0], bg[1], bg[2], 120)
+        p5.ellipse(cx, cy - ch*0.25, ew * 0.6, eh * 0.6)
+      }
     } else if (type === 'ami') {
-      const dw = s * 0.55, dh = s * 0.38
-      p5.rect(cx - s*0.36, cy - dh*0.5 - 4, dw, dh, 3)
-      p5.fill(255, 255, 255, 200)
-      p5.textSize(sz * 0.32); p5.textAlign(p5.CENTER, p5.CENTER)
-      p5.text('→', cx + s*0.12, cy + s*0.05)
-      p5.fill(255)
-      p5.rect(cx + s*0.05, cy - s*0.08, dw*0.75, dh*0.75, 2)
+      if (imgAmi.current) {
+        p5.image(imgAmi.current, cx - s * 0.46, cy - s * 0.46, s * 0.92, s * 0.92)
+      } else {
+        const dw = s * 0.55, dh = s * 0.38
+        p5.rect(cx - s*0.36, cy - dh*0.5 - 4, dw, dh, 3)
+        p5.fill(255, 255, 255, 200)
+        p5.textSize(sz * 0.32); p5.textAlign(p5.CENTER, p5.CENTER)
+        p5.text('->', cx + s*0.12, cy + s*0.05)
+        p5.fill(255)
+        p5.rect(cx + s*0.05, cy - s*0.08, dw*0.75, dh*0.75, 2)
+      }
     } else if (type === 'sg') {
       p5.beginShape()
       p5.vertex(cx, cy - s*0.42)
@@ -245,6 +258,8 @@ export default function EC2BeginnerStepper() {
   const setup = (p5: any, ref: any) => {
     p5.createCanvas(W, H).parent(ref)
     p5.frameRate(40)
+    p5.loadImage('/icons/aws/ami.svg', (img: unknown) => { imgAmi.current = img })
+    p5.loadImage('/icons/aws/Elastic-Block-Store.svg', (img: unknown) => { imgEbs.current = img })
   }
 
   const draw = (p5: any) => {
@@ -360,7 +375,7 @@ export default function EC2BeginnerStepper() {
     // ── Step 3: AMI ──────────────────────────────────────────────────
     else if (s === 3) {
       const amiX = 130, amiY = 145
-      p5.strokeWeight(2); p5.stroke(...AWS_ORANGE)
+      p5.strokeWeight(1); p5.stroke(...AWS_ORANGE)
       p5.fill(255, 240, 220, 200)
       p5.rect(amiX - 74, amiY - 68, 148, 136, 10)
       p5.noStroke(); p5.fill(...AWS_ORANGE)

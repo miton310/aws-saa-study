@@ -1,6 +1,8 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import AwsServiceIcon from '@/components/AwsServiceIcon'
+import { getCategoryBySlug } from '@/lib/categories'
 
 const VPCDiagram = dynamic(() => import('@/components/visualizations/VPCDiagram'), { ssr: false })
 const EC2Diagram = dynamic(() => import('@/components/visualizations/EC2Diagram'), { ssr: false })
@@ -25,11 +27,13 @@ const DIAGRAM_MAP: Record<string, React.ComponentType> = {
 export default function DiagramRenderer({ category }: { category: string }) {
   const Diagram = DIAGRAM_MAP[category]
   if (!Diagram) return null
+  const resolvedCategory = getCategoryBySlug(category)
 
   return (
     <div className="mb-10">
       <h2 className="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
-        🎨 アーキテクチャ図
+        {resolvedCategory ? <AwsServiceIcon service={resolvedCategory.slug} size={26} /> : null}
+        アーキテクチャ図
       </h2>
       <Diagram />
       <p className="text-xs text-gray-400 mt-2 text-right">p5.js によるリアルタイムアニメーション</p>
