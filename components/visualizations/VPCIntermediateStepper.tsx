@@ -178,6 +178,7 @@ export default function VPCIntermediateStepper() {
   const pkts = useRef<Packet[]>([])
   const phaseRef = useRef(0)
   const waitRef = useRef(0)
+  const imgInternet = useRef<unknown>(null)
   const imgEc2 = useRef<unknown>(null)
   const imgIgw = useRef<unknown>(null)
   const imgVpc = useRef<unknown>(null)
@@ -210,9 +211,10 @@ export default function VPCIntermediateStepper() {
   const setup = (p5: any, ref: any) => {
     p5.createCanvas(W, H).parent(ref)
     p5.frameRate(40)
+    p5.loadImage('/icons/aws/internet.svg', (img: unknown) => { imgInternet.current = img })
     p5.loadImage('/icons/aws/ec2.svg', (img: unknown) => { imgEc2.current = img })
     p5.loadImage('/icons/aws/igw.svg', (img: unknown) => { imgIgw.current = img })
-    p5.loadImage('/icons/aws/vpc.svg', (img: unknown) => { imgVpc.current = img })
+    p5.loadImage('/icons/aws/aws-vpc.svg', (img: unknown) => { imgVpc.current = img })
     p5.loadImage('/icons/aws/publicSubnet.svg', (img: unknown) => { imgPublicSubnet.current = img })
   }
 
@@ -226,13 +228,13 @@ export default function VPCIntermediateStepper() {
       // ─── Steps 1-6, 8: SG/NACL layout ──────────────────────────────
 
       // VPC box
-      p5.strokeWeight(2.5); p5.stroke(99, 102, 241)
+      p5.strokeWeight(2.5); p5.stroke(140, 80, 255)
       p5.fill(238, 242, 255, 180)
       p5.rect(VPC_B.x, VPC_B.y, VPC_B.w, VPC_B.h, 0)
       if (imgVpc.current) {
-        p5.image(imgVpc.current, VPC_B.x + 10, VPC_B.y + 4, 24, 24)
+        p5.image(imgVpc.current, VPC_B.x, VPC_B.y, 24, 24)
       }
-      p5.noStroke(); p5.fill(99, 102, 241)
+      p5.noStroke(); p5.fill(140, 80, 255)
       p5.textSize(10); p5.textAlign(p5.LEFT)
       p5.text('VPC  10.0.0.0/16', VPC_B.x + 34, VPC_B.y + 16)
 
@@ -253,11 +255,11 @@ export default function VPCIntermediateStepper() {
       p5.fill(255, 255, 255, 100)
       p5.rect(PUB.x, PUB.y, PUB.w, PUB.h, 0)
       if (imgPublicSubnet.current) {
-        p5.image(imgPublicSubnet.current, PUB.x + 0, PUB.y + 0, 18, 18)
+        p5.image(imgPublicSubnet.current, PUB.x + 0, PUB.y + 0, 24, 24)
       }
       p5.noStroke(); p5.fill(122, 161, 22)
       p5.textSize(9); p5.textAlign(p5.LEFT, p5.CENTER)
-      p5.text('パブリックサブネット', PUB.x + 22, PUB.y + 10)
+      p5.text('パブリックサブネット', PUB.x + 30, PUB.y + 10)
 
       // IGW
       const igwCol: [number, number, number] = [140, 79, 255]
@@ -273,10 +275,14 @@ export default function VPCIntermediateStepper() {
       p5.textSize(10); p5.textAlign(p5.LEFT, p5.CENTER)
       p5.text('インターネットGW', IGW.x - 30, IGW.y + 1)
 
-      // Internet label
-      p5.noStroke(); p5.fill(80, 80, 80)
-      p5.textSize(11); p5.textAlign(p5.CENTER)
-      p5.text('インターネット', INET.x, INET.y)
+      // Internet label/icon
+      if (imgInternet.current) {
+        p5.image(imgInternet.current, INET.x - 18, INET.y - 10, 34, 20)
+      } else {
+        p5.noStroke(); p5.fill(80, 80, 80)
+        p5.textSize(11); p5.textAlign(p5.CENTER)
+        p5.text('インターネット', INET.x, INET.y)
+      }
 
       // Connection lines
       p5.stroke(180, 200, 220); p5.strokeWeight(1)
@@ -293,7 +299,7 @@ export default function VPCIntermediateStepper() {
       p5.noFill()
       p5.circle(EC2.x, EC2.y, SG_R * 2)
       p5.noStroke(); p5.fill(99, 102, 241, 180 * sgGlow)
-      p5.textSize(7.5); p5.textAlign(p5.CENTER)
+      p5.textSize(14); p5.textAlign(p5.CENTER)
       p5.text('SG', EC2.x, EC2.y - SG_R - 8)
 
       // EC2 box
@@ -384,16 +390,16 @@ export default function VPCIntermediateStepper() {
           ]
         }
 
-        p5.textSize(8.5); p5.fill(50, 50, 150)
+        p5.textSize(18); p5.fill(50, 50, 150)  // Title
         p5.text(infoTitle, ipx + 8, ipy + 16)
         p5.stroke(220, 220, 235); p5.strokeWeight(0.5)
         p5.line(ipx + 4, ipy + 22, ipx + ipw - 4, ipy + 22)
 
         infoRows.forEach((row, i) => {
           const ry2 = ipy + 36 + i * 42
-          p5.noStroke(); p5.textSize(7.5); p5.fill(130, 130, 150)
+          p5.noStroke(); p5.textSize(11); p5.fill(130, 130, 150)
           p5.text(row.k, ipx + 8, ry2)
-          p5.textSize(9)
+          p5.textSize(16) // 文字色：デフォルトは濃い灰色、または強調表示用に指定された文字色
           const [vr, vg, vb] = row.vc ?? ([50, 50, 80] as [number, number, number])
           p5.fill(vr, vg, vb)
           p5.text(row.v, ipx + 8, ry2 + 13)
@@ -463,7 +469,7 @@ export default function VPCIntermediateStepper() {
       p5.fill(238, 242, 255, 200)
       p5.rect(VPC1.x, VPC1.y, VPC1.w, VPC1.h, 0)
       if (imgVpc.current) {
-        p5.image(imgVpc.current, VPC1.x + 10, VPC1.y + 4, 20, 20)
+        p5.image(imgVpc.current, VPC1.x, VPC1.y, 24, 24)
       }
       p5.noStroke(); p5.fill(99, 102, 241)
       p5.textSize(9); p5.textAlign(p5.CENTER)
@@ -475,7 +481,7 @@ export default function VPCIntermediateStepper() {
       p5.fill(209, 250, 229, 200)
       p5.rect(VPC2.x, VPC2.y, VPC2.w, VPC2.h, 0)
       if (imgVpc.current) {
-        p5.image(imgVpc.current, VPC2.x + 10, VPC2.y + 4, 20, 20)
+        p5.image(imgVpc.current, VPC2.x, VPC2.y, 24, 24)
       }
       p5.noStroke(); p5.fill(16, 185, 129)
       p5.textSize(9); p5.textAlign(p5.CENTER)
@@ -499,7 +505,7 @@ export default function VPCIntermediateStepper() {
       p5.strokeWeight(1); p5.stroke(200, 200, 220)
       p5.fill(255, 255, 255, 220)
       p5.rect(nx, ny, nw, nh, 8)
-      p5.noStroke(); p5.textAlign(p5.LEFT); p5.textSize(8.5)
+      p5.noStroke(); p5.textAlign(p5.LEFT); p5.textSize(12)
       p5.fill(50, 50, 150); p5.text('📋 VPCピアリングの注意点', nx + 10, ny + 16)
       p5.fill(80, 80, 80)
       p5.text('• CIDRが重複している場合は接続不可（VPC-A: 10.0.0.0/16, VPC-B: 10.1.0.0/16 ✅）', nx + 10, ny + 34)
@@ -507,7 +513,7 @@ export default function VPCIntermediateStepper() {
       p5.text('• 双方のVPCでルートテーブルの設定が必要', nx + 10, ny + 70)
 
       // Legend (above notes box: ny=245)
-      p5.noStroke(); p5.textSize(8.5); p5.textAlign(p5.LEFT)
+      p5.noStroke(); p5.textSize(12); p5.textAlign(p5.LEFT)
       p5.fill(139, 92, 246); p5.circle(14, 238, 8)
       p5.fill(70, 70, 70); p5.text('VPC-A → VPC-B', 22, 242)
       p5.fill(16, 185, 129); p5.circle(140, 238, 8)

@@ -54,3 +54,11 @@ html {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.6; }
 }
+
+/* hero grid overlay */
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(255,153,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,153,0,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}

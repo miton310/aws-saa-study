@@ -383,8 +383,9 @@ export default function EC2BeginnerStepper() {
       p5.text('AMI（テンプレート）', amiX, amiY - 52)
       awsIcon(p5, amiX, amiY - 8, 58, AWS_ORANGE, 'ami')
       p5.fill(80, 80, 80); p5.textSize(10)
-      p5.text('Amazon Linux 2023', amiX, amiY + 46)
-      p5.text('+ Nginx + Node.js', amiX, amiY + 60)
+      p5.text('Amazon Linux 2023', amiX, amiY + 36)
+      p5.text('+ Nginx', amiX, amiY + 48)
+      p5.text('+ Node.js', amiX, amiY + 60)
 
       // Arrows to instances
       const targets = [[385, 75], [385, 165], [385, 255]]

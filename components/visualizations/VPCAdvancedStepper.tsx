@@ -335,16 +335,16 @@ export default function VPCAdvancedStepper() {
         p5.line(EP_EC2.x + 38, EP_EC2.y, EP_GW.x - 52, EP_GW.y)
 
         // S3 box (outside VPC)
-        p5.strokeWeight(2); p5.stroke(16, 185, 129)
-        p5.fill(209, 250, 229, 200)
-        p5.rect(EP_S3.x - 50, EP_S3.y - 20, 100, 40, 8)
+        // p5.strokeWeight(2); p5.stroke(16, 185, 129)
+        // p5.fill(209, 250, 229, 200)
+        // p5.rect(EP_S3.x - 50, EP_S3.y - 20, 100, 40, 8)
         if (imgS3.current) {
-          p5.image(imgS3.current, EP_S3.x - 47, EP_S3.y - 17, 16, 16)
+          p5.image(imgS3.current, EP_S3.x - 25, EP_S3.y - 17, 32, 32)
         }
         p5.noStroke(); p5.fill(5, 150, 105)
         p5.textSize(9); p5.textAlign(p5.LEFT, p5.CENTER)
-        p5.text('Amazon S3', EP_S3.x - 26, EP_S3.y)
-
+        p5.text('Amazon S3', EP_S3.x - 32, EP_S3.y + 25)
+        
         // Line GW EP → S3
         p5.stroke(180, 200, 220); p5.strokeWeight(1)
         p5.line(EP_GW.x + 52, EP_GW.y, EP_S3.x - 50, EP_S3.y)

@@ -275,7 +275,7 @@ export default function VPCBeginnerStepper() {
     p5.loadImage('/icons/aws/ec2.svg', (img: any) => { imgEc2.current = img })
     p5.loadImage('/icons/aws/igw.svg', (img: any) => { imgIgw.current = img })
     p5.loadImage('/icons/aws/nat.svg', (img: any) => { imgNat.current = img })
-    p5.loadImage('/icons/aws/vpc.svg', (img: any) => { imgVpc.current = img })
+    p5.loadImage('/icons/aws/aws-vpc.svg', (img: any) => { imgVpc.current = img })
     p5.loadImage('/icons/aws/publicSubnet.svg', (img: any) => { imgPublicSubnet.current = img })
     p5.loadImage('/icons/aws/privateSubnet.svg', (img: any) => { imgPrivateSubnet.current = img })
   }
@@ -291,7 +291,7 @@ export default function VPCBeginnerStepper() {
     // vpcPulse: 0.3〜1.0 の間を sin でゆっくり往復する係数
     const vpcPulse = s === 1 ? 0.65 + Math.sin(t * 0.07) * 0.35 : 1
     p5.strokeWeight(2.5)
-    p5.stroke(99, 102, 241, 255 * vpcPulse)           // インディゴ系の枠線
+    p5.stroke(140, 80, 255, 255 * vpcPulse)           // インディゴ系の枠線
     p5.fill(238, 242, 255, s === 1 ? 140 * vpcPulse : 180)  // 薄紫の塗り
     p5.rect(VPC.x, VPC.y, VPC.w, VPC.h, 0)           // 角丸なし
     // 左上に CIDR ラベルを描く
@@ -301,7 +301,7 @@ export default function VPCBeginnerStepper() {
     p5.textAlign(p5.LEFT)
     // VPC アイコン（左上、CIDRラベルの左隣）
     if (imgVpc.current) {
-      p5.image(imgVpc.current, VPC.x + 10, VPC.y + 4, 24, 24)  // 上部中央に 24×24 で配置
+      p5.image(imgVpc.current, VPC.x, VPC.y, 24, 24)  // 上部中央に 24×24 で配置
     }
     p5.noStroke()
     p5.fill(99, 102, 241)
@@ -327,10 +327,10 @@ export default function VPCBeginnerStepper() {
       p5.fill(255, 255, 255, alpha)
       p5.rect(PUB.x, PUB.y, PUB.w, PUB.h, 0)
       if (imgPublicSubnet.current) {
-        p5.image(imgPublicSubnet.current, PUB.x + 0, PUB.y + 0, 18, 18)
+        p5.image(imgPublicSubnet.current, PUB.x + 0, PUB.y + 0, 24, 24)
       }
       p5.noStroke()
-      p5.fill(59, 130, 246, alpha)
+      p5.fill(122, 160, 22, alpha) 
       p5.textSize(9); p5.textAlign(p5.LEFT, p5.CENTER)
       p5.text('パブリックサブネット', PUB.x + 30, PUB.y + 14)
       p5.textSize(8)
@@ -342,14 +342,14 @@ export default function VPCBeginnerStepper() {
       p5.fill(255, 255, 255, alpha)
       p5.rect(PRI.x, PRI.y, PRI.w, PRI.h, 0)
       if (imgPrivateSubnet.current) {
-        p5.image(imgPrivateSubnet.current, PRI.x + 0, PRI.y + 0, 18, 18)
+        p5.image(imgPrivateSubnet.current, PRI.x + 0, PRI.y + 0, 24, 24)
       }
       p5.noStroke()
       p5.fill(16, 185, 129, alpha)
       p5.textSize(9); p5.textAlign(p5.LEFT, p5.CENTER)
-      p5.text('プライベートサブネット', PRI.x + 24, PRI.y + 14)
+      p5.text('プライベートサブネット', PRI.x + 30, PRI.y + 14)
       p5.textSize(8)
-      p5.text('10.0.2.0/24', PRI.x + 24, PRI.y + 26)  // CIDR 表記
+      p5.text('10.0.2.0/24', PRI.x + 30, PRI.y + 26)  // CIDR 表記
     }
 
     // ─── ステップ 3〜: インターネットゲートウェイ（IGW）────────────────
