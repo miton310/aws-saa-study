@@ -332,6 +332,18 @@ export const CONTENT: ContentMap = {
           explanation:
             'ターゲット追跡スケーリングでは平均CPU使用率、ネットワーク入出力量、ELBのリクエスト数などをメトリクスとして追跡できます。',
         },
+        {
+          question: 'データベースのトランザクション処理で最大64,000 IOPSが必要な場合、最適なEBSボリュームタイプはどれですか？',
+          options: [
+            'gp3（汎用SSD）',
+            'st1（スループット最適化HDD）',
+            'io2（プロビジョンドIOPS SSD）',
+            'sc1（コールドHDD）',
+          ],
+          answer: 2,
+          explanation:
+            'io2（プロビジョンドIOPS SSD）はミッションクリティカルなデータベース向けで、最大64,000 IOPSを提供します。gp3は最大16,000 IOPS、HDD系（st1/sc1）は高IOPS用途には不向きです。',
+        },
       ],
       affiliateLinks: AFFILIATE_BOOKS,
     },
@@ -371,6 +383,18 @@ export const CONTENT: ContentMap = {
           answer: 1,
           explanation:
             'クラスタープレイスメントグループは同一AZ内に密集配置し、最低レイテンシーと最大スループットを実現します。HPC向けに最適です。',
+        },
+        {
+          question: 'EC2インスタンスのハイバネーション機能を使用する場合、必須の要件はどれですか？',
+          options: [
+            'インスタンスタイプはc5系のみ対応',
+            'ルートEBSボリュームが暗号化されていること',
+            'インスタンスにElastic IPが割り当てられていること',
+            'Nitroハイパーバイザーが必要',
+          ],
+          answer: 1,
+          explanation:
+            'ハイバネーションではRAMの内容をルートEBSに書き出すため、データを保護するためにルートEBSの暗号化が必須です。RAMサイズは150GB以下、ハイバネーション期間は60日以内という制限もあります。',
         },
       ],
       affiliateLinks: AFFILIATE_BOOKS,
