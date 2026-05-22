@@ -101,6 +101,20 @@ const STEPS = [
   },
   {
     id: 8,
+    title: 'Multi-AZで高可用性を高める',
+    emoji: '🏗️',
+    description:
+      'VPCはリージョン単位のネットワークで、複数のAZをまたいで利用できます。高可用性のためには、単一AZに依存せず、同じ構成を複数のAZに展開します。片方のAZに障害が出ても、もう片方でサービス継続しやすくなります。',
+    keyPoints: [
+      'AZ-a / AZ-c は同じVPC内に作成される（VPC配下の別AZサブネット）',
+      'サブネットはAZをまたげないため、AZごとにPublic/Privateサブネットを作成する',
+      'Web層・DB層を複数AZへ分散し、障害時の影響範囲を限定する',
+      'シングルAZ構成は学習用・検証用、本番はMulti-AZが基本',
+    ],
+    hint: 'AZ-a / AZ-c に同じ構成を複製して高可用性を確保',
+  },
+  {
+    id: 9,
     title: 'まとめ：VPCの基本構成',
     emoji: '🎯',
     description:
@@ -108,7 +122,8 @@ const STEPS = [
     keyPoints: [
       'Webサーバー → パブリックサブネット（IGW経由で外部公開）',
       'DBサーバー → プライベートサブネット（外部から完全隔離）',
-      '高可用性のためには複数のAZに同じ構成を作成する（Multi-AZ）',
+      'パブリックサブネットのルート: 0.0.0.0/0 → IGW を設定',
+      'プライベートサブネットはNAT GW経由でアウトバウンド通信を行う',
     ],
     hint: 'ルートテーブルでトラフィックの経路を制御します',
   },
@@ -168,7 +183,7 @@ function getSequence(s: number): Seg[] {
     [EC2_PUB, IGW,     [16, 185, 129]],
     [IGW,     INET,    [16, 185, 129]],
   ]
-  if (s >= 7) return [
+  if (s === 7) return [
     // ① アウトバウンド（緑）: プライベート EC2 → NAT → IGW → Internet
     [EC2_PRI, NAT,  [16, 185, 129]],
     [NAT,     IGW,  [16, 185, 129]],
@@ -280,6 +295,11 @@ export default function VPCBeginnerStepper() {
     p5.loadImage('/icons/aws/privateSubnet.svg', (img: any) => { imgPrivateSubnet.current = img })
   }
 
+  // draw() 内のパケット座標計算部分を差し替え
+  function easeInOutCubic(t: number): number {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+  }
+
   const draw = (p5: any) => {
     const s = stepRef.current
     timerRef.current++
@@ -317,7 +337,7 @@ export default function VPCBeginnerStepper() {
     }
 
     // ─── ステップ 2〜: サブネット ─────────────────────────────────────
-    if (s >= 2) {
+    if (s >= 2 && s !== 8) {
       // ステップ 2 の初回だけ t*5 でフェードイン。以降は常に alpha=255
       const alpha = s === 2 ? Math.min(255, t * 5) : 255
 
@@ -353,7 +373,7 @@ export default function VPCBeginnerStepper() {
     }
 
     // ─── ステップ 3〜: インターネットゲートウェイ（IGW）────────────────
-    if (s >= 3) {
+    if (s >= 3 && s !== 8) {
       // ステップ 3 のときだけ枠を点灯させて IGW の存在を強調する
       // glow: 0.2〜1.0 を sin で往復（ステップ 3 以外は常に 1 = 最大輝度）
       const glow = s === 3 ? 0.6 + Math.sin(t * 0.1) * 0.4 : 1
@@ -368,8 +388,8 @@ export default function VPCBeginnerStepper() {
       // IGW ボックス本体: 幅 120 × 高さ 28px（アイコン左 + テキスト右の横並び）
       // ボックスの縦中心は IGW.y なので、上辺 = IGW.y - 14、下辺 = IGW.y + 14
       // → INET ラベル（y=12）や VPC 上辺（y=62）と被らない高さに収まる
-      p5.strokeWeight(2)
-      p5.stroke(...igwCol)
+      p5.strokeWeight(s === 3 ? 2.5 : 2)
+      p5.stroke(igwCol[0], igwCol[1], igwCol[2], 255 * glow)  // ★alphaに glow を適用
       p5.noFill()  // 塗りなし（背景を透かす）
       p5.rect(IGW.x - 60, IGW.y - 14, 120, 28, 0)  // 角丸なし
       // SVG アイコン（22×22px、ボックス左端から配置）
@@ -384,7 +404,7 @@ export default function VPCBeginnerStepper() {
     }
 
     // ─── ステップ 4〜: インターネット + パブリック EC2（パケットなし）──
-    if (s >= 4) {
+    if (s >= 4 && s !== 8) {
       // キャンバス最上部に「インターネット」ラベルを表示
       p5.noStroke()
       p5.fill(80, 80, 80)
@@ -401,7 +421,7 @@ export default function VPCBeginnerStepper() {
     }
 
     // ─── ステップ 6〜: プライベート EC2 ＋ 内部接続ライン ────────────
-    if (s >= 6) {
+    if (s >= 6 && s !== 8) {
       // パブリック EC2 とプライベート EC2 の間の内部通信経路（薄紫の線）
       p5.stroke(180, 180, 220); p5.strokeWeight(1)
       p5.line(EC2_PUB.x + 38, EC2_PUB.y, EC2_PRI.x - 38, EC2_PRI.y)
@@ -410,7 +430,7 @@ export default function VPCBeginnerStepper() {
     }
 
     // ─── ステップ 7〜: NAT ゲートウェイ ──────────────────────────────
-    if (s >= 7) {
+    if (s >= 7 && s !== 8) {
       // ステップ 7 のみグロー点灯で NAT GW の存在を強調
       const glow = s === 7 ? 0.6 + Math.sin(t * 0.1) * 0.4 : 1
 
@@ -421,8 +441,8 @@ export default function VPCBeginnerStepper() {
 
       // NAT ゲートウェイ ボックス（NAT アイコン色 #8c4fff）
       const natCol: [number, number, number] = [140, 79, 255]
-      p5.strokeWeight(2)
-      p5.stroke(...natCol)
+      p5.strokeWeight(s === 7 ? 2.5 : 2)
+      p5.stroke(natCol[0], natCol[1], natCol[2], 255 * glow)  // ★alphaに glow を適用
       p5.noFill()
       p5.rect(NAT.x - 44, NAT.y - 14, 88, 28, 0)
       if (imgNat.current) {
@@ -435,9 +455,82 @@ export default function VPCBeginnerStepper() {
     }
 
 
-    // ─── ステップ 8: ルートテーブル オーバーレイ ──────────────────────
-    // パブリックサブネットのルートテーブル内容を白いカードとして重ねて表示する
-    if (s >= 8) {
+    // ─── ステップ 8: Multi-AZ 専用レイアウト ────────────────────────
+    if (s === 8) {
+      // STEP8は重なり回避のため、専用図のみ表示する
+      p5.strokeWeight(1.6)
+      p5.stroke(120, 135, 190)
+      p5.fill(250, 252, 255)
+      p5.rect(22, 74, 616, 248, 0)
+
+      p5.noStroke(); p5.textAlign(p5.LEFT)
+      p5.fill(55, 75, 145); p5.textSize(12)
+      p5.text('同一VPC（10.0.0.0/16）内で Multi-AZ 構成を作る', 34, 94)
+
+      const azY = 110
+      const azW = 284
+      const azH = 160
+      const azAX = 34
+      const azCX = 342
+
+      // AZ-a パネル
+      p5.strokeWeight(1.4); p5.stroke(140, 170, 150)
+      p5.fill(245, 252, 248)
+      p5.rect(azAX, azY, azW, azH, 0)
+      p5.noStroke(); p5.fill(65, 95, 80); p5.textSize(10.5)
+      p5.text('AZ-a', azAX + 10, azY + 16)
+
+      // AZ-c パネル
+      p5.strokeWeight(1.4); p5.stroke(140, 170, 150)
+      p5.fill(245, 252, 248)
+      p5.rect(azCX, azY, azW, azH, 0)
+      p5.noStroke(); p5.fill(65, 95, 80); p5.textSize(10.5)
+      p5.text('AZ-c', azCX + 10, azY + 16)
+
+      // 各AZ内の Public / Private サブネット
+      const subnetW = 126
+      const subnetH = 122
+      const subnetY = azY + 26
+
+      // AZ-a
+      p5.strokeWeight(1.2); p5.stroke(59, 130, 246); p5.fill(240, 247, 255)
+      p5.rect(azAX + 10, subnetY, subnetW, subnetH, 0)
+      p5.noStroke(); p5.fill(37, 99, 235); p5.textSize(9.5)
+      p5.text('Public Subnet', azAX + 16, subnetY + 14)
+
+      p5.strokeWeight(1.2); p5.stroke(16, 185, 129); p5.fill(240, 255, 248)
+      p5.rect(azAX + 146, subnetY, subnetW, subnetH, 0)
+      p5.noStroke(); p5.fill(5, 150, 105); p5.textSize(9.5)
+      p5.text('Private Subnet', azAX + 152, subnetY + 14)
+
+      // AZ-c
+      p5.strokeWeight(1.2); p5.stroke(59, 130, 246); p5.fill(240, 247, 255)
+      p5.rect(azCX + 10, subnetY, subnetW, subnetH, 0)
+      p5.noStroke(); p5.fill(37, 99, 235); p5.textSize(9.5)
+      p5.text('Public Subnet', azCX + 16, subnetY + 14)
+
+      p5.strokeWeight(1.2); p5.stroke(16, 185, 129); p5.fill(240, 255, 248)
+      p5.rect(azCX + 146, subnetY, subnetW, subnetH, 0)
+      p5.noStroke(); p5.fill(5, 150, 105); p5.textSize(9.5)
+      p5.text('Private Subnet', azCX + 152, subnetY + 14)
+
+      // 各AZに同じ役割のEC2を配置
+      ec2Box(p5, azAX + 72,  subnetY + 70, 'EC2\nWeb', [37, 99, 235])
+      ec2Box(p5, azAX + 208, subnetY + 70, 'EC2\nDB',  [5, 150, 105])
+      ec2Box(p5, azCX + 72,  subnetY + 70, 'EC2\nWeb', [37, 99, 235])
+      ec2Box(p5, azCX + 208, subnetY + 70, 'EC2\nDB',  [5, 150, 105])
+
+      // 同じ構成を示す横線（直交）
+      p5.stroke(22, 163, 74); p5.strokeWeight(1.4)
+      p5.line(azAX + azW, azY + 58, azCX, azY + 58)
+      p5.line(azAX + azW, azY + 132, azCX, azY + 132)
+
+      p5.noStroke(); p5.fill(70, 80, 90); p5.textSize(14)
+      p5.text('同一VPCの中で、AZごとに同じ構成を複製して高可用性を確保', 310, 292)
+    }
+
+    // ─── ステップ 9: ルートテーブル オーバーレイ ──────────────────────
+    if (s >= 9) {
       // カードの座標とサイズ
       const rx = 500, ry = 100, rw = 150, rh = 80
       p5.strokeWeight(1); p5.stroke(160, 160, 200)
@@ -493,11 +586,25 @@ export default function VPCBeginnerStepper() {
       if (!pk.blocked && pk.progress >= 1)   { pk.active = false; continue }
 
       // lerp で現在の座標を線形補間（出発点と到着点の間を progress 割合で進む）
-      const px = p5.lerp(pk.x, pk.tx, pk.progress)
-      const py = p5.lerp(pk.y, pk.ty, pk.progress)
+      const ep = easeInOutCubic(Math.min(pk.progress, 1))  // ★イージング適用
+      const px = p5.lerp(pk.x, pk.tx, ep)
+      const py = p5.lerp(pk.y, pk.ty, ep)
 
+      // ★矢印を先頭に描画
+      const angle = Math.atan2(pk.ty - pk.y, pk.tx - pk.x)
+      p5.push()
+      p5.translate(
+        px + Math.cos(angle) * 9,
+        py + Math.sin(angle) * 9
+      )
+      p5.rotate(angle)
+      p5.fill(...pk.color)
       p5.noStroke()
-      // 外側の大きめ円（パケット本体の色）
+      p5.triangle(0, -3, 0, 3, 8, 0)
+      p5.pop()
+
+      // パケット本体（変更なし）
+      p5.noStroke()
       p5.fill(...pk.color)
       p5.circle(px, py, 11)
 
@@ -518,7 +625,7 @@ export default function VPCBeginnerStepper() {
 
     // ─── パケット凡例（ステップ 5〜）────────────────────────────────
     // キャンバス左下に色と意味の対応を表示する
-    if (s >= 5) {
+    if (s >= 5 && s !== 8) {
       p5.noStroke(); p5.textSize(14); p5.textAlign(p5.LEFT)
       // 青 = インバウンド（外→内）
       p5.fill(59, 130, 246); p5.circle(20, H - 20, 8)
@@ -535,6 +642,50 @@ export default function VPCBeginnerStepper() {
         // ステップ 7〜: 赤 = ブロック（プライベート EC2 への外部アクセス不可）
         p5.fill(239, 68, 68); p5.circle(240, H - 20, 8)
         p5.fill(70, 70, 70); p5.text('ブロック', 248, H - 20)
+      }
+    }
+    // ─── ホバーツールチップ ────────────────────────────────────────────
+    const tooltips = [
+      {
+        node: EC2_PUB,
+        show: s >= 4 && s !== 8,
+        label: 'パブリックEC2\nパブリックIPを持つ\nSG: Port80/443を許可',
+      },
+      {
+        node: EC2_PRI,
+        show: s >= 6 && s !== 8,
+        label: 'プライベートEC2\n外部から直接到達不可\nRDS/DBサーバー等を配置',
+      },
+      {
+        node: IGW,
+        show: s >= 3 && s !== 8,
+        label: 'インターネットGW (IGW)\n1VPCにつき1つ\nルートテーブルへの設定も必要',
+      },
+      {
+        node: NAT,
+        show: s >= 7 && s !== 8,
+        label: 'NAT Gateway\n外向き通信のみ許可\n料金: $0.045/h + データ転送料',
+      },
+    ]
+
+    for (const tip of tooltips) {
+      if (!tip.show) continue
+      const d = Math.hypot(p5.mouseX - tip.node.x, p5.mouseY - tip.node.y)
+      if (d < 40) {
+        const lines = tip.label.split('\n')
+        const tw = 170, th = 14 * lines.length + 10
+        // 背景カード
+        p5.fill(30, 30, 30, 215)
+        p5.noStroke()
+        const tipX = p5.mouseX + tw + 12 > W ? p5.mouseX - tw - 12 : p5.mouseX + 12
+        p5.rect(tipX, p5.mouseY - 10, tw, th, 6)
+        // テキスト
+        p5.fill(255)
+        p5.textSize(9)
+        p5.textAlign(p5.LEFT, p5.TOP)
+        lines.forEach((ln: string, i: number) =>
+          p5.text(ln, p5.mouseX + 18, p5.mouseY - 4 + i * 14)
+        )
       }
     }
   }

@@ -386,11 +386,11 @@ export default function EC2AdvancedStepper() {
         // 異なるハードウェア marker
         p5.noStroke(); p5.fill(...BLUE, 180)
         p5.textSize(10.5); p5.textAlign(p5.CENTER)
-        p5.text('独立HW', rx + rackW/2, rackY + 104)
+        p5.text('独立HW', rx + rackW/2, rackY + 192)
       }
 
       // Horizontal network backbone
-      const netY = rackY + 45
+      const netY = rackY + 128
       const leftX = startX + rackW/2, rightX = startX + (racks-1)*(rackW+20) + rackW/2
       line(p5, leftX, netY, rightX, netY, BLUE, 1.5)
       // Vertical taps from network to each rack
@@ -681,11 +681,19 @@ export default function EC2AdvancedStepper() {
 
       // Horizontal arrow: ENI-2 → Standby
       arrow(p5, 394, 198, 420, 198, PURPLE, 2)
-      // Vertical then attach to standby (show as dotted)
+      // Dotted orthogonal path (vertical -> horizontal) to standby ENI attach point
       p5.stroke(...PURPLE, 120); p5.strokeWeight(1.5)
-      for (let dx = 0; dx < 140; dx += 10) {
-        if (dx + 8 <= 140) p5.line(420+dx, 198, 420+dx+7, 198)
+      // Vertical dotted segment: (420,198) -> (420,140)
+      for (let y = 198; y > 140; y -= 8) {
+        const y2 = Math.max(140, y - 5)
+        p5.line(420, y, 420, y2)
       }
+      // Horizontal dotted segment: (420,140) -> (438,140)
+      for (let x = 420; x < 438; x += 8) {
+        const x2 = Math.min(438, x + 5)
+        p5.line(x, 140, x2, 140)
+      }
+      arrow(p5, 432, 140, 438, 140, PURPLE, 1.5)
     }
 
     // ── STEP 8: まとめ ───────────────────────────────────────────────

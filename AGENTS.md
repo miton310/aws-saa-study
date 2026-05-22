@@ -12,6 +12,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Keep icon style consistent across non-category UI sections (hero, guides, cards, headings).
 - For Mermaid architecture diagrams, treat icons as optional enhancement; keep labels explicit so diagrams remain readable without custom icons.
 
+### AI reference assets
+
+- Store AI-only reference images under `.claude/assets/` (example: `.claude/assets/reference_diagram.png`).
+- Treat files in `.claude/assets/` as design references only; do not load them in runtime code.
+- Use production assets from `public/` only (for this project, primarily `public/icons/aws/`).
+
 ### p5.js canvas visualizations
 
 - Do **not** use emoji as icon labels inside p5 canvas (cross-platform rendering is unreliable).
@@ -25,3 +31,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **Corner radius**: Minimize rounding on boxes; use `borderRadius: 0` or small value (≤4px) only when needed.
 - **Icon placement**: Position icons at top-left edge with no padding/offset (e.g. icon starts at box top-left corner).
 - **Alignment**: When only icon + text present, center-align both horizontally and vertically for balance.
+- **Line routing**: Represent paths with horizontal and vertical segments by default; use diagonal lines only when there is no clear orthogonal alternative.
+- **Typography**: Prioritize readability in p5 diagrams; use at least 11px for body labels and 12px+ for headings, and resolve overlap by adjusting layout before shrinking text.
+
+### Maintainability for diagram growth
+
+- As the number of diagrams grows, prioritize extracting shared p5 parts before considering a library migration.
+- Start by centralizing reusable primitives (for example: icon rendering helpers, arrow/connector drawing, and common labels/panels).
+- For this project, prefer extracting duplicated logic from stepper visualizations (such as `components/visualizations/EC2BeginnerStepper.tsx`) into shared utilities/components.
+- Consider switching to another library (D3.js/Three.js) only when requirements clearly exceed p5.js strengths (for example: data-driven auto layout at scale or true 3D interaction).

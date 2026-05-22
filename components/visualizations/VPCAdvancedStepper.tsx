@@ -142,12 +142,55 @@ type Seg = [{ x: number; y: number }, { x: number; y: number }, [number, number,
 
 function getSequence(s: number): Seg[] {
   // Step 3: VPC-A → TGW → VPC-C
-  if (s === 3) return [
-    [VPCA, TGW,  [59, 130, 246]],
-    [TGW,  VPCC, [59, 130, 246]],
-    [VPCC, TGW,  [16, 185, 129]],
-    [TGW,  VPCA, [16, 185, 129]],
-  ]
+  if (s === 3) {
+    const tgwA = { x: TGW.x - 38, y: TGW.y - 20 }
+    const tgwB = { x: TGW.x + 38, y: TGW.y - 20 }
+    const tgwC = { x: TGW.x - 38, y: TGW.y + 20 }
+    const tgwD = { x: TGW.x + 38, y: TGW.y + 20 }
+    return [
+      // Forward: VPC-A -> TGW -> VPC-C (orthogonal path)
+      [VPCA, { x: tgwA.x, y: VPCA.y }, [59, 130, 246]],
+      [{ x: tgwA.x, y: VPCA.y }, tgwA, [59, 130, 246]],
+      [tgwA, tgwC, [59, 130, 246]],
+      [tgwC, { x: tgwC.x, y: VPCC.y }, [59, 130, 246]],
+      [{ x: tgwC.x, y: VPCC.y }, VPCC, [59, 130, 246]],
+
+      // Return: VPC-C -> TGW -> VPC-A (orthogonal path)
+      [VPCC, { x: tgwC.x, y: VPCC.y }, [16, 185, 129]],
+      [{ x: tgwC.x, y: VPCC.y }, tgwC, [16, 185, 129]],
+      [tgwC, tgwA, [16, 185, 129]],
+      [tgwA, { x: tgwA.x, y: VPCA.y }, [16, 185, 129]],
+      [{ x: tgwA.x, y: VPCA.y }, VPCA, [16, 185, 129]],
+
+      // Forward: VPC-A -> TGW -> VPC-D
+      [VPCA, { x: tgwA.x, y: VPCA.y }, [59, 130, 246]],
+      [{ x: tgwA.x, y: VPCA.y }, tgwA, [59, 130, 246]],
+      [tgwA, tgwD, [59, 130, 246]],
+      [tgwD, { x: tgwD.x, y: VPCD.y }, [59, 130, 246]],
+      [{ x: tgwD.x, y: VPCD.y }, VPCD, [59, 130, 246]],
+
+      // Return: VPC-D -> TGW -> VPC-A
+      [VPCD, { x: tgwD.x, y: VPCD.y }, [16, 185, 129]],
+      [{ x: tgwD.x, y: VPCD.y }, tgwD, [16, 185, 129]],
+      [tgwD, tgwA, [16, 185, 129]],
+      [tgwA, { x: tgwA.x, y: VPCA.y }, [16, 185, 129]],
+      [{ x: tgwA.x, y: VPCA.y }, VPCA, [16, 185, 129]],
+
+      // Forward: VPC-B -> TGW -> VPC-C
+      [VPCB, { x: tgwB.x, y: VPCB.y }, [59, 130, 246]],
+      [{ x: tgwB.x, y: VPCB.y }, tgwB, [59, 130, 246]],
+      [tgwB, tgwC, [59, 130, 246]],
+      [tgwC, { x: tgwC.x, y: VPCC.y }, [59, 130, 246]],
+      [{ x: tgwC.x, y: VPCC.y }, VPCC, [59, 130, 246]],
+
+      // Return: VPC-C -> TGW -> VPC-B
+      [VPCC, { x: tgwC.x, y: VPCC.y }, [16, 185, 129]],
+      [{ x: tgwC.x, y: VPCC.y }, tgwC, [16, 185, 129]],
+      [tgwC, tgwB, [16, 185, 129]],
+      [tgwB, { x: tgwB.x, y: VPCB.y }, [16, 185, 129]],
+      [{ x: tgwB.x, y: VPCB.y }, VPCB, [16, 185, 129]],
+    ]
+  }
   // Step 4: EC2 → Gateway EP → S3
   if (s === 4) return [
     [EP_EC2, EP_GW, [59, 130, 246]],
@@ -191,6 +234,8 @@ export default function VPCAdvancedStepper() {
   const imgPrivateSubnet = useRef<unknown>(null)
   const imgTgw = useRef<unknown>(null)
   const imgS3 = useRef<unknown>(null)
+  const imgPrivateLink = useRef<unknown>(null)
+  const imgVpcEndpoint = useRef<unknown>(null)
 
   useEffect(() => {
     stepRef.current  = step
@@ -209,31 +254,55 @@ export default function VPCAdvancedStepper() {
     p5.fill(col[0], col[1], col[2], 40)
     p5.rect(cx - w / 2, cy - h / 2, w, h, 8)
     p5.noStroke(); p5.fill(...col)
-    p5.textSize(9); p5.textAlign(p5.CENTER, p5.CENTER)
+    p5.textSize(10); p5.textAlign(p5.CENTER, p5.CENTER)
     p5.text(label, cx, cy)
   }
 
   function ec2Box(p5: any, cx: number, cy: number, label: string, col: [number, number, number]) {
     p5.strokeWeight(1.5); p5.stroke(...col)
     p5.fill(col[0], col[1], col[2], 35)
-    p5.rect(cx - 38, cy - 26, 76, 52, 0)
+    // p5.rect(cx - 38, cy - 26, 76, 52, 0)
     if (imgEc2.current) {
-      p5.image(imgEc2.current, cx - 13, cy - 23, 26, 26)
+      p5.image(imgEc2.current, cx - 16, cy - 23, 32, 32)
     }
     p5.noStroke(); p5.fill(...col)
-    p5.textSize(8)
+    p5.textSize(12)
     p5.textAlign(p5.CENTER, p5.CENTER)
-    label.split('\n').forEach((ln: string, i: number) => p5.text(ln, cx, cy + 8 + i * 12))
+    label.split('\n').forEach((ln: string, i: number) => p5.text(ln, cx, cy + 16 + i * 12))
+  }
+
+  // Orthogonal connector (horizontal/vertical) with one bend
+  function orthoLine(
+    p5: any,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    col: [number, number, number],
+    w = 1.5,
+    first: 'h' | 'v' = 'h',
+  ) {
+    p5.stroke(...col)
+    p5.strokeWeight(w)
+    if (first === 'h') {
+      p5.line(x1, y1, x2, y1)
+      p5.line(x2, y1, x2, y2)
+    } else {
+      p5.line(x1, y1, x1, y2)
+      p5.line(x1, y2, x2, y2)
+    }
   }
 
   const setup = (p5: any, ref: any) => {
     p5.createCanvas(W, H).parent(ref)
     p5.frameRate(40)
     p5.loadImage('/icons/aws/ec2.svg', (img: unknown) => { imgEc2.current = img })
-    p5.loadImage('/icons/aws/vpc.svg', (img: unknown) => { imgVpc.current = img })
+    p5.loadImage('/icons/aws/aws-vpc.svg', (img: unknown) => { imgVpc.current = img })
     p5.loadImage('/icons/aws/privateSubnet.svg', (img: unknown) => { imgPrivateSubnet.current = img })
     p5.loadImage('/icons/aws/tgw.svg', (img: unknown) => { imgTgw.current = img })
     p5.loadImage('/icons/aws/s3.svg', (img: unknown) => { imgS3.current = img })
+    p5.loadImage('/icons/aws/Arch_AWS-PrivateLink_32.svg', (img: unknown) => { imgPrivateLink.current = img })
+    p5.loadImage('/icons/aws/Res_Amazon-VPC_Endpoints_48_Light.svg', (img: unknown) => { imgVpcEndpoint.current = img })
   }
 
   const draw = (p5: any) => {
@@ -259,7 +328,7 @@ export default function VPCAdvancedStepper() {
         p5.noStroke(); p5.fill(239, 68, 68, 200)
         p5.textSize(13); p5.textAlign(p5.CENTER, p5.CENTER)
         p5.text('6本の接続が必要！', W / 2, H / 2)
-        p5.textSize(9); p5.fill(150, 60, 60)
+        p5.textSize(10); p5.fill(150, 60, 60)
         p5.text('（VPCが増えるほど爆発的に増加）', W / 2, H / 2 + 20)
       }
 
@@ -267,19 +336,24 @@ export default function VPCAdvancedStepper() {
         // TGW hub & spoke: draw 4 lines from VPCs to TGW
         const tgwGlow = s === 2 ? 0.5 + Math.sin(t * 0.08) * 0.5 : 0.8
         const tgwCol: [number, number, number] = [140, 79, 255]
-        p5.stroke(245, 158, 11, 160); p5.strokeWeight(1.5)
-        positions.forEach(pos => p5.line(pos.x, pos.y, TGW.x, TGW.y))
+
+        // Orthogonal spokes for readability (reference-style routing)
+        const spokeCol: [number, number, number] = [245, 158, 11]
+        orthoLine(p5, VPCA.x, VPCA.y, TGW.x - 38, TGW.y - 20, spokeCol, 1.5, 'h')
+        orthoLine(p5, VPCB.x, VPCB.y, TGW.x + 38, TGW.y - 20, spokeCol, 1.5, 'h')
+        orthoLine(p5, VPCC.x, VPCC.y, TGW.x - 38, TGW.y + 20, spokeCol, 1.5, 'h')
+        orthoLine(p5, VPCD.x, VPCD.y, TGW.x + 38, TGW.y + 20, spokeCol, 1.5, 'h')
 
         // TGW box
         p5.strokeWeight(2.5); p5.stroke(...tgwCol, 200 * tgwGlow)
         p5.noFill()
-        p5.rect(TGW.x - 66, TGW.y - 18, 132, 36, 0)
+        p5.rect(TGW.x - 74, TGW.y - 22, 148, 44, 0)
         if (imgTgw.current) {
-          p5.image(imgTgw.current, TGW.x - 64, TGW.y - 16, 24, 24)
+          p5.image(imgTgw.current, TGW.x - 68, TGW.y - 12, 24, 24)
         }
         p5.noStroke(); p5.fill(...tgwCol)
-        p5.textSize(9.5); p5.textAlign(p5.LEFT, p5.CENTER)
-        p5.text('Transit Gateway', TGW.x - 36, TGW.y + 1)
+        p5.textSize(11); p5.textAlign(p5.LEFT, p5.TOP)
+        p5.text('AWS Transit\nGateway', TGW.x - 36, TGW.y - 12)
 
         if (s === 2) {
           p5.noStroke(); p5.fill(16, 130, 60, 200)
@@ -299,10 +373,10 @@ export default function VPCAdvancedStepper() {
       p5.fill(238, 242, 255, 180)
       p5.rect(EP_VPC.x, EP_VPC.y, EP_VPC.w, EP_VPC.h, 0)
       if (imgVpc.current) {
-        p5.image(imgVpc.current, EP_VPC.x + 10, EP_VPC.y + 4, 24, 24)
+        p5.image(imgVpc.current, EP_VPC.x, EP_VPC.y, 32, 32)
       }
       p5.noStroke(); p5.fill(99, 102, 241)
-      p5.textSize(9); p5.textAlign(p5.LEFT)
+      p5.textSize(10.5); p5.textAlign(p5.LEFT)
       p5.text('VPC  10.0.0.0/16', EP_VPC.x + 36, EP_VPC.y + 16)
 
       // Private subnet
@@ -313,7 +387,7 @@ export default function VPCAdvancedStepper() {
         p5.image(imgPrivateSubnet.current, EP_PRIV.x + 0, EP_PRIV.y + 0, 18, 18)
       }
       p5.noStroke(); p5.fill(5, 150, 105)
-      p5.textSize(9); p5.textAlign(p5.LEFT, p5.CENTER)
+      p5.textSize(10); p5.textAlign(p5.LEFT, p5.CENTER)
       p5.text('プライベートサブネット', EP_PRIV.x + 22, EP_PRIV.y + 10)
 
       // EC2
@@ -324,11 +398,14 @@ export default function VPCAdvancedStepper() {
         p5.strokeWeight(2); p5.stroke(59, 130, 246)
         p5.fill(219, 234, 254, 200)
         p5.rect(EP_GW.x - 52, EP_GW.y - 20, 104, 40, 8)
+        if (imgVpcEndpoint.current) {
+          p5.image(imgVpcEndpoint.current, EP_GW.x - 48, EP_GW.y - 16, 20, 20)
+        }
         p5.noStroke(); p5.fill(37, 99, 235)
-        p5.textSize(8.5); p5.textAlign(p5.CENTER, p5.CENTER)
-        p5.text('Gateway Endpoint', EP_GW.x, EP_GW.y - 5)
-        p5.textSize(7.5); p5.fill(100, 100, 200)
-        p5.text('（S3 / DynamoDB）', EP_GW.x, EP_GW.y + 9)
+        p5.textSize(10); p5.textAlign(p5.LEFT, p5.CENTER)
+        p5.text('Gateway Endpoint', EP_GW.x - 24, EP_GW.y - 4)
+        p5.textSize(9); p5.fill(100, 100, 200)
+        p5.text('（S3 / DynamoDB）', EP_GW.x - 24, EP_GW.y + 10)
 
         // Line EC2 → GW EP
         p5.stroke(180, 200, 220); p5.strokeWeight(1)
@@ -342,7 +419,7 @@ export default function VPCAdvancedStepper() {
           p5.image(imgS3.current, EP_S3.x - 25, EP_S3.y - 17, 32, 32)
         }
         p5.noStroke(); p5.fill(5, 150, 105)
-        p5.textSize(9); p5.textAlign(p5.LEFT, p5.CENTER)
+        p5.textSize(10); p5.textAlign(p5.LEFT, p5.CENTER)
         p5.text('Amazon S3', EP_S3.x - 32, EP_S3.y + 25)
         
         // Line GW EP → S3
@@ -351,12 +428,12 @@ export default function VPCAdvancedStepper() {
 
         // "Internet不要" label
         p5.noStroke(); p5.fill(239, 68, 68, 160)
-        p5.textSize(8); p5.textAlign(p5.CENTER)
+        p5.textSize(9); p5.textAlign(p5.CENTER)
         p5.text('インターネット不使用', EP_S3.x, EP_S3.y + 35)
 
         // Legend
         p5.fill(59, 130, 246); p5.circle(14, H - 20, 8)
-        p5.fill(70, 70, 70); p5.textSize(8.5); p5.textAlign(p5.LEFT)
+        p5.fill(70, 70, 70); p5.textSize(10.5); p5.textAlign(p5.LEFT)
         p5.text('リクエスト', 22, H - 16)
         p5.fill(16, 185, 129); p5.circle(100, H - 20, 8)
         p5.text('レスポンス', 108, H - 16)
@@ -366,25 +443,31 @@ export default function VPCAdvancedStepper() {
         // Interface endpoint ENI inside subnet
         p5.strokeWeight(2); p5.stroke(139, 92, 246)
         p5.fill(237, 233, 254, 200)
-        p5.rect(EP_ENI.x - 38, EP_ENI.y - 18, 76, 36, 8)
+        p5.rect(EP_ENI.x - 44, EP_ENI.y - 24, 88, 48, 8)
+        if (imgVpcEndpoint.current) {
+          p5.image(imgVpcEndpoint.current, EP_ENI.x - 42, EP_ENI.y + 4, 14, 14)
+        }
+        if (imgPrivateLink.current) {
+          p5.image(imgPrivateLink.current, EP_ENI.x - 40, EP_ENI.y - 22, 24, 24)
+        }
         p5.noStroke(); p5.fill(109, 40, 217)
-        p5.textSize(8); p5.textAlign(p5.CENTER, p5.CENTER)
-        p5.text('ENI', EP_ENI.x, EP_ENI.y - 5)
-        p5.textSize(7); p5.fill(130, 60, 200)
-        p5.text('(PrivateLink)', EP_ENI.x, EP_ENI.y + 8)
+        p5.textSize(10); p5.textAlign(p5.LEFT, p5.CENTER)
+        p5.text('ENI', EP_ENI.x - 12, EP_ENI.y - 8)
+        p5.textSize(9); p5.fill(130, 60, 200)
+        p5.text('PrivateLink', EP_ENI.x - 12, EP_ENI.y + 6)
 
         // Line EC2 → ENI
         p5.stroke(180, 180, 220); p5.strokeWeight(1)
-        p5.line(EP_EC2.x + 38, EP_EC2.y, EP_ENI.x - 38, EP_ENI.y)
+        p5.line(EP_EC2.x + 38, EP_EC2.y, EP_ENI.x - 44, EP_ENI.y)
 
         // AWS Service box (outside VPC)
         p5.strokeWeight(2); p5.stroke(139, 92, 246)
         p5.fill(237, 233, 254, 200)
         p5.rect(EP_SVC.x - 55, EP_SVC.y - 25, 110, 50, 8)
         p5.noStroke(); p5.fill(109, 40, 217)
-        p5.textSize(9); p5.textAlign(p5.CENTER, p5.CENTER)
+        p5.textSize(10); p5.textAlign(p5.CENTER, p5.CENTER)
         p5.text('AWS Service', EP_SVC.x, EP_SVC.y - 8)
-        p5.textSize(7.5); p5.fill(130, 60, 200)
+        p5.textSize(9.5); p5.fill(130, 60, 200)
         p5.text('(CloudWatch, SNS…)', EP_SVC.x, EP_SVC.y + 8)
 
         // Line ENI → Service
@@ -393,15 +476,15 @@ export default function VPCAdvancedStepper() {
 
         // Note
         p5.noStroke(); p5.fill(100, 50, 180, 170)
-        p5.textSize(7.5); p5.textAlign(p5.CENTER)
+        p5.textSize(9.5); p5.textAlign(p5.CENTER)
         p5.text('SGで制御可能', EP_ENI.x, EP_ENI.y + 28)
 
         // Legend
         p5.fill(139, 92, 246); p5.circle(14, H - 20, 8)
-        p5.fill(70, 70, 70); p5.textSize(8.5); p5.textAlign(p5.LEFT)
-        p5.text('PrivateLinkリクエスト', 22, H - 16)
+        p5.fill(70, 70, 70); p5.textSize(12); p5.textAlign(p5.LEFT)
+        p5.text('PrivateLinkリクエスト', 22, H - 20)
         p5.fill(16, 185, 129); p5.circle(168, H - 20, 8)
-        p5.text('レスポンス', 176, H - 16)
+        p5.text('レスポンス', 176, H - 20)
       }
     }
 
@@ -412,9 +495,9 @@ export default function VPCAdvancedStepper() {
       p5.fill(240, 240, 240, 200)
       p5.rect(ONPREM.x, ONPREM.y, ONPREM.w, ONPREM.h, 10)
       p5.noStroke(); p5.fill(60, 60, 60)
-      p5.textSize(9); p5.textAlign(p5.CENTER)
+      p5.textSize(10); p5.textAlign(p5.CENTER)
       p5.text('オンプレミス', ONPREM.x + ONPREM.w / 2, ONPREM.y + 20)
-      p5.textSize(8); p5.fill(100, 100, 100)
+      p5.textSize(10); p5.fill(100, 100, 100)
       p5.text('データセンター', ONPREM.x + ONPREM.w / 2, ONPREM.y + 34)
       // Router label
       p5.fill(80, 80, 80)
@@ -426,7 +509,7 @@ export default function VPCAdvancedStepper() {
       p5.fill(238, 242, 255, 180)
       p5.rect(HY_VPC.x, HY_VPC.y, HY_VPC.w, HY_VPC.h, 12)
       p5.noStroke(); p5.fill(99, 102, 241)
-      p5.textSize(9); p5.textAlign(p5.CENTER)
+      p5.textSize(10); p5.textAlign(p5.CENTER)
       p5.text('AWS VPC', HY_VPC.x + HY_VPC.w / 2, HY_VPC.y + 16)
       ec2Box(p5, HY_EC2.x, HY_EC2.y, 'EC2', [37, 99, 235])
 
@@ -435,9 +518,9 @@ export default function VPCAdvancedStepper() {
       p5.fill(219, 234, 254, 200)
       p5.rect(VGW.x - 38, VGW.y - 18, 76, 36, 8)
       p5.noStroke(); p5.fill(37, 99, 235)
-      p5.textSize(8.5); p5.textAlign(p5.CENTER, p5.CENTER)
+      p5.textSize(10.5); p5.textAlign(p5.CENTER, p5.CENTER)
       p5.text('VGW', VGW.x, VGW.y - 4)
-      p5.textSize(7); p5.fill(100, 120, 200)
+      p5.textSize(9); p5.fill(100, 120, 200)
       p5.text('(仮想PGW)', VGW.x, VGW.y + 9)
 
       // Line VGW → EC2
@@ -453,9 +536,9 @@ export default function VPCAdvancedStepper() {
 
         // Internet cloud label
         p5.noStroke(); p5.fill(245, 158, 11, 180)
-        p5.textSize(9); p5.textAlign(p5.CENTER)
+        p5.textSize(10); p5.textAlign(p5.CENTER)
         p5.text('インターネット経由', INET_CLOUD.x, INET_CLOUD.y - 12)
-        p5.textSize(8); p5.fill(180, 120, 0)
+        p5.textSize(10); p5.fill(180, 120, 0)
         p5.text('IPsec 暗号化トンネル', INET_CLOUD.x, INET_CLOUD.y + 4)
 
         // Props
@@ -463,7 +546,7 @@ export default function VPCAdvancedStepper() {
         p5.strokeWeight(1); p5.stroke(220, 200, 150)
         p5.fill(255, 253, 230, 220)
         p5.rect(nx, ny, nw, nh, 8)
-        p5.noStroke(); p5.textAlign(p5.LEFT); p5.textSize(8.5)
+        p5.noStroke(); p5.textAlign(p5.LEFT); p5.textSize(10.5)
         p5.fill(130, 90, 0)
         p5.text('Site-to-Site VPN', nx + 10, ny + 16)
         p5.fill(80, 80, 80)
@@ -471,7 +554,7 @@ export default function VPCAdvancedStepper() {
         p5.text('⚠️ レイテンシー：インターネット経由のため不安定', nx + 10, ny + 52)
 
         // Legend
-        p5.noStroke(); p5.textSize(8.5); p5.textAlign(p5.LEFT)
+        p5.noStroke(); p5.textSize(10.5); p5.textAlign(p5.LEFT)
         p5.fill(245, 158, 11); p5.circle(14, H - 86, 8)
         p5.fill(70, 70, 70); p5.text('VPN（暗号化）', 22, H - 82)
       }
@@ -483,9 +566,9 @@ export default function VPCAdvancedStepper() {
 
         // DX label
         p5.noStroke(); p5.fill(37, 99, 235, 200)
-        p5.textSize(9); p5.textAlign(p5.CENTER)
+        p5.textSize(10); p5.textAlign(p5.CENTER)
         p5.text('専用回線（Direct Connect）', INET_CLOUD.x, INET_CLOUD.y - 12)
-        p5.textSize(8); p5.fill(30, 60, 160)
+        p5.textSize(10); p5.fill(30, 60, 160)
         p5.text('低レイテンシー・安定帯域', INET_CLOUD.x, INET_CLOUD.y + 4)
 
         // Props
@@ -493,7 +576,7 @@ export default function VPCAdvancedStepper() {
         p5.strokeWeight(1); p5.stroke(180, 200, 240)
         p5.fill(235, 243, 255, 220)
         p5.rect(nx, ny, nw, nh, 8)
-        p5.noStroke(); p5.textAlign(p5.LEFT); p5.textSize(8.5)
+        p5.noStroke(); p5.textAlign(p5.LEFT); p5.textSize(10.5)
         p5.fill(30, 60, 150)
         p5.text('Direct Connect (DX)', nx + 10, ny + 16)
         p5.fill(80, 80, 80)
@@ -501,7 +584,7 @@ export default function VPCAdvancedStepper() {
         p5.text('⚠️ コスト：高い（VPNより）　→ 大容量・ミッションクリティカルな用途に最適', nx + 10, ny + 52)
 
         // Legend
-        p5.noStroke(); p5.textSize(8.5); p5.textAlign(p5.LEFT)
+        p5.noStroke(); p5.textSize(10.5); p5.textAlign(p5.LEFT)
         p5.fill(59, 130, 246); p5.circle(14, H - 86, 8)
         p5.fill(70, 70, 70); p5.text('Direct Connect（専用線）', 22, H - 82)
       }
@@ -511,7 +594,7 @@ export default function VPCAdvancedStepper() {
     else if (s === 8) {
       const rows = [
         ['サービス', '用途', '特徴'],
-        ['Transit GW', '多数VPC接続', 'ハブ&スポーク、N本で済む'],
+        ['AWS TGW', '多数VPC接続', 'ハブ&スポーク、N本で済む'],
         ['GW型EP', 'S3/DynamoDB', '無料、ルートテーブル設定'],
         ['IF型EP', 'AWS各種サービス', 'ENI、SG制御可、有料'],
         ['VPN', 'オンプレ接続', '手軽・安価、帯域不安定'],
@@ -526,7 +609,7 @@ export default function VPCAdvancedStepper() {
         const y = ry + 30 + i * 48
         const colX = [rx + 12, rx + 150, rx + 310]
         if (i === 0) {
-          p5.textSize(10.5); p5.fill(50, 50, 150)
+          p5.textSize(11.5); p5.fill(50, 50, 150)
           row.forEach((cell, j) => p5.text(cell, colX[j], y))
           p5.stroke(200, 200, 220); p5.strokeWeight(1)
           p5.line(rx + 4, y + 8, rx + rw - 4, y + 8)
@@ -535,7 +618,7 @@ export default function VPCAdvancedStepper() {
             [245, 158, 11], [59, 130, 246], [139, 92, 246], [245, 158, 11], [37, 99, 235]
           ]
           const [r, g, b] = colors[i - 1]
-          p5.textSize(10.5); p5.fill(r, g, b)
+          p5.textSize(11.5); p5.fill(r, g, b)
           p5.text(row[0], colX[0], y)
           p5.fill(60, 60, 60)
           p5.text(row[1], colX[1], y)
@@ -584,7 +667,7 @@ export default function VPCAdvancedStepper() {
   return (
     <div className="space-y-5 mb-10">
       <div className="flex items-center gap-3">
-        <span className="text-xs font-semibold text-gray-500 shrink-0">STEP {step} / {TOTAL}</span>
+        <span className="text-base font-semibold text-gray-500 shrink-0">STEP {step} / {TOTAL}</span>
         <div className="flex gap-1.5 flex-1">
           {STEPS.map((_, i) => (
             <button
@@ -600,12 +683,12 @@ export default function VPCAdvancedStepper() {
       </div>
 
       <div className="rounded-xl overflow-hidden border border-gray-200 bg-slate-50">
-        <div className="bg-slate-100 px-4 py-2 text-xs font-semibold text-gray-600 flex items-center justify-between">
+        <div className="bg-slate-100 px-4 py-2 text-base font-semibold text-gray-600 flex items-center justify-between">
           <span className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block" />
             VPC アーキテクチャ図（ステップ {step}/{TOTAL}）
           </span>
-          <span className="text-gray-400 font-normal">💡 {cur.hint}</span>
+          <span className="text-gray-400 font-normal text-base">💡 {cur.hint}</span>
         </div>
         <Sketch setup={setup} draw={draw} />
       </div>
@@ -614,15 +697,15 @@ export default function VPCAdvancedStepper() {
         <div className="flex items-center gap-3 mb-3">
           <span className="text-4xl">{cur.emoji}</span>
           <div>
-            <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">ステップ {step}</p>
+            <p className="text-base text-gray-400 font-semibold uppercase tracking-wide">ステップ {step}</p>
             <h3 className="text-xl font-bold text-gray-800">{cur.title}</h3>
           </div>
         </div>
-        <p className="text-gray-700 text-sm leading-relaxed mb-5">{cur.description}</p>
+        <p className="text-gray-700 text-base leading-relaxed mb-5">{cur.description}</p>
         <ul className="space-y-2.5">
           {cur.keyPoints.map((kp, i) => (
-            <li key={i} className="flex items-start gap-2.5 text-sm text-gray-700">
-              <span className="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold">✓</span>
+            <li key={i} className="flex items-start gap-2.5 text-base text-gray-700">
+              <span className="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">✓</span>
               {kp}
             </li>
           ))}
@@ -633,7 +716,7 @@ export default function VPCAdvancedStepper() {
         <button
           onClick={() => setStep(s => Math.max(1, s - 1))}
           disabled={step === 1}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-gray-200 text-gray-600 font-semibold text-sm hover:border-gray-300 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-gray-200 text-gray-600 font-semibold text-base hover:border-gray-300 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
         >← 前へ</button>
 
         <div className="flex gap-1.5">
@@ -651,7 +734,7 @@ export default function VPCAdvancedStepper() {
         <button
           onClick={() => setStep(s => Math.min(TOTAL, s + 1))}
           disabled={step === TOTAL}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-semibold text-base disabled:opacity-30 disabled:cursor-not-allowed transition-all"
         >{step === TOTAL ? '完了！🎉' : '次へ →'}</button>
       </div>
 
@@ -659,7 +742,7 @@ export default function VPCAdvancedStepper() {
         <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-5 text-center">
           <div className="text-3xl mb-2">🎉</div>
           <p className="font-bold text-green-700 mb-1">VPC上級コンテンツ完了！</p>
-          <p className="text-sm text-green-600">下の練習問題で理解度を確認しましょう。</p>
+          <p className="text-base text-green-600">下の練習問題で理解度を確認しましょう。</p>
         </div>
       )}
     </div>

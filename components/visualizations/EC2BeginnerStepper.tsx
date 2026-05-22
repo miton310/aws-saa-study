@@ -139,8 +139,11 @@ export default function EC2BeginnerStepper() {
   const pkts     = useRef<Packet[]>([])
   const phaseRef = useRef(0)
   const waitRef  = useRef(0)
+  const imgEc2 = useRef<unknown>(null)
   const imgAmi = useRef<unknown>(null)
   const imgEbs = useRef<unknown>(null)
+  const imgSnapshot = useRef<unknown>(null)
+  const imgS3 = useRef<unknown>(null)
 
   useEffect(() => {
     stepRef.current  = step
@@ -159,7 +162,13 @@ export default function EC2BeginnerStepper() {
   function awsIcon(p5: any, cx: number, cy: number, sz: number,
     bg: [number,number,number], type: string, label?: string) {
     const r = sz * 0.18
-    const withBg = type !== 'ami'
+    const hasImage =
+      (type === 'ec2' && !!imgEc2.current) ||
+      (type === 'ebs' && !!imgEbs.current) ||
+      (type === 'snapshot' && !!imgSnapshot.current) ||
+      (type === 's3' && !!imgS3.current) ||
+      (type === 'ami' && !!imgAmi.current)
+    const withBg = !hasImage && type !== 'ami'
     p5.noStroke()
     if (withBg) {
       // Shadow
@@ -173,17 +182,23 @@ export default function EC2BeginnerStepper() {
     p5.fill(255)
     const s = sz * 0.55
     if (type === 'ec2') {
-      const bh = s * 0.18, gap = s * 0.14, bw = s * 0.82
-      for (let i = 0; i < 3; i++) {
-        const by = cy - s*0.25 + i*(bh + gap)
-        p5.rect(cx - bw/2, by, bw, bh, 2)
-        p5.fill(bg[0], bg[1], bg[2], 200)
-        p5.circle(cx + bw/2 - 5, by + bh/2, 4)
-        p5.fill(255)
+      if (imgEc2.current) {
+        const isz = sz * 0.84
+        p5.image(imgEc2.current, cx - isz/2, cy - isz/2, isz, isz)
+      } else {
+        const bh = s * 0.18, gap = s * 0.14, bw = s * 0.82
+        for (let i = 0; i < 3; i++) {
+          const by = cy - s*0.25 + i*(bh + gap)
+          p5.rect(cx - bw/2, by, bw, bh, 2)
+          p5.fill(bg[0], bg[1], bg[2], 200)
+          p5.circle(cx + bw/2 - 5, by + bh/2, 4)
+          p5.fill(255)
+        }
       }
     } else if (type === 'ebs') {
       if (imgEbs.current) {
-        p5.image(imgEbs.current, cx - s * 0.46, cy - s * 0.46, s * 0.92, s * 0.92)
+        const isz = sz * 0.84
+        p5.image(imgEbs.current, cx - isz/2, cy - isz/2, isz, isz)
       } else {
         const cw = s * 0.72, ch = s * 0.52, ew = cw, eh = ch * 0.28
         p5.ellipse(cx, cy - ch*0.25, ew, eh)
@@ -192,9 +207,30 @@ export default function EC2BeginnerStepper() {
         p5.fill(bg[0], bg[1], bg[2], 120)
         p5.ellipse(cx, cy - ch*0.25, ew * 0.6, eh * 0.6)
       }
+    } else if (type === 'snapshot') {
+      if (imgSnapshot.current) {
+        const isz = sz * 0.84
+        p5.image(imgSnapshot.current, cx - isz/2, cy - isz/2, isz, isz)
+      } else {
+        // Fallback: camera glyph-like shape
+        p5.rect(cx - s*0.32, cy - s*0.2, s*0.64, s*0.4, 3)
+        p5.circle(cx, cy, s*0.16)
+        p5.rect(cx - s*0.2, cy - s*0.3, s*0.18, s*0.1, 2)
+      }
+    } else if (type === 's3') {
+      if (imgS3.current) {
+        const isz = sz * 0.84
+        p5.image(imgS3.current, cx - isz/2, cy - isz/2, isz, isz)
+      } else {
+        // Fallback: simple bucket/cylinder shape
+        p5.ellipse(cx, cy - s*0.15, s*0.5, s*0.18)
+        p5.rect(cx - s*0.25, cy - s*0.15, s*0.5, s*0.38)
+        p5.ellipse(cx, cy + s*0.23, s*0.5, s*0.18)
+      }
     } else if (type === 'ami') {
       if (imgAmi.current) {
-        p5.image(imgAmi.current, cx - s * 0.46, cy - s * 0.46, s * 0.92, s * 0.92)
+        const isz = sz * 0.84
+        p5.image(imgAmi.current, cx - isz/2, cy - isz/2, isz, isz)
       } else {
         const dw = s * 0.55, dh = s * 0.38
         p5.rect(cx - s*0.36, cy - dh*0.5 - 4, dw, dh, 3)
@@ -258,8 +294,11 @@ export default function EC2BeginnerStepper() {
   const setup = (p5: any, ref: any) => {
     p5.createCanvas(W, H).parent(ref)
     p5.frameRate(40)
+    p5.loadImage('/icons/aws/ec2.svg', (img: unknown) => { imgEc2.current = img })
     p5.loadImage('/icons/aws/ami.svg', (img: unknown) => { imgAmi.current = img })
     p5.loadImage('/icons/aws/Elastic-Block-Store.svg', (img: unknown) => { imgEbs.current = img })
+    p5.loadImage('/icons/aws/Snapshot.svg', (img: unknown) => { imgSnapshot.current = img })
+    p5.loadImage('/icons/aws/s3.svg', (img: unknown) => { imgS3.current = img })
   }
 
   const draw = (p5: any) => {
@@ -480,7 +519,7 @@ export default function EC2BeginnerStepper() {
       p5.fill(238, 242, 255, 60)
       p5.rect(AZ_X, AZ_Y, AZ_W, AZ_H, 10)
       p5.noStroke(); p5.fill(99, 102, 241, 180)
-      p5.textSize(10.5); p5.textAlign(p5.LEFT)
+      p5.textSize(12); p5.textAlign(p5.LEFT)
       p5.text('アベイラビリティゾーン（AZ）', AZ_X + 12, AZ_Y + 17)
 
       const ec2X = 130, ec2Y = 158, ec2Sz = 66
@@ -496,36 +535,36 @@ export default function EC2BeginnerStepper() {
 
       // EBS 1
       awsIcon(p5, ebs1X, ebs1Y, ebsSz, AWS_GREEN, 'ebs', 'EBS')
-      p5.noStroke(); p5.fill(40, 90, 40); p5.textSize(10.5); p5.textAlign(p5.LEFT)
+      p5.noStroke(); p5.fill(40, 90, 40); p5.textSize(12); p5.textAlign(p5.LEFT)
       p5.text('gp3 ルートボリューム', ebs1X + 36, ebs1Y - 7)
-      p5.fill(100, 130, 80); p5.textSize(10)
+      p5.fill(100, 130, 80); p5.textSize(11)
       p5.text('OS・アプリ', ebs1X + 36, ebs1Y + 9)
 
       // EBS 2
       awsIcon(p5, ebs2X, ebs2Y, ebsSz, AWS_GREEN, 'ebs', 'EBS')
-      p5.noStroke(); p5.fill(40, 90, 40); p5.textSize(10.5); p5.textAlign(p5.LEFT)
+      p5.noStroke(); p5.fill(40, 90, 40); p5.textSize(12); p5.textAlign(p5.LEFT)
       p5.text('gp3 データボリューム', ebs2X + 36, ebs2Y - 7)
-      p5.fill(100, 130, 80); p5.textSize(10)
+      p5.fill(100, 130, 80); p5.textSize(11)
       p5.text('DB・ファイル', ebs2X + 36, ebs2Y + 9)
 
-      // S3 Snapshot box (outside AZ, to the right)
-      const s3X = 565, s3Y = 162
-      p5.strokeWeight(1.5); p5.stroke(AWS_GREEN[0], AWS_GREEN[1], AWS_GREEN[2], 180)
-      p5.fill(240, 252, 220, 230)
-      p5.rect(s3X - 52, s3Y - 45, 104, 90, 8)
-      p5.noStroke(); p5.fill(60, 100, 20)
-      p5.textSize(11.5); p5.textAlign(p5.CENTER)
-      p5.text('📸 Snapshot', s3X, s3Y - 24)
-      p5.fill(40, 80, 20); p5.textSize(10.5)
-      p5.text('→ S3 に保存', s3X, s3Y - 4)
-      p5.fill(100, 130, 60); p5.textSize(10)
-      p5.text('バックアップ', s3X, s3Y + 14)
-      p5.fill(130, 150, 90); p5.textSize(9.5)
-      p5.text('（別AZ・別リージョン）', s3X, s3Y + 30)
+      // Snapshot & S3 (outside AZ, right side)
+      const snapX = 560, snapY = 112
+      const s3X = 560, s3Y = 212
+      awsIcon(p5, snapX, snapY, 58, AWS_GREEN, 'snapshot')
+      awsIcon(p5, s3X, s3Y, 58, AWS_BLUE, 's3')
 
-      // Snapshot arrows: EBS → S3
-      arrow(p5, ebs1X + 33, ebs1Y - 4, s3X - 52, s3Y - 22, AWS_GREEN, 1.5)
-      arrow(p5, ebs2X + 33, ebs2Y + 4, s3X - 52, s3Y + 18, AWS_GREEN, 1.5)
+      p5.noStroke(); p5.textAlign(p5.CENTER)
+      p5.fill(60, 100, 20); p5.textSize(12)
+      p5.text('Snapshot', snapX, 152)
+      p5.fill(40, 80, 140)
+      p5.text('S3', s3X, 252)
+      p5.fill(110, 120, 140); p5.textSize(10.5)
+      p5.text('（別AZ・別リージョン）', s3X, 268)
+
+      // Flow arrows: EBS -> Snapshot -> S3
+      arrow(p5, ebs1X + 33, ebs1Y - 4, snapX - 32, snapY - 6, AWS_GREEN, 1.5)
+      arrow(p5, ebs2X + 33, ebs2Y + 4, snapX - 32, snapY + 6, AWS_GREEN, 1.5)
+      arrow(p5, snapX, snapY + 30, s3X, s3Y - 30, AWS_BLUE, 1.5)
 
       // Note panel below AZ
       const ny = AZ_Y + AZ_H + 8   // y=286
@@ -533,9 +572,9 @@ export default function EC2BeginnerStepper() {
       p5.fill(235, 243, 255, 220)
       p5.rect(22, ny, 616, 46, 8)
       p5.noStroke(); p5.textAlign(p5.LEFT)
-      p5.fill(30, 60, 150); p5.textSize(11)
+      p5.fill(30, 60, 150); p5.textSize(12)
       p5.text('💡 永続性のポイント', 34, ny + 16)
-      p5.fill(70, 70, 70); p5.textSize(10)
+      p5.fill(70, 70, 70); p5.textSize(11)
       p5.text('EC2 を stop → EBS データは保持    |    EC2 を terminate → ルート EBS は削除（デフォルト）', 34, ny + 34)
     }
 

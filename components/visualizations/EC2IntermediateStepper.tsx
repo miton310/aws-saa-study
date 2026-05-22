@@ -158,19 +158,12 @@ export default function EC2IntermediateStepper() {
   // ── AWS-style service icon ────────────────────────────────────────
   function awsIcon(p5: any, cx: number, cy: number, sz: number,
     bg: [number,number,number], type: string, label?: string) {
-    const r = sz * 0.18
-    // Shadow
-    p5.noStroke(); p5.fill(0, 0, 0, 18)
-    p5.rect(cx - sz/2 + 2, cy - sz/2 + 3, sz, sz, r + 2)
-    // Background
-    p5.fill(...bg)
-    p5.rect(cx - sz/2, cy - sz/2, sz, sz, r)
-
     const s = sz * 0.55
+    const iconSize = sz * 0.82
 
     if (type === 'ec2') {
       if (imgEc2.current) {
-        p5.image(imgEc2.current, cx - s*0.46, cy - s*0.46, s*0.92, s*0.92)
+        p5.image(imgEc2.current, cx - iconSize / 2, cy - iconSize / 2, iconSize, iconSize)
       } else {
         p5.fill(255)
         const bh = s*0.18, gap = s*0.14, bw = s*0.82
@@ -184,7 +177,7 @@ export default function EC2IntermediateStepper() {
       }
     } else if (type === 'alb') {
       if (imgAlb.current) {
-        p5.image(imgAlb.current, cx - s*0.46, cy - s*0.46, s*0.92, s*0.92)
+        p5.image(imgAlb.current, cx - iconSize / 2, cy - iconSize / 2, iconSize, iconSize)
       } else {
         p5.fill(255)
         p5.rect(cx - s*0.38, cy - s*0.08, s*0.76, s*0.16, 3)
@@ -195,7 +188,7 @@ export default function EC2IntermediateStepper() {
       }
     } else if (type === 'asg') {
       if (imgAsg.current) {
-        p5.image(imgAsg.current, cx - s*0.46, cy - s*0.46, s*0.92, s*0.92)
+        p5.image(imgAsg.current, cx - iconSize / 2, cy - iconSize / 2, iconSize, iconSize)
       } else {
         p5.fill(255)
         p5.triangle(cx - s*0.1, cy - s*0.32, cx - s*0.32, cy - s*0.1, cx + s*0.12, cy - s*0.1)
@@ -203,7 +196,7 @@ export default function EC2IntermediateStepper() {
       }
     } else if (type === 'ebs') {
       if (imgEbs.current) {
-        p5.image(imgEbs.current, cx - s*0.46, cy - s*0.46, s*0.92, s*0.92)
+        p5.image(imgEbs.current, cx - iconSize / 2, cy - iconSize / 2, iconSize, iconSize)
       } else {
         p5.fill(255)
         const cw = s*0.72, ch = s*0.52, ew = cw, eh = ch*0.28
@@ -215,7 +208,7 @@ export default function EC2IntermediateStepper() {
       }
     } else if (type === 'snapshot') {
       if (imgSnapshot.current) {
-        p5.image(imgSnapshot.current, cx - s*0.46, cy - s*0.46, s*0.92, s*0.92)
+        p5.image(imgSnapshot.current, cx - iconSize / 2, cy - iconSize / 2, iconSize, iconSize)
       } else {
         p5.fill(255)
         p5.rect(cx - s*0.4, cy - s*0.3, s*0.8, s*0.6, 4)
@@ -267,7 +260,7 @@ export default function EC2IntermediateStepper() {
       // Left: single EC2 overwhelmed
       p5.strokeWeight(1.5); p5.stroke(200, 80, 80, 160)
       p5.fill(255, 242, 242, 200)
-      p5.rect(18, 44, 272, 258, 10)
+      p5.rect(18, 44, 272, 258, 0)
       p5.noStroke(); p5.fill(180, 50, 50)
       p5.textSize(11); p5.textAlign(p5.CENTER)
       p5.text('❌ 単一インスタンス構成', 154, 66)
@@ -290,7 +283,7 @@ export default function EC2IntermediateStepper() {
       // Right: ELB + ASG
       p5.strokeWeight(1.5); p5.stroke(30, 160, 80, 160)
       p5.fill(238, 252, 243, 200)
-      p5.rect(370, 44, 272, 258, 10)
+      p5.rect(370, 44, 272, 258, 0)
       p5.noStroke(); p5.fill(16, 130, 60)
       p5.textSize(11); p5.textAlign(p5.CENTER)
       p5.text('✅ ELB + Auto Scaling', 506, 66)
@@ -333,15 +326,15 @@ export default function EC2IntermediateStepper() {
       // ASG boundary
       p5.strokeWeight(1.5); p5.stroke(...AWS_ORANGE, 120)
       p5.fill(255, 248, 235, 100)
-      p5.rect(28, 118, 604, 190, 10)
+      p5.rect(28, 118, 604, 190, 0)
       p5.noStroke(); p5.fill(...AWS_ORANGE); p5.textSize(10); p5.textAlign(p5.LEFT)
-      p5.text('Auto Scaling Group', 42, 136)
-      awsIcon(p5, 608, 136, 26, AWS_ORANGE, 'asg')
+      awsIcon(p5, 40, 130, 30, AWS_ORANGE, 'asg')
+      p5.text('Auto Scaling Group', 60, 130)
 
       // AZ-A
       p5.strokeWeight(1); p5.stroke(100, 100, 200, 140)
       p5.fill(242, 242, 255, 130)
-      p5.rect(46, 146, 260, 150, 6)
+      p5.rect(46, 146, 260, 150, 0)
       p5.noStroke(); p5.fill(80, 80, 180); p5.textSize(10); p5.textAlign(p5.CENTER)
       p5.text('AZ-a', 176, 163)
       awsIcon(p5, 116, 240, 50, AWS_ORANGE, 'ec2', 'EC2')
@@ -350,7 +343,7 @@ export default function EC2IntermediateStepper() {
       // AZ-B
       p5.strokeWeight(1); p5.stroke(100, 100, 200, 140)
       p5.fill(242, 242, 255, 130)
-      p5.rect(354, 146, 260, 150, 6)
+      p5.rect(354, 146, 260, 150, 0)
       p5.noStroke(); p5.fill(80, 80, 180); p5.textSize(10); p5.textAlign(p5.CENTER)
       p5.text('AZ-b', 484, 163)
       awsIcon(p5, 424, 240, 50, AWS_ORANGE, 'ec2', 'EC2')
@@ -399,7 +392,7 @@ export default function EC2IntermediateStepper() {
       // ASG box
       p5.strokeWeight(1.5); p5.stroke(...AWS_ORANGE, 120)
       p5.fill(255, 248, 235, 140)
-      p5.rect(28, 76, 604, 220, 10)
+      p5.rect(28, 76, 604, 220, 0)
       p5.noStroke(); p5.fill(...AWS_ORANGE); p5.textSize(10.5); p5.textAlign(p5.LEFT)
       p5.text('Auto Scaling Group', 42, 94)
       const instanceCount = t > 185 ? 3 : 2
@@ -458,7 +451,7 @@ export default function EC2IntermediateStepper() {
       // ASG box
       p5.strokeWeight(1.5); p5.stroke(...AWS_ORANGE, 120)
       p5.fill(255, 248, 235, 140)
-      p5.rect(28, 76, 604, 220, 10)
+      p5.rect(28, 76, 604, 220, 0)
       p5.noStroke(); p5.fill(...AWS_ORANGE); p5.textSize(10.5); p5.textAlign(p5.LEFT)
       p5.text('Auto Scaling Group', 42, 94)
       const instanceCount2 = t > 160 ? 2 : 3
@@ -496,7 +489,7 @@ export default function EC2IntermediateStepper() {
       // Template box
       p5.strokeWeight(1.5); p5.stroke(...AWS_PURPLE, 160)
       p5.fill(248, 244, 255, 230)
-      p5.rect(18, 36, 224, 260, 10)
+      p5.rect(18, 36, 224, 260, 0)
 
       awsIcon(p5, 130, 80, 46, AWS_PURPLE, 'template')
       p5.noStroke(); p5.fill(...AWS_PURPLE); p5.textSize(11); p5.textAlign(p5.CENTER)
@@ -523,7 +516,7 @@ export default function EC2IntermediateStepper() {
       // ASG box
       p5.strokeWeight(1.5); p5.stroke(...AWS_ORANGE, 150)
       p5.fill(255, 248, 235, 210)
-      p5.rect(302, 92, 188, 148, 10)
+      p5.rect(302, 92, 188, 148, 0)
       awsIcon(p5, 396, 138, 46, AWS_ORANGE, 'asg')
       p5.noStroke(); p5.fill(...AWS_ORANGE); p5.textSize(11); p5.textAlign(p5.CENTER)
       p5.text('Auto Scaling Group', 396, 170)
@@ -533,8 +526,12 @@ export default function EC2IntermediateStepper() {
 
       // Arrow ASG → EC2s
       const ec2Pts: [number,number][] = [[556, 110], [556, 196], [556, 282]]
+      const branchX = 526
       ec2Pts.forEach(([ex, ey]) => {
-        arrow(p5, 490, 166, ex - 30, ey, AWS_ORANGE, 1.5)
+        p5.stroke(...AWS_ORANGE); p5.strokeWeight(1.5)
+        p5.line(490, 166, branchX, 166)
+        p5.line(branchX, 166, branchX, ey)
+        arrow(p5, branchX, ey, ex - 30, ey, AWS_ORANGE, 1.5)
         awsIcon(p5, ex, ey, 48, AWS_ORANGE, 'ec2', 'EC2')
       })
 
@@ -556,7 +553,7 @@ export default function EC2IntermediateStepper() {
         const cx = 82 + i * 130
         p5.strokeWeight(1); p5.stroke(vt.col[0], vt.col[1], vt.col[2], 80)
         p5.fill(vt.col[0], vt.col[1], vt.col[2], 12)
-        p5.rect(cx - 58, 12, 116, 272, 10)
+        p5.rect(cx - 58, 12, 116, 272, 0)
 
         if (vt.recommended) {
           p5.noStroke(); p5.fill(...vt.col)
@@ -614,7 +611,7 @@ export default function EC2IntermediateStepper() {
       // AZ-A (always healthy)
       p5.strokeWeight(1.5); p5.stroke(100, 100, 200, 180)
       p5.fill(240, 240, 255, 150)
-      p5.rect(28, 106, 266, 210, 8)
+      p5.rect(28, 106, 266, 210, 0)
       p5.noStroke(); p5.fill(80, 80, 180); p5.textSize(11); p5.textAlign(p5.CENTER)
       p5.text('AZ-a ✅ 正常', 161, 126)
       awsIcon(p5, 108, 222, 52, AWS_ORANGE, 'ec2', 'EC2-1')
@@ -625,7 +622,7 @@ export default function EC2IntermediateStepper() {
       const azBBorder: [number,number,number] = azFailed ? [200, 60, 60] : [100, 100, 200]
       p5.strokeWeight(1.5); p5.stroke(...azBBorder, 180)
       p5.fill(azFailed ? 255 : 240, azFailed ? 234 : 240, azFailed ? 234 : 255, 150)
-      p5.rect(366, 106, 266, 210, 8)
+      p5.rect(366, 106, 266, 210, 0)
       p5.noStroke(); p5.fill(...azBBorder); p5.textSize(11); p5.textAlign(p5.CENTER)
       p5.text(azFailed ? 'AZ-b ❌ 障害発生' : 'AZ-b ✅ 正常', 499, 126)
 
@@ -640,12 +637,23 @@ export default function EC2IntermediateStepper() {
 
       // ALB → AZ arrows
       const albACol: [number,number,number] = azFailed ? AWS_GREEN : AWS_BLUE
-      arrow(p5, W/2 - 22, 93, 161, 108, albACol, 2)
+      const trunkX = W / 2
+      const branchY = 92
+      const azEntryY = 108
+      const leftX = 161
+      const rightX = 499
+      p5.stroke(...albACol); p5.strokeWeight(2)
+      p5.line(trunkX, 93, trunkX, branchY)
+      p5.line(trunkX, branchY, leftX, branchY)
+      arrow(p5, leftX, branchY, leftX, azEntryY, albACol, 2)
       if (!azFailed) {
-        arrow(p5, W/2 + 22, 93, 499, 108, AWS_BLUE, 2)
+        p5.stroke(...AWS_BLUE); p5.strokeWeight(2)
+        p5.line(trunkX, branchY, rightX, branchY)
+        arrow(p5, rightX, branchY, rightX, azEntryY, AWS_BLUE, 2)
       } else {
         p5.stroke(200, 60, 60, 100); p5.strokeWeight(1)
-        p5.line(W/2 + 22, 93, 499, 108)
+        p5.line(trunkX, branchY, rightX, branchY)
+        p5.line(rightX, branchY, rightX, azEntryY)
       }
 
       // Status note

@@ -218,6 +218,10 @@ export default function VPCIntermediateStepper() {
     p5.loadImage('/icons/aws/publicSubnet.svg', (img: unknown) => { imgPublicSubnet.current = img })
   }
 
+  function easeInOutCubic(t: number): number {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+  }
+
   const draw = (p5: any) => {
     const s = stepRef.current
     timerRef.current++
@@ -240,8 +244,10 @@ export default function VPCIntermediateStepper() {
 
       // NACL dashed border (steps 5-6, 8)
       if (s >= 5) {
+        const naclGlow = (s === 5 || s === 8) ? 0.5 + Math.sin(t * 0.1) * 0.5 : 0.8
         p5.drawingContext.setLineDash([6, 4])
-        p5.strokeWeight(2); p5.stroke(245, 158, 11)
+        p5.strokeWeight(s === 8 ? 2.5 : 2)
+        p5.stroke(245, 158, 11, 255 * naclGlow)  // ★glowを適用
         p5.noFill()
         p5.rect(PUB.x - 4, PUB.y - 4, PUB.w + 8, PUB.h + 8, 10)
         p5.drawingContext.setLineDash([])
@@ -290,7 +296,7 @@ export default function VPCIntermediateStepper() {
       p5.line(IGW.x, IGW.y + 13, EC2.x, EC2.y - 26)
 
       // SG shield (glow circle around EC2)
-      const sgGlow = s === 1 ? 0.5 + Math.sin(t * 0.08) * 0.5 : 0.7
+      const sgGlow = (s === 1 || s === 8) ? 0.5 + Math.sin(t * 0.08) * 0.5 : 0.7
       p5.noStroke()
       p5.fill(99, 102, 241, 30 + sgGlow * 40)
       p5.circle(EC2.x, EC2.y, SG_R * 2 + 8)
@@ -542,10 +548,19 @@ export default function VPCIntermediateStepper() {
       if (pk.blocked && pk.progress >= 0.75) { pk.active = false; continue }
       if (!pk.blocked && pk.progress >= 1)   { pk.active = false; continue }
 
-      const px = p5.lerp(pk.x, pk.tx, pk.progress)
-      const py = p5.lerp(pk.y, pk.ty, pk.progress)
+      const ep = easeInOutCubic(Math.min(pk.progress, 1))
+      const px = p5.lerp(pk.x, pk.tx, ep)
+      const py = p5.lerp(pk.y, pk.ty, ep)
 
+      const angle = Math.atan2(pk.ty - pk.y, pk.tx - pk.x)
       p5.noStroke()
+      p5.push()
+      p5.translate(px + Math.cos(angle) * 9, py + Math.sin(angle) * 9)
+      p5.rotate(angle)
+      p5.fill(...pk.color)
+      p5.noStroke()
+      p5.triangle(0, -3, 0, 3, 8, 0)
+      p5.pop()
       p5.fill(...pk.color)
       p5.circle(px, py, 11)
       if (!pk.blocked) {
