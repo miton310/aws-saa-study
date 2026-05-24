@@ -33,6 +33,32 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **Alignment**: When only icon + text present, center-align both horizontally and vertically for balance.
 - **Line routing**: Represent paths with horizontal and vertical segments by default; use diagonal lines only when there is no clear orthogonal alternative.
 - **Typography**: Prioritize readability in p5 diagrams; use at least 11px for body labels and 12px+ for headings, and resolve overlap by adjusting layout before shrinking text.
+- **Text width — calculate before placing**: Always verify text fits before writing code. Never guess. Use these approximations for p5's default sans-serif:
+  - `textSize(N)`: Japanese char ≈ N px wide, ASCII char ≈ N × 0.6 px wide, `"• "` prefix ≈ 12 px
+  - Formula: `text_px = (japanese_count × N) + (ascii_count × N × 0.6) + prefix_px`
+  - Available width: `panel_width - left_padding - right_padding`
+  - If `text_px > available_width` → shorten the string first, then widen the panel if needed
+  - Document the calculation in a comment next to the layout constants (see STEP 6 tooltip panel as reference)
+
+### Icon & box color rules for p5 canvas
+
+- **Icon ↔ border color must match**: The box stroke color must equal the icon's representative AWS brand color. Never use a mismatched color for the surrounding box.
+- **No background fill**: Do not apply a background color inside icon boxes. Use `noFill()` or fully transparent fill — do not tint the box interior.
+- **Icon at top-left, zero padding**: Place the icon image at the exact top-left corner of its bounding area with no inset offset.
+- **Single-service box with no inner content → no border**: If a box contains only one AWS service icon and no child elements (labels, sub-boxes, connectors), omit the surrounding border entirely and render only the icon.
+
+### Animation rules for p5 canvas steppers
+
+- **All steps must be animated**: Every stepper step should have meaningful animation — static drawings are equivalent to JPEG images and provide no added value over p5.js.
+- **Use `timerRef.current % LOOP` for looping**: Animation state is driven by `timerRef.current` (incremented each frame). Always modulo by a `LOOP` constant so the animation cycles automatically.
+- **Animate the core concept, not decoration**: The animation must visually express the key mechanism of that step (e.g. data replication = packets flying between buckets, event notification = ball entering S3 then packets fanning out to targets).
+- **Phase-based timing**: Break each animation into named phases with explicit start/end frame constants (e.g. `flyStart`, `flyEnd`, `retryStart`). Never use magic numbers inline.
+- **Parallel vs sequential**: Use simultaneous packet movement for parallel operations (e.g. multipart upload). Use sequential departures for ordered operations (e.g. CRR object replication one-by-one).
+- **Failure/retry flows**: When a feature supports partial failure recovery, animate the failure and re-send (e.g. multipart: Part 2 shows NG → re-flies in orange). Use `NG`/`OK` indicator rects, not emoji.
+- **Arrival feedback**: When a packet arrives at its destination, briefly increase the fill alpha (flash) on the destination box to confirm receipt.
+- **Status label**: Show a plain-text status label (e.g. `'並列アップロード中...'`) that changes per phase to narrate what is happening.
+- **Packet style**: Animated packets are filled rects (no corner radius) with white text. Use the destination service's brand color for the packet fill. Retry packets use ORANGE to distinguish from the initial attempt.
+- **Icon brand colors**: Look up the SVG hex colors via `grep -oE '#[0-9A-Fa-f]{6}' <file>` before assigning a color constant. The border, arrow, and packet color for a service must all equal its SVG brand color.
 
 ### Maintainability for diagram growth
 

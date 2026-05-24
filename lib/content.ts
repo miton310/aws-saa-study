@@ -513,6 +513,18 @@ export const CONTENT: ContentMap = {
           explanation:
             'バージョニングを有効にすると、すべてのバージョン分のストレージコストが発生します。古いバージョンのデータも保存されるためコストが増加します。',
         },
+        {
+          question: 'S3のCRR（クロスリージョンレプリケーション）を設定する際に必要な条件として正しいものはどれですか？',
+          options: [
+            '送信元バケットのみバージョニングを有効にする',
+            '送信先バケットのみバージョニングを有効にする',
+            '送信元・送信先の両方のバケットでバージョニングを有効にする必要がある',
+            'バージョニングの設定は不要で、IAMポリシーのみで設定できる',
+          ],
+          answer: 2,
+          explanation:
+            'CRR（Cross-Region Replication）を設定するには、送信元バケットと送信先バケットの両方でバージョニングを有効にする必要があります。これはSRR（Same-Region Replication）でも同様です。',
+        },
       ],
       affiliateLinks: AFFILIATE_BOOKS,
     },
@@ -552,6 +564,18 @@ export const CONTENT: ContentMap = {
           answer: 1,
           explanation:
             'コンプライアンスモードはルートユーザーを含む誰も保持期間中はオブジェクトを削除・変更できません。厳格なコンプライアンス要件に対応します。',
+        },
+        {
+          question: 'S3 Transfer Accelerationについて正しいものはどれですか？',
+          options: [
+            '有効にすると常に追加料金が発生する',
+            'CloudFrontのエッジロケーションを経由してS3へのアップロードを高速化する',
+            'ダウンロードのみ高速化され、アップロードには効果がない',
+            'S3バケットと同じリージョン内からのアクセスに最も効果がある',
+          ],
+          answer: 1,
+          explanation:
+            'S3 Transfer AccelerationはCloudFrontのエッジロケーションを利用して、遠距離（海外など）からのS3へのアップロードを最大300%高速化します。速度が改善しない場合は追加料金が発生しません。同一リージョン内では効果が少なく、むしろ遠距離ほど効果が大きいサービスです。',
         },
       ],
       affiliateLinks: AFFILIATE_BOOKS,
