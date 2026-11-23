@@ -4,6 +4,21 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+## Lesson Player（新レッスンの標準形式）
+
+新しく作るレッスンは、この形式を標準とする。以下の「Project UI Conventions」の p5.js 関連ルールは、既存の p5 ステッパー（`components/visualizations/`）の保守にだけ適用する。
+
+- 見た目：ソフト・ネオブルータリズム（太い黒枠 2px、ずらしただけの影 `3px 3px 0`、パステル塗り、クリーム背景）× アイソメトリック図解。
+- 構成：`lib/lessons/<slug>.ts` に `Lesson` データを書き、`lib/lessons/index.ts` の `LESSONS` に登録するだけで `/learn/<slug>` が生成される（共通ルート `app/learn/[slug]/page.tsx` → `components/lesson/LessonPlayer.tsx`）。前後のレッスンは `prev` / `next` の `href` でつなぐ。
+- 細長い壁（NACLなどの境界）は `sy` で y 方向の長さを指定する。
+- データ：レッスンの中身（ノード・ゾーン・ステップ・クイズ）は `lib/lessons/<slug>.ts` に書き、コンポーネントには書かない。型は `lib/lessons/types.ts`。
+- 図解：`components/lesson/IsoScene.tsx`（SVG）。ノードは座標をグリッド単位で指定し、`kind: 'cyl'` でDB型の円柱にする。図形の上には文字ラベルを必ず付ける（公式アイコンは使わない）。
+- 吹き出し（callouts）は、図形・他の吹き出し・枠外と重ならない位置に自動配置される。位置の手動指定はしない。
+- パケット：`flows` にノードIDの経路を書く。色は `req`（リクエスト）/`res`（レスポンス）/`out`（アウトバウンド）/`atk`（攻撃・失敗）。失敗は `fail: true`。各ステップには最低1つ動きを入れる（全体像などの導入ステップを除く）。
+- 用語：本文中の専門用語は `{{id}}` / `{{id:表示}}` で書き、定義は `lib/terms.ts` に1か所で持つ。定義は「一言説明＋たとえ」。`**強調**` で太字。
+- 重なり禁止：図形と文字、図とカード・バッジが重ならないこと。情報バッジ・凡例・カードは図の上下の段に置き、図の上に浮かせない。
+- PC（幅900px以上）では画面の高さに収め、ステッパーと「次へ」ボタンが常に見える状態を保つ。
+
 ## Project UI Conventions
 
 - Use AWS icon components for UI visuals instead of emoji when representing AWS services or cloud concepts.
