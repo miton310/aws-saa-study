@@ -16,7 +16,6 @@ const CHIP_OUT_OK = { label: 'EC2→外部', value: 'NAT経由で可', tone: 'go
 export const vpcNatLesson: Lesson = {
   slug: 'vpc-nat',
   category: 'vpc',
-  chapter: '01. VPC・ネットワーク',
   lessonLabel: 'レッスン 1 / 4',
   title: 'VPCとNATゲートウェイ',
   lead: '入口だけを公開して、アプリとDBは隠す。それでもサーバーから外には出られるようにする。',

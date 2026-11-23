@@ -12,7 +12,6 @@ const SQS = (v: string, tone?: Chip['tone']): Chip => ({ label: 'SQSへの経路
 export const vpcEndpointLesson: Lesson = {
   slug: 'vpc-endpoint',
   category: 'vpc',
-  chapter: '01. VPC・ネットワーク',
   lessonLabel: 'レッスン 4 / 4',
   title: 'VPCエンドポイント',
   lead: 'S3やSQSへの通信を、NATもインターネットも通さずに届ける。2種類のエンドポイントの違いと使い分けを確かめる。',

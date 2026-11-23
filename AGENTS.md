@@ -9,6 +9,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 新しく作るレッスンは、この形式を標準とする。以下の「Project UI Conventions」の p5.js 関連ルールは、既存の p5 ステッパー（`components/visualizations/`）の保守にだけ適用する。
 
 - 見た目：ソフト・ネオブルータリズム（太い黒枠 2px、ずらしただけの影 `3px 3px 0`、パステル塗り、クリーム背景）× アイソメトリック図解。
+- 章立てと作る順番は `docs/curriculum.md`（SAA-C03 の対象サービス一覧と突き合わせたもの）に従う。章を増やすときは `lib/categories.ts` と `components/site/chapters.ts` も更新する。
 - 構成：`lib/lessons/<slug>.ts` に `Lesson` データを書き、`lib/lessons/index.ts` の `LESSONS` に登録するだけで `/learn/<slug>` が生成される（共通ルート `app/learn/[slug]/page.tsx` → `components/lesson/LessonPlayer.tsx`）。前後のレッスンは `prev` / `next` の `href` でつなぐ。
 - 細長い壁（NACLなどの境界）は `sy` で y 方向の長さを指定する。
 - データ：レッスンの中身（ノード・ゾーン・ステップ・クイズ）は `lib/lessons/<slug>.ts` に書き、コンポーネントには書かない。型は `lib/lessons/types.ts`。

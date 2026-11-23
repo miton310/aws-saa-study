@@ -8,6 +8,7 @@ import type { Block, Lesson } from '@/lib/lessons/types'
 import IsoScene, { FLOW_COLORS } from './IsoScene'
 import { RichText, TermTooltip, hideTermTip } from './Term'
 import { announceStep, onStepRequest } from './stepSync'
+import { chapterLabel } from '@/components/site/chapters'
 import './lesson.css'
 
 const LEGEND = [
@@ -69,7 +70,7 @@ export default function LessonPlayer({ lesson }: { lesson: Lesson }) {
       <main className="lp-main">
         <section className="lp-card lp-head">
           <div className="lp-crumb">
-            {lesson.chapter}　/　{lesson.lessonLabel}
+            {chapterLabel(lesson.category)}　/　{lesson.lessonLabel}
           </div>
           <div className="lp-title-row">
             <h1>{lesson.title}</h1>

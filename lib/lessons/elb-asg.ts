@@ -22,7 +22,6 @@ const REQ_ALL = [
 export const elbAsgLesson: Lesson = {
   slug: 'elb-asg',
   category: 'elb',
-  chapter: '07. ELB・負荷分散',
   lessonLabel: 'レッスン 1',
   title: 'ELBとAuto Scaling',
   lead: '1台が止まっても、AZごと止まっても、アクセスが急に増えても動き続ける。可用性の定番構成を、通信を流して組み立てる。',

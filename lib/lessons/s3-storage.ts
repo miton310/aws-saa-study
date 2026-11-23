@@ -14,7 +14,6 @@ const TIERS = ['ia', 'oz', 'gir', 'gfr', 'gda', 'it']
 export const s3StorageLesson: Lesson = {
   slug: 's3-storage',
   category: 's3',
-  chapter: '03. S3・ストレージ',
   lessonLabel: 'レッスン 1',
   title: 'ストレージクラスとライフサイクル',
   lead: 'よく使うデータは速く、めったに使わないデータは安く。S3のストレージクラスの違いと、自動で移すライフサイクルを確かめる。',

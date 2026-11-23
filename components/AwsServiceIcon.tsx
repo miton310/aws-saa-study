@@ -17,7 +17,7 @@ type AwsServiceIconProps = {
   className?: string
 }
 
-const ICONS: Record<CategorySlug, ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>> = {
+const ICONS: Partial<Record<CategorySlug, ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>>> = {
   vpc: ArchitectureServiceAmazonVirtualPrivateCloud,
   ec2: ArchitectureServiceAmazonEC2,
   s3: ArchitectureServiceAmazonSimpleStorageService,
@@ -30,6 +30,7 @@ const ICONS: Record<CategorySlug, ComponentType<{ size?: number; className?: str
 
 export default function AwsServiceIcon({ service, size = 48, className }: AwsServiceIconProps) {
   const Icon = ICONS[service]
+  if (!Icon) return null
 
   return (
     <span className={className} aria-hidden>

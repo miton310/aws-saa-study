@@ -120,7 +120,6 @@ export interface Lesson {
   slug: string
   /** サイドナビで所属する章 */
   category: CategorySlug
-  chapter: string
   lessonLabel: string
   title: string
   lead: string

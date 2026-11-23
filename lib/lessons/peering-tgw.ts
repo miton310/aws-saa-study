@@ -16,7 +16,6 @@ const PCX = ['pcxab', 'pcxbc', 'pcxac']
 export const peeringTgwLesson: Lesson = {
   slug: 'peering-tgw',
   category: 'vpc',
-  chapter: '01. VPC・ネットワーク',
   lessonLabel: 'レッスン 3 / 4',
   title: 'ピアリングとTransit Gateway',
   lead: '2つならピアリング、たくさんならTransit Gateway。VPC同士をつなぐ2つの方法と、その限界を通信を流して確かめる。',

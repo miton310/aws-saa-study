@@ -10,6 +10,11 @@ export const CHAPTER_COLORS: Record<CategorySlug, string> = {
   lambda: '#f6e2a4',
   elb: '#b9e3dc',
   cloudfront: '#c9d2f2',
+  route53: '#a8dcc5',
+  containers: '#bcd4f0',
+  monitoring: '#e9e4da',
+  migration: '#f6c191',
+  analytics: '#f3b7b0',
 }
 
 /** サイドナビと同じ「01. VPC・ネットワーク」形式の章名 */

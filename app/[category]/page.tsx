@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { RelatedLessons } from '@/components/guide/GuidePage'
 import { CHAPTER_COLORS, chapterLabel } from '@/components/site/chapters'
 import { DIFFICULTIES, getCategoryBySlug } from '@/lib/categories'
+import { getContent } from '@/lib/content'
 import { LESSONS } from '@/lib/lessons'
 import '@/components/guide/guide.css'
 
@@ -18,6 +19,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   const cat = getCategoryBySlug(category)
   if (!cat) notFound()
   const lessons = LESSONS.filter((l) => l.category === cat.slug)
+  const levels = DIFFICULTIES.filter((d) => getContent(cat.slug, d.slug))
 
   return (
     <div className="gd">
@@ -43,8 +45,14 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
       <section className="gd-section">
         <h2>解説と練習問題</h2>
+        {levels.length === 0 && (
+          <aside className="gd-related empty">
+            <span className="gd-tag">解説</span>
+            <p>この章の解説と練習問題は準備中です。</p>
+          </aside>
+        )}
         <div className="gd-levels-big">
-          {DIFFICULTIES.map((d) => (
+          {levels.map((d) => (
             <Link key={d.slug} href={`/${cat.slug}/${d.slug}`} className="gd-card gd-level-card">
               <span className="gd-pill" style={{ background: LEVEL_COLORS[d.slug] }}>{d.label}編</span>
               <h3>{d.description}</h3>
