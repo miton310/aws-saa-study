@@ -35,7 +35,7 @@ SAA-C03 の公式「対象サービス一覧」（In-Scope AWS Services）と突
 | 05 ストレージ | ストレージクラスとライフサイクル | EBS・EFS・FSx の使い分け |
 | 06 データベース | Multi-AZとリードレプリカ | DynamoDB / Aurora・ElastiCache |
 | 07 疎結合・サーバーレス | — | SQS・SNS・EventBridge |
-| 08 セキュリティ・ID | — | IAMポリシーとロール / KMS |
+| 08 セキュリティ・ID | IAMポリシーとロール | KMS / Organizations と SCP |
 | 09〜13 | — | 重要度の高い章のあとで着手 |
 
 作る順番：重要度★★★の章から（Route 53 は公開済み）。

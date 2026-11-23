@@ -215,5 +215,5 @@ export const rdsMultiAzLesson: Lesson = {
     { text: 'Multi-AZ とリードレプリカの使い分け', atStep: 5 },
   ],
   prev: { title: 'ストレージクラスとライフサイクル', href: '/learn/s3-storage' },
-  next: { title: 'IAMポリシーとロール' },
+  next: { title: 'IAMポリシーとロール', href: '/learn/iam-basics' },
 }

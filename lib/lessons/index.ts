@@ -8,7 +8,8 @@ import { elbAsgLesson } from './elb-asg'
 import { s3StorageLesson } from './s3-storage'
 import { route53BasicsLesson } from './route53-basics'
 import { rdsMultiAzLesson } from './rds-multiaz'
+import { iamBasicsLesson } from './iam-basics'
 
-export const LESSONS: Lesson[] = [vpcNatLesson, sgNaclLesson, peeringTgwLesson, vpcEndpointLesson, route53BasicsLesson, elbAsgLesson, s3StorageLesson, rdsMultiAzLesson]
+export const LESSONS: Lesson[] = [vpcNatLesson, sgNaclLesson, peeringTgwLesson, vpcEndpointLesson, route53BasicsLesson, elbAsgLesson, s3StorageLesson, rdsMultiAzLesson, iamBasicsLesson]
 
 export const getLesson = (slug: string) => LESSONS.find((l) => l.slug === slug)
