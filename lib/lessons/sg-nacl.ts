@@ -7,7 +7,7 @@ const ATK = (v: string, tone?: Chip['tone']): Chip => ({ label: '攻撃者 203.0
 export const sgNaclLesson: Lesson = {
   slug: 'sg-nacl',
   category: 'vpc',
-  chapter: '02. VPC・ネットワーク',
+  chapter: '01. VPC・ネットワーク',
   lessonLabel: 'レッスン 2 / 4',
   title: 'セキュリティグループとネットワークACL',
   lead: '似ているようで、守る場所もルールの書き方も違う。2つのファイアウォールの使い分けを、通信を流して確かめる。',

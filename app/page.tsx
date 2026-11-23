@@ -1,257 +1,161 @@
 import Link from 'next/link'
-import { CATEGORIES, DIFFICULTIES, type CategorySlug } from '@/lib/categories'
-import AwsServiceIcon from '@/components/AwsServiceIcon'
-import { ArchitectureGroupAWSCloudlogo } from 'aws-react-icons'
+import { CATEGORIES, type CategorySlug } from '@/lib/categories'
+import { LESSONS } from '@/lib/lessons'
+import HeroScene from '@/components/site/HeroScene'
+import { CHAPTER_COLORS } from '@/components/site/chapters'
+import './home.css'
 
-const CATEGORY_TEXT: Record<string, string> = {
-  vpc: 'text-blue-700',
-  ec2: 'text-orange-700',
-  s3: 'text-green-700',
-  iam: 'text-red-700',
-  rds: 'text-purple-700',
-  lambda: 'text-yellow-700',
-  elb: 'text-teal-700',
-  cloudfront: 'text-indigo-700',
+// 公開予定のレッスン（実装したら lib/lessons に移し、ここから消す）
+const UPCOMING: { category: CategorySlug; title: string }[] = [
+  { category: 'vpc', title: 'ピアリングとTransit Gateway' },
+  { category: 'vpc', title: 'VPCエンドポイント' },
+  { category: 'elb', title: 'ELBとAuto Scaling' },
+  { category: 's3', title: 'ストレージクラスとライフサイクル' },
+]
+
+/** サイドナビと同じ「01. VPC・ネットワーク」形式の章名 */
+const chapterLabel = (slug: CategorySlug) => {
+  const i = CATEGORIES.findIndex((c) => c.slug === slug)
+  return `${String(i + 1).padStart(2, '0')}. ${CATEGORIES[i].name}`
 }
 
-const CATEGORY_HOVER: Record<string, string> = {
-  vpc: 'hover:border-blue-500',
-  ec2: 'hover:border-orange-500',
-  s3: 'hover:border-green-500',
-  iam: 'hover:border-red-500',
-  rds: 'hover:border-purple-500',
-  lambda: 'hover:border-yellow-500',
-  elb: 'hover:border-teal-500',
-  cloudfront: 'hover:border-indigo-500',
-}
+const FEATURES = [
+  { color: '#bcd4f0', title: '通信が動く図', desc: 'リクエストや攻撃がどこを通り、どこで止まるのか。パケットの動きで仕組みが見える。' },
+  { color: '#f6e2a4', title: '用語はその場で', desc: 'ALB、NAT、ステートフル…。下線の付いた用語に触れると、一言説明とたとえが出る。' },
+  { color: '#cfe8b8', title: '1ステップずつ', desc: '構成を1つずつ組み立て、最後に試験で狙われるポイントと確認問題で仕上げる。' },
+]
 
-const DIFFICULTY_STYLES: Record<string, { label: string; border: string; text: string; bg: string }> = {
-  beginner: { label: '初級', border: 'border-green-300', text: 'text-green-700', bg: 'bg-green-100' },
-  intermediate: { label: '中級', border: 'border-yellow-300', text: 'text-yellow-700', bg: 'bg-yellow-100' },
-  advanced: { label: '上級', border: 'border-red-300', text: 'text-red-700', bg: 'bg-red-100' },
-}
+const BOOKS = [
+  { title: 'AWS認定ソリューションアーキテクト-アソシエイト問題集', badge: 'ベストセラー', desc: '1000問以上の模擬問題。', url: 'https://amzn.to/3SAA001' },
+  { title: 'AWS認定資格試験テキスト SAA', badge: '公式推薦', desc: '図解で丁寧に解説。', url: 'https://amzn.to/3SAA002' },
+]
 
 export default function HomePage() {
-  return (
-    <div className="bg-white text-gray-900">
+  const first = LESSONS[0]
+  const heroStep = first.steps[first.steps.length - 1]
 
+  return (
+    <div className="home">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-white to-gray-50 py-24 px-4 border-b border-gray-100">
-        <div className="hero-grid absolute inset-0 pointer-events-none" />
-        <div className="relative max-w-4xl mx-auto text-center">
-          <div className="mb-6 flex justify-center" aria-label="AWS Cloud ロゴ">
-            <ArchitectureGroupAWSCloudlogo size={96} aria-hidden />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-5 leading-tight tracking-tight">
-            AWS SAA を<br />
-            <span className="text-orange-400">図解アニメーション</span>で学ぼう
+      <section className="home-card home-hero">
+        <div className="home-hero-text">
+          <span className="home-pill">SAA-C03 対応 ・ 無料</span>
+          <h1>
+            AWS SAA を、
+            <br />
+            <mark>動く図解</mark>で。
           </h1>
-          <p className="text-sm text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            AWS認定ソリューションアーキテクト-アソシエイト（SAA-C03）の合格を目指す方へ。<br />
-            VPC・EC2・S3など主要サービスを、動くビジュアルで直感的に理解できます。
+          <p>
+            VPC、セキュリティグループ、NATゲートウェイ…。文字だけでは掴みにくい仕組みを、通信が流れるアイソメトリック図で1ステップずつ組み立てて理解します。
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="#categories"
-              className="bg-orange-500 hover:bg-orange-400 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
-            >
-              今すぐ学習する →
+          <div className="home-cta">
+            <Link href={`/learn/${first.slug}`} className="home-btn primary">
+              最初のレッスンを始める <span aria-hidden>→</span>
+            </Link>
+            <a href="#lessons" className="home-btn">
+              レッスン一覧
             </a>
-            <a
-              href="#howto"
-              className="border border-gray-300 text-gray-700 hover:border-gray-400 hover:text-gray-900 font-semibold px-8 py-3 rounded-lg transition-colors"
-            >
-              使い方を見る
-            </a>
+          </div>
+        </div>
+        <div className="home-hero-visual">
+          <HeroScene nodes={first.nodes} zones={first.zones} step={heroStep} label={`${first.title}の構成図`} />
+          <div className="home-hero-caption">
+            ▲ レッスン「{first.title}」の完成図。図形に触れると用語の説明が出ます。
           </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="border-y border-gray-200 bg-white py-8 px-4">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
-          {[
-            { value: '8', label: 'サービスカテゴリ' },
-            { value: '24', label: '学習コンテンツ' },
-            { value: '60+', label: '練習問題' },
-            { value: '無料', label: '完全無料' },
-          ].map((s) => (
-            <div key={s.label}>
-              <div className="text-3xl font-extrabold text-orange-400">{s.value}</div>
-              <div className="text-xs text-gray-500 mt-1">{s.label}</div>
+      {/* 図解レッスン */}
+      <section id="lessons" className="home-section">
+        <div className="home-hd">
+          <h2>図解レッスン</h2>
+          <span>{LESSONS.length} 本公開中</span>
+        </div>
+        <div className="home-grid">
+          {LESSONS.map((l) => (
+            <Link key={l.slug} href={`/learn/${l.slug}`} className="home-card home-lesson">
+              <div className="home-lesson-top">
+                <span className="home-dot" style={{ background: CHAPTER_COLORS[l.category] }} />
+                <span className="home-mono">{chapterLabel(l.category)}</span>
+              </div>
+              <h3>{l.title}</h3>
+              <p>{l.lead}</p>
+              <div className="home-meta">
+                <span className="home-badge" style={{ background: '#f6e2a4' }}>◷ {l.minutes} 分</span>
+                <span className="home-badge" style={{ background: '#d9cdf2' }}>{l.steps.length} ステップ</span>
+                <span className="home-badge" style={{ background: '#cfe8b8' }}>{l.badge}</span>
+                <span className="home-go" aria-hidden>→</span>
+              </div>
+            </Link>
+          ))}
+          {UPCOMING.map((u) => (
+            <div key={u.title} className="home-upcoming">
+              <span className="home-mono">{chapterLabel(u.category)}</span>
+              <h3>{u.title}</h3>
+              <span className="home-soon">近日公開</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* How to use */}
-      <section id="howto" className="py-20 px-4 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-center text-orange-400 mb-2 tracking-widest uppercase">How it works</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-10">このサイトの使い方</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-            {[
-              {
-                step: '01',
-                service: 'vpc' as CategorySlug,
-                title: 'カテゴリを選ぶ',
-                desc: 'VPC、EC2、S3 など学びたいAWSサービスのカテゴリを選択します。',
-              },
-              {
-                step: '02',
-                service: 'elb' as CategorySlug,
-                title: '難易度を選ぶ',
-                desc: '初級（基本概念）・中級（設計パターン）・上級（試験対策）から選べます。',
-              },
-              {
-                step: '03',
-                service: 'lambda' as CategorySlug,
-                title: 'アニメーションで学ぶ',
-                desc: 'p5.jsアニメーションで動きを視覚的に理解し、練習問題で定着させましょう。',
-              },
-            ].map((item) => (
-              <div key={item.step} className="p-6 bg-gray-50 rounded-xl border border-gray-200 hover:border-orange-300 transition-colors">
-                <div className="text-4xl font-extrabold text-gray-200 mb-3 tabular-nums">{item.step}</div>
-                <div className="mb-3" aria-label={`${item.title} アイコン`}>
-                  <AwsServiceIcon service={item.service} size={48} />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-xs text-gray-600 leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
+      {/* 学び方 */}
+      <section className="home-section">
+        <div className="home-hd">
+          <h2>この形式で学べること</h2>
+        </div>
+        <div className="home-features">
+          {FEATURES.map((f, i) => (
+            <div key={f.title} className="home-card home-feature">
+              <span className="home-num" style={{ background: f.color }}>{i + 1}</span>
+              <h3>{f.title}</h3>
+              <p>{f.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Categories */}
-      <section id="categories" className="py-20 px-4 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto">
-          <p className="text-xs font-bold text-center text-orange-400 mb-2 tracking-widest uppercase">Categories</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">学習カテゴリ</h2>
-          <p className="text-center text-gray-600 text-xs mb-10">
-            AWSサービス別に体系的に学習できます。各カテゴリに初級・中級・上級のコンテンツがあります。
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {CATEGORIES.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/${cat.slug}`}
-                className={`group block bg-white border border-gray-200 ${CATEGORY_HOVER[cat.slug]} rounded-xl p-5 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5`}
-              >
-                <div className="mb-3" aria-label={`${cat.name} アイコン`}>
-                  <AwsServiceIcon service={cat.slug} size={44} />
+      {/* カテゴリ */}
+      <section id="categories" className="home-section">
+        <div className="home-hd">
+          <h2>カテゴリから探す</h2>
+          <span>各カテゴリに初級・中級・上級の解説もあります</span>
+        </div>
+        <div className="home-cats">
+          {CATEGORIES.map((c, i) => {
+            const n = LESSONS.filter((l) => l.category === c.slug).length
+            return (
+              <Link key={c.slug} href={`/${c.slug}`} className="home-card home-cat">
+                <div className="home-cat-top">
+                  <span className="home-dot" style={{ background: CHAPTER_COLORS[c.slug] }} />
+                  <span className="home-mono">{String(i + 1).padStart(2, '0')}</span>
+                  {n > 0 && <span className="home-tag">図解 {n}</span>}
                 </div>
-                <h3 className={`font-bold text-sm mb-1 ${CATEGORY_TEXT[cat.slug] ?? 'text-gray-900'}`}>
-                  {cat.name}
-                </h3>
-                <p className="text-xs text-gray-600 mb-3 leading-relaxed">{cat.description}</p>
-                <div className="flex gap-1 flex-wrap">
-                  {DIFFICULTIES.map((d) => {
-                    const ds = DIFFICULTY_STYLES[d.slug]
-                    return (
-                      <span
-                        key={d.slug}
-                        className={`text-xs px-2 py-0.5 rounded ${ds.bg} ${ds.text} font-medium`}
-                      >
-                        {ds.label}
-                      </span>
-                    )
-                  })}
-                </div>
+                <h3>{c.name}</h3>
+                <p>{c.description}</p>
               </Link>
-            ))}
-          </div>
+            )
+          })}
         </div>
       </section>
 
-      {/* Difficulty guide */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-center text-orange-400 mb-2 tracking-widest uppercase">Difficulty</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-10">難易度ガイド</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {DIFFICULTIES.map((d) => {
-              const ds = DIFFICULTY_STYLES[d.slug]
-              return (
-                <div key={d.slug} className={`rounded-xl p-6 bg-gray-50 border-t-2 ${ds.border}`}>
-                  <span className={`inline-block text-xs font-bold px-3 py-1 rounded ${ds.bg} ${ds.text} mb-3`}>
-                    {ds.label}
-                  </span>
-                  <h3 className="font-bold text-base mb-3 text-gray-900">{d.description}</h3>
-                  <ul className="text-xs text-gray-700 space-y-1.5">
-                    {d.slug === 'beginner' && (
-                      <>
-                        <li className="flex gap-2"><span className="text-orange-400 shrink-0">—</span>AWSの基本用語と概念</li>
-                        <li className="flex gap-2"><span className="text-orange-400 shrink-0">—</span>各サービスの役割と特徴</li>
-                        <li className="flex gap-2"><span className="text-orange-400 shrink-0">—</span>基本的なユースケース</li>
-                      </>
-                    )}
-                    {d.slug === 'intermediate' && (
-                      <>
-                        <li className="flex gap-2"><span className="text-orange-400 shrink-0">—</span>高可用性設計パターン</li>
-                        <li className="flex gap-2"><span className="text-orange-400 shrink-0">—</span>セキュリティのベストプラクティス</li>
-                        <li className="flex gap-2"><span className="text-orange-400 shrink-0">—</span>コスト最適化の考え方</li>
-                      </>
-                    )}
-                    {d.slug === 'advanced' && (
-                      <>
-                        <li className="flex gap-2"><span className="text-orange-400 shrink-0">—</span>試験頻出の難問対策</li>
-                        <li className="flex gap-2"><span className="text-orange-400 shrink-0">—</span>複合サービスの連携パターン</li>
-                        <li className="flex gap-2"><span className="text-orange-400 shrink-0">—</span>実践的な設計判断</li>
-                      </>
-                    )}
-                  </ul>
-                </div>
-              )
-            })}
-          </div>
+      {/* 参考書 */}
+      <section className="home-section">
+        <div className="home-hd">
+          <h2>参考書でさらに深く</h2>
+          <span>図解で仕組みを掴んだら、問題集で演習を</span>
         </div>
-      </section>
-
-      {/* CTA / Affiliate */}
-      <section className="py-20 px-4 bg-gray-50 border-t border-gray-200">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl font-bold mb-3 text-gray-900">参考書でさらに深く学ぼう</h2>
-          <p className="text-gray-600 mb-8 leading-relaxed text-sm">
-            本サイトと合わせて参考書や問題集を活用することで、SAA合格の可能性がさらに高まります。
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[
-              {
-                title: 'AWS認定ソリューションアーキテクト-アソシエイト問題集',
-                badge: 'ベストセラー',
-                desc: '1000問以上の模擬問題。',
-                url: 'https://amzn.to/3SAA001',
-              },
-              {
-                title: 'AWS認定資格試験テキスト SAA',
-                badge: '公式推薦',
-                desc: '図解で丁寧に解説。',
-                url: 'https://amzn.to/3SAA002',
-              },
-            ].map((book) => (
-              <a
-                key={book.title}
-                href={book.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white hover:bg-gray-100 border border-gray-200 hover:border-gray-300 transition-colors rounded-xl p-5 text-left block"
-              >
-                <span className="inline-block text-xs bg-orange-500 text-white px-2 py-0.5 rounded mb-2 font-medium">
-                  {book.badge}
-                </span>
-                <div className="font-semibold text-sm text-gray-900 mb-1">{book.title}</div>
-                <div className="text-gray-600 text-xs">{book.desc}</div>
-                <div className="text-orange-400 text-xs mt-2 font-medium">Amazonで見る →</div>
-              </a>
-            ))}
-          </div>
-          <p className="text-xs text-gray-500 mt-4">
-            ※Amazonアソシエイト・プログラムに参加しています。
-          </p>
+        <div className="home-books">
+          {BOOKS.map((b) => (
+            <a key={b.title} href={b.url} target="_blank" rel="noopener noreferrer sponsored" className="home-card home-book">
+              <span className="home-tag">{b.badge}</span>
+              <h3>{b.title}</h3>
+              <p>{b.desc}</p>
+              <span className="home-link">Amazonで見る →</span>
+            </a>
+          ))}
         </div>
+        <p className="home-note">※Amazonアソシエイト・プログラムに参加しています。</p>
       </section>
-
     </div>
   )
 }

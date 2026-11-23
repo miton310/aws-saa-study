@@ -3,6 +3,7 @@ import { Geist, IBM_Plex_Sans_JP, JetBrains_Mono } from 'next/font/google'
 import Link from 'next/link'
 import SiteHeader from '@/components/site/SiteHeader'
 import SiteSidebar, { type SidebarChapter } from '@/components/site/SiteSidebar'
+import { CHAPTER_COLORS } from '@/components/site/chapters'
 import { CATEGORIES, DIFFICULTIES, type CategorySlug } from '@/lib/categories'
 import { getContent } from '@/lib/content'
 import { LESSONS } from '@/lib/lessons'
@@ -19,17 +20,6 @@ export const metadata: Metadata = {
     'AWS認定ソリューションアーキテクト-アソシエイト（SAA）を図解アニメーションで楽しく学べる無料学習サイト。VPC、EC2、S3、IAM、RDS、Lambdaなど全サービスを初級・中級・上級の3段階で解説。',
 }
 
-// サイドナビの章の色
-const CHAPTER_COLORS: Record<CategorySlug, string> = {
-  vpc: '#cfe8b8',
-  ec2: '#f6c191',
-  s3: '#bcd4f0',
-  iam: '#f3b7b0',
-  rds: '#d9cdf2',
-  lambda: '#f6e2a4',
-  elb: '#b9e3dc',
-  cloudfront: '#c9d2f2',
-}
 // app/ 直下に静的ページがあるカテゴリ（content が無くても難易度別ページが開ける）
 const STATIC_LEVEL_PAGES: CategorySlug[] = ['vpc', 'ec2', 's3']
 
