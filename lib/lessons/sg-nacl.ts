@@ -184,5 +184,5 @@ export const sgNaclLesson: Lesson = {
     { text: '試験での使い分けの判断', atStep: 7 },
   ],
   prev: { title: 'VPCとNATゲートウェイ', href: '/learn/vpc-nat' },
-  next: { title: 'ピアリングとTransit GW' },
+  next: { title: 'ピアリングとTransit Gateway', href: '/learn/peering-tgw' },
 }

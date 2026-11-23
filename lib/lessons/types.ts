@@ -89,6 +89,8 @@ export interface LessonStep {
   note?: Rich
   changes: { kind: 'add' | 'mod'; text: Rich }[]
   focus: 'all' | string[]
+  /** このステップでは描かないノード（同じ位置に別のノードを置くときなどに使う） */
+  hide?: string[]
   flows: Flow[]
   callouts: Callout[]
   chips: Chip[]

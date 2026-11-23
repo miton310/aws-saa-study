@@ -7,7 +7,6 @@ import './home.css'
 
 // 公開予定のレッスン（実装したら lib/lessons に移し、ここから消す）
 const UPCOMING: { category: CategorySlug; title: string }[] = [
-  { category: 'vpc', title: 'ピアリングとTransit Gateway' },
   { category: 'vpc', title: 'VPCエンドポイント' },
   { category: 'elb', title: 'ELBとAuto Scaling' },
   { category: 's3', title: 'ストレージクラスとライフサイクル' },

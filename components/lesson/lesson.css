@@ -79,6 +79,7 @@ a.lp-btn { text-decoration: none; color: inherit; display: inline-flex; align-it
 .lp-scene [data-term] { cursor: help; }
 .lp-node { transition: opacity .35s; }
 .lp-node.dim { opacity: .32; }
+.lp-node.is-hidden { opacity: 0; pointer-events: none; } /* Tailwind の .hidden と衝突しない名前 */
 .lp-node[data-term]:hover polygon:last-of-type, .lp-node[data-term]:hover ellipse:last-of-type { stroke-width: 3.4; }
 .lp-edge { stroke: var(--lp-ink); stroke-width: 2.2; fill: none; stroke-linecap: round; }
 .lp-edge.fail { stroke: #e5534b; stroke-dasharray: 6 6; }

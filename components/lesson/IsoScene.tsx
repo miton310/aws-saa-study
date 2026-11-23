@@ -96,7 +96,11 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
     if (!g || !svg) return
     g.replaceChildren()
     const vb = svg.viewBox.baseVal
-    const obstacles = nodes.map((n) => nodeBox(n.id)).filter((b): b is Box => !!b)
+    const hidden = new Set(step.hide ?? [])
+    const obstacles = nodes
+      .filter((n) => !hidden.has(n.id))
+      .map((n) => nodeBox(n.id))
+      .filter((b): b is Box => !!b)
     // ゾーン名（回転した文字もあるので、画面上の矩形をSVG座標に戻して使う）
     const inv = svg.getScreenCTM()?.inverse()
     if (inv) {
@@ -126,13 +130,17 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
         [nb.x1 + PILL_GAP + w / 2, nb.y0 - PILL_H / 2],
         [nb.x0 - PILL_GAP - w / 2, nb.y0 - PILL_H / 2],
       ]
+      // 枠外は重く、重なりは数に応じて減点。最も点の低い（同点なら先の）候補を選ぶ
       let pos = cands[0]
+      let best = Infinity
       for (const [x, y] of cands) {
         const r = { x0: x - w / 2 - 2, y0: y - PILL_H / 2 - 2, x1: x + w / 2 + 5, y1: y + PILL_H / 2 + 5 }
         const inside = r.x0 > vb.x && r.y0 > vb.y && r.x1 < vb.x + vb.width && r.y1 < vb.y + vb.height
-        if (inside && !obstacles.concat(taken).some((o) => hit(r, o))) {
+        const score = (inside ? 0 : 100) + obstacles.concat(taken).filter((o) => hit(r, o)).length * 10
+        if (score < best) {
+          best = score
           pos = [x, y]
-          break
+          if (score === 0) break
         }
       }
       const [x, y] = pos
@@ -225,6 +233,7 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
   }, [step, byId])
 
   const focused = (id: string) => step.focus === 'all' || step.focus.includes(id)
+  const isHidden = (id: string) => !!step.hide?.includes(id)
 
   return (
     <svg ref={svgRef} className="lp-scene" viewBox={viewBox} preserveAspectRatio="xMidYMid meet" role="img" aria-label={ariaLabel}>
@@ -261,7 +270,7 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
         {/* ノード（奥から手前の順） */}
         <g ref={nodesRef}>
           {sorted.map((n) => (
-            <IsoNodeShape key={n.id} n={n} dim={!focused(n.id)} />
+            <IsoNodeShape key={n.id} n={n} dim={!focused(n.id)} hidden={isHidden(n.id)} />
           ))}
         </g>
       </g>
@@ -271,7 +280,7 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
   )
 }
 
-function IsoNodeShape({ n, dim }: { n: IsoNode; dim: boolean }) {
+function IsoNodeShape({ n, dim, hidden }: { n: IsoNode; dim: boolean; hidden: boolean }) {
   const st = { stroke: INK, strokeWidth: 2.4, strokeLinejoin: 'round' as const }
   const [gx, gy] = P(n.x, n.y)
   const [tx, ty] = P(n.x, n.y, n.h)
@@ -302,7 +311,7 @@ function IsoNodeShape({ n, dim }: { n: IsoNode; dim: boolean }) {
   }
 
   return (
-    <g className={`lp-node${dim ? ' dim' : ''}`} data-node={n.id} data-term={n.term}>
+    <g className={`lp-node${dim ? ' dim' : ''}${hidden ? ' is-hidden' : ''}`} data-node={n.id} data-term={hidden ? undefined : n.term} aria-hidden={hidden || undefined}>
       {/* 影（先頭の子要素。外形計算では除外する） */}
       <ellipse cx={gx + 6} cy={gy + 8} rx={Math.min(n.s, n.sy ?? n.s) * ISO_W * 1.6} ry={Math.min(n.s, n.sy ?? n.s) * ISO_H * 1.6} fill="rgba(31,27,22,.10)" />
       {shape}

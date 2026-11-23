@@ -2,7 +2,8 @@
 import type { Lesson } from './types'
 import { vpcNatLesson } from './vpc-nat'
 import { sgNaclLesson } from './sg-nacl'
+import { peeringTgwLesson } from './peering-tgw'
 
-export const LESSONS: Lesson[] = [vpcNatLesson, sgNaclLesson]
+export const LESSONS: Lesson[] = [vpcNatLesson, sgNaclLesson, peeringTgwLesson]
 
 export const getLesson = (slug: string) => LESSONS.find((l) => l.slug === slug)
