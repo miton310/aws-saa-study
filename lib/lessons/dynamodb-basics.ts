@@ -197,5 +197,5 @@ export const dynamodbBasicsLesson: Lesson = {
     { text: 'RDS との使い分け', atStep: 5 },
   ],
   prev: { title: 'CloudFront とキャッシュ', href: '/learn/cloudfront-cache' },
-  next: { title: 'CloudWatch と CloudTrail' },
+  next: { title: 'CloudWatch と CloudTrail', href: '/learn/cloudwatch-cloudtrail' },
 }
