@@ -29,7 +29,7 @@ const CHAPTERS: SidebarChapter[] = CATEGORIES.map((cat) => ({
   color: CHAPTER_COLORS[cat.slug],
   items: [
     { href: `/${cat.slug}`, label: '概要', kind: 'overview' as const },
-    ...LESSONS.filter((l) => l.category === cat.slug).map((l) => ({ href: `/learn/${l.slug}`, label: l.title, kind: 'lesson' as const })),
+    ...LESSONS.filter((l) => l.category === cat.slug).map((l) => ({ href: `/learn/${l.slug}`, label: l.title, kind: 'lesson' as const, steps: l.steps.map((s) => s.short) })),
     ...DIFFICULTIES.filter((d) => STATIC_LEVEL_PAGES.includes(cat.slug) || getContent(cat.slug, d.slug)).map((d) => ({
       href: `/${cat.slug}/${d.slug}`,
       label: `${d.label}編`,

@@ -4,15 +4,18 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { onStep, requestStep, type StepDetail } from '@/components/lesson/stepSync'
 
-export type SidebarItem = { href: string; label: string; kind: 'overview' | 'lesson' | 'level' }
+export type SidebarItem = { href: string; label: string; kind: 'overview' | 'lesson' | 'level'; steps?: string[] }
 export type SidebarChapter = { slug: string; name: string; color: string; items: SidebarItem[] }
 
 export default function SiteSidebar({ chapters }: { chapters: SidebarChapter[] }) {
   const pathname = usePathname() ?? '/'
   const current = chapters.find((c) => c.items.some((i) => i.href === pathname))
   const [open, setOpen] = useState<Set<string>>(() => new Set(current ? [current.slug] : []))
+  const [step, setStep] = useState<StepDetail | null>(null)
+  useEffect(() => onStep(setStep), [])
 
   const toggle = (slug: string) =>
     setOpen((prev) => {
@@ -45,12 +48,36 @@ export default function SiteSidebar({ chapters }: { chapters: SidebarChapter[] }
             </button>
             {isOpen && (
               <div className="site-lessons">
-                {c.items.map((i) => (
-                  <Link key={i.href} href={i.href} className={pathname === i.href ? 'on' : ''} aria-current={pathname === i.href ? 'page' : undefined}>
-                    {i.kind === 'lesson' && <span className="site-badge">図解</span>}
-                    {i.label}
-                  </Link>
-                ))}
+                {c.items.map((i) => {
+                  const here = pathname === i.href
+                  const slug = i.href.replace('/learn/', '')
+                  const cur = step?.slug === slug ? step.index : 0
+                  return (
+                    <div key={i.href}>
+                      <Link href={i.href} className={here ? 'on' : ''} aria-current={here ? 'page' : undefined}>
+                        {i.kind === 'lesson' && <span className="site-badge">図解</span>}
+                        {i.label}
+                      </Link>
+                      {here && i.steps && (
+                        <ol className="site-steps" aria-label={`${i.label}のステップ`}>
+                          {i.steps.map((s, n) => (
+                            <li key={s}>
+                              <button
+                                type="button"
+                                className={n === cur ? 'cur' : n < cur ? 'done' : ''}
+                                aria-current={n === cur ? 'step' : undefined}
+                                onClick={() => requestStep({ slug, index: n })}
+                              >
+                                <span className="site-step-n">{n < cur ? '✓' : n + 1}</span>
+                                {s}
+                              </button>
+                            </li>
+                          ))}
+                        </ol>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>

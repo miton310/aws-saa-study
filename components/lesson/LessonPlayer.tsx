@@ -7,6 +7,7 @@ import Link from 'next/link'
 import type { Block, Lesson } from '@/lib/lessons/types'
 import IsoScene, { FLOW_COLORS } from './IsoScene'
 import { RichText, TermTooltip, hideTermTip } from './Term'
+import { announceStep, onStepRequest } from './stepSync'
 import './lesson.css'
 
 const LEGEND = [
@@ -34,6 +35,12 @@ export default function LessonPlayer({ lesson }: { lesson: Lesson }) {
     },
     [steps.length],
   )
+  // サイドナビとステップを同期
+  useEffect(() => {
+    announceStep({ slug: lesson.slug, index: cur })
+  }, [lesson.slug, cur])
+  useEffect(() => onStepRequest((d) => d.slug === lesson.slug && go(d.index)), [lesson.slug, go])
+
   const replay = useCallback(() => {
     setReplayKey((k) => k + 1)
     setPlaying(true)
