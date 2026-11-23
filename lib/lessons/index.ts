@@ -9,7 +9,8 @@ import { s3StorageLesson } from './s3-storage'
 import { route53BasicsLesson } from './route53-basics'
 import { rdsMultiAzLesson } from './rds-multiaz'
 import { iamBasicsLesson } from './iam-basics'
+import { sqsSnsEventBridgeLesson } from './sqs-sns-eventbridge'
 
-export const LESSONS: Lesson[] = [vpcNatLesson, sgNaclLesson, peeringTgwLesson, vpcEndpointLesson, route53BasicsLesson, elbAsgLesson, s3StorageLesson, rdsMultiAzLesson, iamBasicsLesson]
+export const LESSONS: Lesson[] = [vpcNatLesson, sgNaclLesson, peeringTgwLesson, vpcEndpointLesson, route53BasicsLesson, elbAsgLesson, s3StorageLesson, rdsMultiAzLesson, iamBasicsLesson, sqsSnsEventBridgeLesson]
 
 export const getLesson = (slug: string) => LESSONS.find((l) => l.slug === slug)

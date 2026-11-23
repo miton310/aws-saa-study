@@ -34,7 +34,7 @@ SAA-C03 の公式「対象サービス一覧」（In-Scope AWS Services）と突
 | 04 EC2・コンピュート | — | 購入オプションの選び方 |
 | 05 ストレージ | ストレージクラスとライフサイクル | EBS・EFS・FSx の使い分け |
 | 06 データベース | Multi-AZとリードレプリカ | DynamoDB / Aurora・ElastiCache |
-| 07 疎結合・サーバーレス | — | SQS・SNS・EventBridge |
+| 07 疎結合・サーバーレス | SQS・SNS・EventBridge | Lambda と API Gateway / Step Functions |
 | 08 セキュリティ・ID | IAMポリシーとロール | KMS / Organizations と SCP |
 | 09〜13 | — | 重要度の高い章のあとで着手 |
 

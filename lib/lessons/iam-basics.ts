@@ -200,5 +200,5 @@ export const iamBasicsLesson: Lesson = {
     { text: 'バケットポリシー（リソースベース）', atStep: 5 },
   ],
   prev: { title: 'Multi-AZとリードレプリカ', href: '/learn/rds-multiaz' },
-  next: { title: 'SQS・SNS・EventBridge' },
+  next: { title: 'SQS・SNS・EventBridge', href: '/learn/sqs-sns-eventbridge' },
 }
