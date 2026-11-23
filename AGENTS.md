@@ -22,6 +22,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
   - データの検証：`lib/lessons/validate.ts`。ノードID・用語IDの打ち間違い、非表示ノードを通る経路などを検出し、`npm run build` と開発中のレッスン表示をエラーで止める。
   - 表示の確認：`npm run dev` を起動した状態で `npm run check:lessons`。全レッスン・全ステップを3つの画面サイズで開き、吹き出しの重なり・はみ出し、ゾーン名の隠れ、ステップ欄のはみ出しを検出する（初回のみ `npx playwright install chromium`）。
 
+## デザインの統一（移行中）
+
+サイトは「ソフト・ネオブルータリズム（クリーム背景・太い黒枠・ずらした影・パステル）」に移行中。古い見た目（白背景・グレー・オレンジのボタン・絵文字見出しなど）が残っている部分は、触るついでに少しずつ新デザインに合わせる。
+
+- 新デザインの部品：ページ枠は `components/site/`、解説ページは `components/guide/`（`guide.css`）、図解レッスンは `components/lesson/`（`lesson.css`）。色・枠・影はこれらのCSSに合わせる。
+- 未移行（今後合わせる）：p5 のステッパーと図（`components/visualizations/`）の内側の配色とボタン、`components/DiagramRenderer.tsx` の見出し、フッター。
+- 新しく作る画面は、最初から新デザインで作る。
+
 ## Project UI Conventions
 
 - Use AWS icon components for UI visuals instead of emoji when representing AWS services or cloud concepts.

@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { CATEGORIES, type CategorySlug } from '@/lib/categories'
 import { LESSONS } from '@/lib/lessons'
 import HeroScene from '@/components/site/HeroScene'
-import { CHAPTER_COLORS } from '@/components/site/chapters'
+import { CHAPTER_COLORS, chapterLabel } from '@/components/site/chapters'
 import './home.css'
 
 // 公開予定のレッスン（実装したら lib/lessons に移し、ここから消す）
@@ -12,11 +12,6 @@ const UPCOMING: { category: CategorySlug; title: string }[] = [
   { category: 'iam', title: 'IAMポリシーとロール' },
 ]
 
-/** サイドナビと同じ「01. VPC・ネットワーク」形式の章名 */
-const chapterLabel = (slug: CategorySlug) => {
-  const i = CATEGORIES.findIndex((c) => c.slug === slug)
-  return `${String(i + 1).padStart(2, '0')}. ${CATEGORIES[i].name}`
-}
 
 const FEATURES = [
   { color: '#bcd4f0', title: '通信が動く図', desc: 'リクエストや攻撃がどこを通り、どこで止まるのか。パケットの動きで仕組みが見える。' },
