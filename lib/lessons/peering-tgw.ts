@@ -179,5 +179,5 @@ export const peeringTgwLesson: Lesson = {
     { text: 'オンプレミス接続の集約', atStep: 5 },
   ],
   prev: { title: 'SGとNACL', href: '/learn/sg-nacl' },
-  next: { title: 'VPCエンドポイント' },
+  next: { title: 'VPCエンドポイント', href: '/learn/vpc-endpoint' },
 }
