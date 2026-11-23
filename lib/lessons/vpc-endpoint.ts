@@ -1,4 +1,9 @@
-import type { Chip, Lesson } from './types'
+import type { Chip, Lesson, Packet } from './types'
+
+// パケットの流れ表に出す通信（VPC 内では、評価されるときのプライベートIPで表す）
+const pk = (src: string, dst: string, proto: string, result: string, ok = true): Packet => ({ src, dst, proto, result, ok })
+const EC2 = '10.0.2.10'
+const ENI = '10.0.2.25'
 
 const S3 = (v: string, tone?: Chip['tone']): Chip => ({ label: 'S3への経路', value: v, tone })
 const FEE = (v: string, tone?: Chip['tone']): Chip => ({ label: 'NATの料金（S3分）', value: v, tone })
@@ -43,8 +48,8 @@ export const vpcEndpointLesson: Lesson = {
       changes: [{ kind: 'mod', text: 'S3への通信がNATを経由している' }],
       focus: ['ec2', 'nat', 'igw', 's3'], hide: ['gwep', 'ifep', 'sqs', 'other'],
       flows: [
-        { path: ['ec2', 'nat', 'igw', 's3'], color: 'out' },
-        { path: ['s3', 'igw', 'nat', 'ec2'], color: 'res', delay: 0.45 },
+        { path: ['ec2', 'nat', 'igw', 's3'], color: 'out', packet: pk(`${EC2}:51000`, 'S3 の公開アドレス:443', 'TCP 443（HTTPS）', '許可（NAT 経由・データ処理料金あり）') },
+        { path: ['s3', 'igw', 'nat', 'ec2'], color: 'res', delay: 0.45, packet: pk('S3:443', `${EC2}:51000`, 'TCP 応答', '許可（NAT 経由）') },
       ],
       callouts: [{ node: 'nat', text: 'データ量に応じて課金', tone: '#f3b7b0' }],
       chips: [S3('NAT → IGW'), FEE('かかる', 'bad'), SQS('—')],
@@ -63,8 +68,8 @@ export const vpcEndpointLesson: Lesson = {
       ],
       focus: ['ec2', 'gwep', 's3'], hide: ['ifep', 'sqs', 'other'],
       flows: [
-        { path: ['ec2', 'gwep', 's3'], color: 'out' },
-        { path: ['s3', 'gwep', 'ec2'], color: 'res', delay: 0.45 },
+        { path: ['ec2', 'gwep', 's3'], color: 'out', packet: pk(`${EC2}:51000`, 'S3:443（pl-s3 に一致）', 'TCP 443（HTTPS）', '許可（vpce 経由・追加料金なし）') },
+        { path: ['s3', 'gwep', 'ec2'], color: 'res', delay: 0.45, packet: pk('S3:443', `${EC2}:51000`, 'TCP 応答', '許可（vpce 経由）') },
       ],
       callouts: [{ node: 'gwep', text: 'S3・DynamoDB専用' }],
       chips: [S3('エンドポイント', 'good'), FEE('かからない', 'good'), SQS('—')],
@@ -83,8 +88,8 @@ export const vpcEndpointLesson: Lesson = {
       ],
       focus: ['ec2', 'ifep', 'sqs'], hide: ['other'],
       flows: [
-        { path: ['ec2', 'ifep', 'sqs'], color: 'req' },
-        { path: ['sqs', 'ifep', 'ec2'], color: 'res', delay: 0.45 },
+        { path: ['ec2', 'ifep', 'sqs'], color: 'req', packet: pk(`${EC2}:51200`, `${ENI}:443（ENI）`, 'TCP 443（SQS）', '許可（PrivateLink）') },
+        { path: ['sqs', 'ifep', 'ec2'], color: 'res', delay: 0.45, packet: pk(`${ENI}:443（ENI）`, `${EC2}:51200`, 'TCP 応答', '許可（PrivateLink）') },
       ],
       callouts: [{ node: 'ifep', text: 'プライベートIPを持つ' }],
       chips: [S3('エンドポイント', 'good'), FEE('かからない', 'good'), SQS('ENI（PrivateLink）', 'good')],
@@ -100,8 +105,8 @@ export const vpcEndpointLesson: Lesson = {
       changes: [{ kind: 'add', text: 'エンドポイントポリシーで my-bucket だけを許可' }],
       focus: ['ec2', 'gwep', 's3', 'other'], hide: [],
       flows: [
-        { path: ['ec2', 'gwep', 's3'], color: 'out' },
-        { path: ['ec2', 'gwep'], color: 'atk', fail: true, delay: 0.45 },
+        { path: ['ec2', 'gwep', 's3'], color: 'out', packet: pk(`${EC2}:51000`, 'my-bucket:443', 'TCP 443（HTTPS）', '許可（エンドポイントポリシーに一致）') },
+        { path: ['ec2', 'gwep'], color: 'atk', fail: true, delay: 0.45, packet: pk(`${EC2}:51010`, 'other-bucket:443', 'TCP 443（HTTPS）', '拒否（エンドポイントポリシー）', false) },
       ],
       callouts: [{ node: 'gwep', text: '自社バケットのみ' }],
       chips: [S3('エンドポイント', 'good'), { label: '別のバケットへ', value: '拒否', tone: 'good' }, SQS('ENI（PrivateLink）', 'good')],
@@ -121,8 +126,8 @@ export const vpcEndpointLesson: Lesson = {
       changes: [],
       focus: 'all', hide: ['other'],
       flows: [
-        { path: ['ec2', 'gwep', 's3'], color: 'out' },
-        { path: ['ec2', 'ifep', 'sqs'], color: 'req', delay: 0.5 },
+        { path: ['ec2', 'gwep', 's3'], color: 'out', packet: pk(`${EC2}:51000`, 'S3:443（pl-s3 に一致）', 'TCP 443（HTTPS）', '許可（vpce 経由）') },
+        { path: ['ec2', 'ifep', 'sqs'], color: 'req', delay: 0.5, packet: pk(`${EC2}:51200`, `${ENI}:443（ENI）`, 'TCP 443（SQS）', '許可（PrivateLink）') },
       ],
       callouts: [{ node: 'gwep', text: 'S3はまずこれ', tone: '#f6e2a4' }],
       chips: [S3('エンドポイント', 'good'), FEE('かからない', 'good'), SQS('ENI（PrivateLink）', 'good')],

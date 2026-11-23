@@ -1,4 +1,11 @@
-import type { Chip, Lesson } from './types'
+import type { Chip, Lesson, Packet } from './types'
+
+// パケットの流れ表に出す通信（VPC 内では、評価されるときのプライベートIPで表す）
+const pk = (src: string, dst: string, proto: string, result: string, ok = true): Packet => ({ src, dst, proto, result, ok })
+const A = '10.0.0.10'
+const B = '10.1.0.10'
+const C = '10.2.0.10'
+const ONPREM = '192.168.10.5'
 
 const HOW = (v: string): Chip => ({ label: '接続方式', value: v })
 const AC = (v: string, tone?: Chip['tone']): Chip => ({ label: 'A → C の通信', value: v, tone })
@@ -61,8 +68,8 @@ export const peeringTgwLesson: Lesson = {
       ],
       focus: ['a', 'b', 'pcxab'], hide: ['pcxbc', 'pcxac', 'tgw', 'onprem'],
       flows: [
-        { path: ['a', 'pcxab', 'b'], color: 'req' },
-        { path: ['b', 'pcxab', 'a'], color: 'res', delay: 0.45 },
+        { path: ['a', 'pcxab', 'b'], color: 'req', packet: pk(`${A}:50100`, `${B}:443`, 'TCP 443', '許可（A の RT：10.1.0.0/16 → pcx-ab）') },
+        { path: ['b', 'pcxab', 'a'], color: 'res', delay: 0.45, packet: pk(`${B}:443`, `${A}:50100`, 'TCP 応答', '許可（B の RT：10.0.0.0/16 → pcx-ab）') },
       ],
       callouts: [{ node: 'pcxab', text: '1対1の接続' }],
       chips: [HOW('ピアリング'), AC('不可', 'bad'), NUM('1')],
@@ -77,8 +84,8 @@ export const peeringTgwLesson: Lesson = {
       changes: [{ kind: 'add', text: 'B–C間にもピアリング接続を作成' }],
       focus: ['a', 'b', 'c', 'pcxab', 'pcxbc'], hide: ['pcxac', 'tgw', 'onprem'],
       flows: [
-        { path: ['a', 'pcxab', 'b'], color: 'atk', fail: true },
-        { path: ['b', 'pcxbc', 'c'], color: 'req', delay: 0.5 },
+        { path: ['a', 'pcxab', 'b'], color: 'atk', fail: true, packet: pk(`${A}:50100`, `${C}:443`, 'TCP 443', '届かない（ピアリングは中継しない）', false) },
+        { path: ['b', 'pcxbc', 'c'], color: 'req', delay: 0.5, packet: pk(`${B}:50200`, `${C}:443`, 'TCP 443', '許可（pcx-bc）') },
       ],
       callouts: [{ node: 'b', text: 'Bは中継しない', tone: '#f3b7b0' }],
       chips: [HOW('ピアリング'), AC('不可', 'bad'), NUM('2')],
@@ -93,8 +100,8 @@ export const peeringTgwLesson: Lesson = {
       changes: [{ kind: 'add', text: 'A–C間に直接ピアリング接続を作成' }],
       focus: ['a', 'b', 'c', ...PCX], hide: ['tgw', 'onprem'],
       flows: [
-        { path: ['a', 'pcxac', 'c'], color: 'req' },
-        { path: ['c', 'pcxac', 'a'], color: 'res', delay: 0.45 },
+        { path: ['a', 'pcxac', 'c'], color: 'req', packet: pk(`${A}:50100`, `${C}:443`, 'TCP 443', '許可（A の RT：10.2.0.0/16 → pcx-ac）') },
+        { path: ['c', 'pcxac', 'a'], color: 'res', delay: 0.45, packet: pk(`${C}:443`, `${A}:50100`, 'TCP 応答', '許可（pcx-ac）') },
       ],
       callouts: [{ node: 'pcxac', text: 'ペアごとに1本' }],
       chips: [HOW('ピアリング'), AC('可', 'good'), NUM('3')],
@@ -113,9 +120,9 @@ export const peeringTgwLesson: Lesson = {
       ],
       focus: ['a', 'b', 'c', 'tgw'], hide: [...PCX, 'onprem'],
       flows: [
-        { path: ['a', 'tgw', 'c'], color: 'req' },
-        { path: ['c', 'tgw', 'a'], color: 'res', delay: 0.45 },
-        { path: ['b', 'tgw'], color: 'req', delay: 0.2 },
+        { path: ['a', 'tgw', 'c'], color: 'req', packet: pk(`${A}:50100`, `${C}:443`, 'TCP 443', '許可（A の RT：10.2.0.0/16 → tgw）') },
+        { path: ['c', 'tgw', 'a'], color: 'res', delay: 0.45, packet: pk(`${C}:443`, `${A}:50100`, 'TCP 応答', '許可（TGW が中継）') },
+        { path: ['b', 'tgw'], color: 'req', delay: 0.2, packet: pk(`${B}:50200`, `${A}:443`, 'TCP 443', '許可（TGW が中継）') },
       ],
       callouts: [{ node: 'tgw', text: 'ハブで中継' }],
       chips: [HOW('Transit Gateway'), AC('可', 'good'), NUM('3（VPCの数）', 'good')],
@@ -130,8 +137,8 @@ export const peeringTgwLesson: Lesson = {
       changes: [{ kind: 'add', text: 'Site-to-Site VPNをTGWにアタッチ' }],
       focus: ['onprem', 'tgw', 'b', 'a', 'c'], hide: [...PCX],
       flows: [
-        { path: ['onprem', 'tgw', 'b'], color: 'req' },
-        { path: ['b', 'tgw', 'onprem'], color: 'res', delay: 0.45 },
+        { path: ['onprem', 'tgw', 'b'], color: 'req', packet: pk(`${ONPREM}:50300`, `${B}:443`, 'TCP 443', '許可（VPN → TGW → VPC B）') },
+        { path: ['b', 'tgw', 'onprem'], color: 'res', delay: 0.45, packet: pk(`${B}:443`, `${ONPREM}:50300`, 'TCP 応答', '許可（TGW → VPN）') },
       ],
       callouts: [{ node: 'onprem', text: 'VPN 1本で全VPCへ' }],
       chips: [HOW('Transit Gateway'), AC('可', 'good'), NUM('4（VPC＋VPN）', 'good')],
@@ -151,8 +158,8 @@ export const peeringTgwLesson: Lesson = {
       changes: [],
       focus: 'all', hide: [...PCX],
       flows: [
-        { path: ['a', 'tgw', 'c'], color: 'req' },
-        { path: ['onprem', 'tgw', 'b'], color: 'req', delay: 0.5 },
+        { path: ['a', 'tgw', 'c'], color: 'req', packet: pk(`${A}:50100`, `${C}:443`, 'TCP 443', '許可（TGW が中継）') },
+        { path: ['onprem', 'tgw', 'b'], color: 'req', delay: 0.5, packet: pk(`${ONPREM}:50300`, `${B}:443`, 'TCP 443', '許可（VPN → TGW）') },
       ],
       callouts: [{ node: 'tgw', text: '数が多ければTGW', tone: '#f6e2a4' }],
       chips: [HOW('Transit Gateway'), AC('可', 'good'), NUM('VPCの数＋VPN', 'good')],

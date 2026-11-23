@@ -1,14 +1,22 @@
-import type { Chip, Lesson } from './types'
+import type { Chip, Lesson, Packet } from './types'
+
+// パケットの流れ表に出す通信（VPC 内では、評価されるときのプライベートIPで表す）
+const pk = (src: string, dst: string, proto: string, result: string, ok = true): Packet => ({ src, dst, proto, result, ok })
+const ALB = '10.0.0.20（ALB）'
+const A1 = '10.0.1.11'
+const A2 = '10.0.1.12'
+const C1 = '10.0.3.11'
+const C2 = '10.0.3.12'
 
 const N = (v: string, tone?: Chip['tone']): Chip => ({ label: 'EC2の台数', value: v, tone })
 const AZ = (v: string, tone?: Chip['tone']): Chip => ({ label: 'AZ', value: v, tone })
 const DOWN = (v: string, tone?: Chip['tone']): Chip => ({ label: '1台が止まったら', value: v, tone })
 
 const REQ_ALL = [
-  { path: ['user', 'igw', 'alb', 'a1'], color: 'req' as const },
-  { path: ['user', 'igw', 'alb', 'c1'], color: 'req' as const, delay: 0.25 },
-  { path: ['user', 'igw', 'alb', 'a2'], color: 'req' as const, delay: 0.5 },
-  { path: ['user', 'igw', 'alb', 'c2'], color: 'req' as const, delay: 0.75 },
+  { path: ['user', 'igw', 'alb', 'a1'], color: 'req' as const, packet: pk(ALB, `${A1}:80`, 'TCP 80（HTTP）', '振り分け（AZ-a の1台目）') },
+  { path: ['user', 'igw', 'alb', 'c1'], color: 'req' as const, delay: 0.25, packet: pk(ALB, `${C1}:80`, 'TCP 80（HTTP）', '振り分け（AZ-c の1台目）') },
+  { path: ['user', 'igw', 'alb', 'a2'], color: 'req' as const, delay: 0.5, packet: pk(ALB, `${A2}:80`, 'TCP 80（HTTP）', '振り分け（自動で追加した台）') },
+  { path: ['user', 'igw', 'alb', 'c2'], color: 'req' as const, delay: 0.75, packet: pk(ALB, `${C2}:80`, 'TCP 80（HTTP）', '振り分け（自動で追加した台）') },
 ]
 
 export const elbAsgLesson: Lesson = {
@@ -47,7 +55,7 @@ export const elbAsgLesson: Lesson = {
       ],
       changes: [{ kind: 'mod', text: 'EC2 1台をインターネットに直接公開している' }],
       focus: ['user', 'igw', 'a1'], hide: ['alb', 'a2', 'c1', 'c2'],
-      flows: [{ path: ['user', 'igw', 'a1'], color: 'req', fail: true }],
+      flows: [{ path: ['user', 'igw', 'a1'], color: 'req', fail: true, packet: pk('198.51.100.7:52344', 'EC2 の公開アドレス:443', 'TCP 443（HTTPS）', '応答なし（唯一の EC2 が停止）', false) }],
       callouts: [{ node: 'a1', text: '止まると全停止', tone: '#f3b7b0' }],
       chips: [N('1台'), AZ('1つ'), DOWN('全停止', 'bad')],
       card: { title: 'いまの構成', lines: ['EC2 1台（パブリックIPで公開）', '障害 ＝ サービス停止'], highlight: 1 },
@@ -64,9 +72,9 @@ export const elbAsgLesson: Lesson = {
       ],
       focus: ['user', 'igw', 'alb', 'a1', 'a2'], hide: ['c1', 'c2'],
       flows: [
-        { path: ['user', 'igw', 'alb', 'a1'], color: 'req' },
-        { path: ['a1', 'alb', 'igw', 'user'], color: 'res', delay: 0.45 },
-        { path: ['alb', 'a2'], color: 'atk', fail: true, delay: 0.2 },
+        { path: ['user', 'igw', 'alb', 'a1'], color: 'req', packet: pk(ALB, `${A1}:80`, 'TCP 80（HTTP）', '振り分け（healthy）') },
+        { path: ['a1', 'alb', 'igw', 'user'], color: 'res', delay: 0.45, packet: pk(`${A1}:80`, ALB, 'TCP 応答', '応答（200 OK）') },
+        { path: ['alb', 'a2'], color: 'atk', fail: true, delay: 0.2, packet: pk(ALB, `${A2}:80/health`, 'ヘルスチェック', '失敗 → 振り分け対象から除外', false) },
       ],
       callouts: [{ node: 'a2', text: '異常なので外す', tone: '#f3b7b0' }],
       chips: [N('2台'), AZ('1つ'), DOWN('残りで継続', 'good')],
@@ -82,9 +90,9 @@ export const elbAsgLesson: Lesson = {
       changes: [{ kind: 'mod', text: 'EC2をAZ-aとAZ-cに1台ずつ配置' }],
       focus: ['user', 'igw', 'alb', 'a1', 'c1'], hide: ['a2', 'c2'],
       flows: [
-        { path: ['user', 'igw', 'alb', 'c1'], color: 'req' },
-        { path: ['c1', 'alb', 'igw', 'user'], color: 'res', delay: 0.45 },
-        { path: ['alb', 'a1'], color: 'atk', fail: true, delay: 0.2 },
+        { path: ['user', 'igw', 'alb', 'c1'], color: 'req', packet: pk(ALB, `${C1}:80`, 'TCP 80（HTTP）', '振り分け（AZ-c）') },
+        { path: ['c1', 'alb', 'igw', 'user'], color: 'res', delay: 0.45, packet: pk(`${C1}:80`, ALB, 'TCP 応答', '応答（200 OK）') },
+        { path: ['alb', 'a1'], color: 'atk', fail: true, delay: 0.2, packet: pk(ALB, `${A1}:80/health`, 'ヘルスチェック', '失敗（AZ-a で障害）', false) },
       ],
       callouts: [{ node: 'a1', text: 'AZ-aで障害', tone: '#f3b7b0' }],
       chips: [N('2台'), AZ('2つ', 'good'), DOWN('AZごと止まっても継続', 'good')],
@@ -142,7 +150,7 @@ export const elbAsgLesson: Lesson = {
       focus: 'all', hide: [],
       flows: [
         ...REQ_ALL,
-        { path: ['c1', 'alb', 'igw', 'user'], color: 'res', delay: 0.6 },
+        { path: ['c1', 'alb', 'igw', 'user'], color: 'res', delay: 0.6, packet: pk(`${C1}:80`, ALB, 'TCP 応答', '応答（200 OK）') },
       ],
       callouts: [{ node: 'alb', text: 'マルチAZ＋ASG', tone: '#f6e2a4' }],
       chips: [N('2〜6台（自動）', 'good'), AZ('2つ', 'good'), DOWN('自動で入れ替え', 'good')],

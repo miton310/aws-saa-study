@@ -1,4 +1,12 @@
-import type { Lesson } from './types'
+import type { Lesson, Packet } from './types'
+
+// パケットの流れ表に出す通信（VPC 内では、評価されるときのプライベートIPで表す）
+const pk = (src: string, dst: string, proto: string, result: string, ok = true): Packet => ({ src, dst, proto, result, ok })
+const USER = '198.51.100.7:52344'
+const ALB = '10.0.1.20'
+const EC2 = '10.0.2.10'
+const RDS = '10.0.3.10'
+const REPO = '192.0.2.80'
 
 const CHIP_IN = (v: string) => ({ label: '入口', value: v })
 const CHIP_IP = { label: 'EC2のパブリックIP', value: 'なし', tone: 'good' as const }
@@ -75,7 +83,7 @@ export const vpcNatLesson: Lesson = {
         { kind: 'mod', text: '{{sg:sg-alb}}：443 を 0.0.0.0/0 から許可' },
       ],
       focus: ['user', 'igw', 'alb'],
-      flows: [{ path: ['user', 'igw', 'alb'], color: 'req' }],
+      flows: [{ path: ['user', 'igw', 'alb'], color: 'req', packet: pk(USER, `${ALB}:443`, 'TCP 443（HTTPS）', '許可（sg-alb の 443）') }],
       callouts: [{ node: 'alb', text: 'HTTPS :443' }],
       chips: [CHIP_IN('ALB :443'), CHIP_IP, CHIP_OUT_NG],
       card: { title: 'sg-alb（インバウンド）', lines: ['443/tcp  ← 0.0.0.0/0'], highlight: 0 },
@@ -93,8 +101,8 @@ export const vpcNatLesson: Lesson = {
       ],
       focus: ['user', 'igw', 'alb', 'ec2'],
       flows: [
-        { path: ['user', 'igw', 'alb', 'ec2'], color: 'req' },
-        { path: ['ec2', 'alb', 'igw', 'user'], color: 'res', delay: 0.45 },
+        { path: ['user', 'igw', 'alb', 'ec2'], color: 'req', packet: pk(`${ALB}:38120（ALB）`, `${EC2}:80`, 'TCP 80（HTTP）', '許可（sg-app：sg-alb から）') },
+        { path: ['ec2', 'alb', 'igw', 'user'], color: 'res', delay: 0.45, packet: pk(`${EC2}:80`, `${ALB}:38120（ALB）`, 'TCP 応答', '許可（SG はステートフル）') },
       ],
       callouts: [{ node: 'ec2', text: 'SG：sg-albからのみ' }],
       chips: [CHIP_IN('ALB :443'), CHIP_IP, CHIP_OUT_NG],
@@ -113,8 +121,8 @@ export const vpcNatLesson: Lesson = {
       ],
       focus: ['ec2', 'rds', 'alb'],
       flows: [
-        { path: ['ec2', 'rds'], color: 'req' },
-        { path: ['rds', 'ec2'], color: 'res', delay: 0.45 },
+        { path: ['ec2', 'rds'], color: 'req', packet: pk(`${EC2}:45012`, `${RDS}:3306`, 'TCP 3306（MySQL）', '許可（sg-db：sg-app から）') },
+        { path: ['rds', 'ec2'], color: 'res', delay: 0.45, packet: pk(`${RDS}:3306`, `${EC2}:45012`, 'TCP 応答', '許可（SG はステートフル）') },
       ],
       callouts: [{ node: 'rds', text: 'MySQL :3306' }],
       chips: [CHIP_IN('ALB :443'), CHIP_IP, CHIP_OUT_NG],
@@ -128,7 +136,7 @@ export const vpcNatLesson: Lesson = {
       ],
       changes: [{ kind: 'mod', text: '直接アクセスは失敗する' }],
       focus: ['attacker', 'igw', 'ec2'],
-      flows: [{ path: ['attacker', 'igw'], color: 'atk', fail: true }],
+      flows: [{ path: ['attacker', 'igw'], color: 'atk', fail: true, packet: pk('203.0.113.9:40112', 'EC2 の公開アドレス（なし）', 'TCP 22（SSH）', '届かない（EC2 にパブリックIPがない）', false) }],
       callouts: [{ node: 'igw', text: 'EC2の宛先がない', tone: '#f3b7b0' }],
       chips: [CHIP_IN('ALB :443'), CHIP_IP, CHIP_OUT_NG],
       card: { title: '防御の層', lines: ['1. ルーティング：パブリックIPなし', '2. SG：sg-albからのみ許可', '3. ALB：公開ポートは443だけ'], highlight: 0 },
@@ -146,9 +154,9 @@ export const vpcNatLesson: Lesson = {
       ],
       focus: ['ec2', 'nat', 'igw', 'repo'],
       flows: [
-        { path: ['ec2', 'nat', 'igw', 'repo'], color: 'out' },
-        { path: ['repo', 'igw', 'nat', 'ec2'], color: 'res', delay: 0.45 },
-        { path: ['repo', 'igw', 'nat'], color: 'atk', fail: true, delay: 0.2 },
+        { path: ['ec2', 'nat', 'igw', 'repo'], color: 'out', packet: pk(`${EC2}:51000`, `${REPO}:443`, 'TCP 443（HTTPS）', '許可（NAT が送信元を EIP に変換）') },
+        { path: ['repo', 'igw', 'nat', 'ec2'], color: 'res', delay: 0.45, packet: pk(`${REPO}:443`, `${EC2}:51000`, 'TCP 応答', '許可（NAT が EC2 に戻す）') },
+        { path: ['repo', 'igw', 'nat'], color: 'atk', fail: true, delay: 0.2, packet: pk(`${REPO}:50500`, 'NAT の EIP:22', 'TCP 22（SSH）', '拒否（外から始まる通信は通さない）', false) },
       ],
       callouts: [{ node: 'nat', text: '内→外のみ' }],
       chips: [CHIP_IN('ALB :443'), CHIP_IP, CHIP_OUT_OK],
@@ -168,8 +176,8 @@ export const vpcNatLesson: Lesson = {
       changes: [],
       focus: 'all',
       flows: [
-        { path: ['user', 'igw', 'alb', 'ec2', 'rds'], color: 'req' },
-        { path: ['ec2', 'nat', 'igw', 'repo'], color: 'out', delay: 0.5 },
+        { path: ['user', 'igw', 'alb', 'ec2', 'rds'], color: 'req', packet: pk(USER, `${ALB}:443`, 'TCP 443（HTTPS）', '許可（ALB → EC2 → RDS）') },
+        { path: ['ec2', 'nat', 'igw', 'repo'], color: 'out', delay: 0.5, packet: pk(`${EC2}:51000`, `${REPO}:443`, 'TCP 443（HTTPS）', '許可（NAT 経由）') },
       ],
       callouts: [{ node: 'nat', text: 'AZごとに1つ', tone: '#f6e2a4' }],
       chips: [CHIP_IN('ALB :443'), CHIP_IP, CHIP_OUT_OK],
