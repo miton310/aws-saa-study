@@ -51,9 +51,11 @@ type Props = {
   /** 値が変わるとアニメーションを最初から再生 */
   replayKey: number
   ariaLabel?: string
+  /** 画面に出ているパケット（flows の番号）が変わったときに呼ばれる */
+  onActiveChange?: (active: number[]) => void
 }
 
-export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaLabel }: Props) {
+export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaLabel, onActiveChange }: Props) {
   const byId = useMemo(() => Object.fromEntries(nodes.map((n) => [n.id, n])), [nodes])
   const sorted = useMemo(() => [...nodes].sort((a, b) => a.x + a.y - (b.x + b.y)), [nodes])
 
@@ -157,6 +159,11 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
 
   // パケット
   const stepRef = useRef(step)
+  const onActiveRef = useRef(onActiveChange)
+  const lastActiveRef = useRef('')
+  useEffect(() => {
+    onActiveRef.current = onActiveChange
+  }, [onActiveChange])
   const playingRef = useRef(playing)
   const elapsedRef = useRef(0)
   useEffect(() => {
@@ -197,10 +204,12 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
       if (g) {
         g.replaceChildren()
         const phase = (elapsedRef.current % CYCLE) / CYCLE
-        stepRef.current.flows.forEach((f) => {
+        const active: number[] = []
+        stepRef.current.flows.forEach((f, fi) => {
           let l = phase - (f.delay ?? 0)
           if (l < 0) l += 1
           const k = l / TRAVEL
+          if (k <= 1 || (f.fail && k < FAIL_MARK_UNTIL)) active.push(fi)
           if (k <= 1) {
             const [x, y] = along(f.path, k)
             svgEl('circle', { cx: x, cy: y, r: 6.5, fill: FLOW_COLORS[f.color], stroke: INK, 'stroke-width': 2 }, g)
@@ -210,6 +219,11 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
             svgEl('path', { d: `M${x - 4},${y - 4}L${x + 4},${y + 4}M${x + 4},${y - 4}L${x - 4},${y + 4}`, stroke: '#fff', 'stroke-width': 2.4, 'stroke-linecap': 'round' }, g)
           }
         })
+        const key = active.join(',')
+        if (key !== lastActiveRef.current) {
+          lastActiveRef.current = key
+          onActiveRef.current?.(active)
+        }
       }
       raf = requestAnimationFrame(frame)
     }

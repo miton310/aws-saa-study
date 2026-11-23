@@ -22,6 +22,7 @@ export default function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [playing, setPlaying] = useState(true)
   const [replayKey, setReplayKey] = useState(0)
   const [picked, setPicked] = useState<number | null>(null)
+  const [active, setActive] = useState<number[]>([])
   const step = steps[cur]
 
   const go = useCallback(
@@ -54,6 +55,7 @@ export default function LessonPlayer({ lesson }: { lesson: Lesson }) {
   }, [cur, go, replay])
 
   const isLast = cur === steps.length - 1
+  const packets = step.flows.flatMap((f, i) => (f.packet ? [{ p: f.packet, i, color: FLOW_COLORS[f.color] }] : []))
 
   return (
     <div className="lp">
@@ -91,23 +93,45 @@ export default function LessonPlayer({ lesson }: { lesson: Lesson }) {
             </div>
           </div>
 
-          <IsoScene nodes={lesson.nodes} zones={lesson.zones} step={step} playing={playing} replayKey={replayKey} ariaLabel={`${lesson.title}の構成図`} />
+          <IsoScene nodes={lesson.nodes} zones={lesson.zones} step={step} playing={playing} replayKey={replayKey} ariaLabel={`${lesson.title}の構成図`} onActiveChange={setActive} />
 
           <div className="lp-stage-bottom">
-            <div className="lp-legend">
-              {LEGEND.map((l) => (
-                <span key={l.label}>
-                  <i style={{ background: l.color }} />
-                  {l.label}
-                </span>
-              ))}
-            </div>
-            <div className="lp-infocard">
-              <h4>🔑 {step.card.title}</h4>
-              {step.card.lines.map((l, i) => (
-                <div key={l} className={`lp-ln${i === step.card.highlight ? ' hl' : ''}`}>{l}</div>
-              ))}
-            </div>
+            {packets.length > 0 ? (
+              <div className="lp-packets">
+                <table>
+                  <caption className="lp-sr">パケットの流れ</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">送信元</th>
+                      <th scope="col">宛先</th>
+                      <th scope="col">種類</th>
+                      <th scope="col">判定</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {packets.map(({ p, i, color }, n) => (
+                      <tr key={i} className={active.includes(i) ? 'on' : undefined}>
+                        <td><i style={{ background: color }}>{n + 1}</i></td>
+                        <td>{p.src}</td>
+                        <td>{p.dst}</td>
+                        <td>{p.proto}</td>
+                        <td className={p.ok ? 'ok' : 'ng'}>{p.result}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="lp-legend">
+                {LEGEND.map((l) => (
+                  <span key={l.label}>
+                    <i style={{ background: l.color }} />
+                    {l.label}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -137,6 +161,13 @@ export default function LessonPlayer({ lesson }: { lesson: Lesson }) {
           <div className="lp-body">
             {step.body.map((b, i) => (
               <BodyBlock key={i} block={b} />
+            ))}
+          </div>
+
+          <div className="lp-infocard">
+            <h4>{step.card.title}</h4>
+            {step.card.lines.map((l, i) => (
+              <div key={l} className={`lp-ln${i === step.card.highlight ? ' hl' : ''}`}>{l}</div>
             ))}
           </div>
 

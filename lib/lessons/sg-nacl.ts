@@ -1,4 +1,12 @@
-import type { Chip, Lesson } from './types'
+import type { Chip, Lesson, Packet } from './types'
+
+// パケットの流れ表に出す通信（宛先は VPC 内で評価されるときのプライベートIP）
+const USER_IP = '198.51.100.7:52344'
+const ATK_IP = '203.0.113.9:40112'
+const WEB_IP = '10.0.1.10'
+const REQ = (result: string): Packet => ({ src: USER_IP, dst: `${WEB_IP}:443`, proto: 'TCP 443（HTTPS）', result, ok: true })
+const RES = (result: string, ok: boolean): Packet => ({ src: `${WEB_IP}:443`, dst: USER_IP, proto: 'TCP 応答', result, ok })
+const ATK443 = (result: string, ok: boolean): Packet => ({ src: ATK_IP, dst: `${WEB_IP}:443`, proto: 'TCP 443（HTTPS）', result, ok })
 
 const SG = (v: string, tone?: Chip['tone']): Chip => ({ label: 'SG（インスタンス単位）', value: v, tone })
 const NACL = (v: string, tone?: Chip['tone']): Chip => ({ label: 'NACL（サブネット単位）', value: v, tone })
@@ -51,8 +59,8 @@ export const sgNaclLesson: Lesson = {
       changes: [{ kind: 'add', text: 'sg-web：443 を 0.0.0.0/0 から許可' }],
       focus: ['user', 'attacker', 'igw', 'nacl', 'ec2'],
       flows: [
-        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req' },
-        { path: ['attacker', 'igw', 'nacl', 'ec2'], color: 'atk', fail: true, delay: 0.4 },
+        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req', packet: REQ('許可（sg-web の 443）') },
+        { path: ['attacker', 'igw', 'nacl', 'ec2'], color: 'atk', fail: true, delay: 0.4, packet: { src: ATK_IP, dst: `${WEB_IP}:22`, proto: 'TCP 22（SSH）', result: '拒否（SG に 22 の許可がない）', ok: false } },
       ],
       callouts: [{ node: 'ec2', text: 'SSH :22 は拒否', tone: '#f3b7b0' }],
       chips: [SG('443のみ許可'), NACL('デフォルト（全許可）'), ATK('22番は遮断', 'good')],
@@ -67,8 +75,8 @@ export const sgNaclLesson: Lesson = {
       changes: [{ kind: 'mod', text: 'アウトバウンドを空にしても応答は返る' }],
       focus: ['user', 'igw', 'nacl', 'ec2'],
       flows: [
-        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req' },
-        { path: ['ec2', 'nacl', 'igw', 'user'], color: 'res', delay: 0.45 },
+        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req', packet: REQ('許可（sg-web の 443）') },
+        { path: ['ec2', 'nacl', 'igw', 'user'], color: 'res', delay: 0.45, packet: RES('許可（SG はステートフル）', true) },
       ],
       callouts: [{ node: 'ec2', text: '戻りは自動で許可' }],
       chips: [SG('443のみ許可'), NACL('デフォルト（全許可）'), ATK('—')],
@@ -84,8 +92,8 @@ export const sgNaclLesson: Lesson = {
       changes: [{ kind: 'mod', text: '攻撃者の443への通信も通ってしまう' }],
       focus: ['user', 'attacker', 'igw', 'nacl', 'ec2'],
       flows: [
-        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req' },
-        { path: ['attacker', 'igw', 'nacl', 'ec2'], color: 'atk', delay: 0.4 },
+        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req', packet: REQ('許可（sg-web の 443）') },
+        { path: ['attacker', 'igw', 'nacl', 'ec2'], color: 'atk', delay: 0.4, packet: ATK443('許可（0.0.0.0/0 に一致してしまう）', true) },
       ],
       callouts: [{ node: 'ec2', text: '攻撃も届く', tone: '#f3b7b0' }],
       chips: [SG('443のみ許可'), NACL('デフォルト（全許可）'), ATK('到達してしまう', 'bad')],
@@ -101,8 +109,8 @@ export const sgNaclLesson: Lesson = {
       changes: [{ kind: 'add', text: 'NACL ルール90：203.0.113.9/32 を拒否' }],
       focus: ['user', 'attacker', 'igw', 'nacl', 'ec2'],
       flows: [
-        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req' },
-        { path: ['attacker', 'igw', 'nacl'], color: 'atk', fail: true, delay: 0.4 },
+        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req', packet: REQ('許可（NACL 100 → SG 443）') },
+        { path: ['attacker', 'igw', 'nacl'], color: 'atk', fail: true, delay: 0.4, packet: ATK443('拒否（NACL ルール 90）', false) },
       ],
       callouts: [{ node: 'nacl', text: '90番で拒否' }],
       chips: [SG('443のみ許可'), NACL('90：攻撃者を拒否', 'good'), ATK('遮断', 'good')],
@@ -117,8 +125,8 @@ export const sgNaclLesson: Lesson = {
       changes: [{ kind: 'mod', text: '拒否を110番に移すと効かない' }],
       focus: ['user', 'attacker', 'igw', 'nacl', 'ec2'],
       flows: [
-        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req' },
-        { path: ['attacker', 'igw', 'nacl', 'ec2'], color: 'atk', delay: 0.4 },
+        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req', packet: REQ('許可（NACL 100 → SG 443）') },
+        { path: ['attacker', 'igw', 'nacl', 'ec2'], color: 'atk', delay: 0.4, packet: ATK443('許可（先に NACL 100 に一致）', true) },
       ],
       callouts: [{ node: 'nacl', text: '100番で許可が確定', tone: '#f3b7b0' }],
       chips: [SG('443のみ許可'), NACL('110に拒否（無効）', 'bad'), ATK('到達してしまう', 'bad')],
@@ -134,8 +142,8 @@ export const sgNaclLesson: Lesson = {
       changes: [{ kind: 'add', text: 'NACL アウトバウンド：1024-65535 の許可が必要' }],
       focus: ['user', 'igw', 'nacl', 'ec2'],
       flows: [
-        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req' },
-        { path: ['ec2', 'nacl'], color: 'res', fail: true, delay: 0.45 },
+        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req', packet: REQ('許可（NACL 100 → SG 443）') },
+        { path: ['ec2', 'nacl'], color: 'res', fail: true, delay: 0.45, packet: RES('拒否（NACL アウトバウンドに 52344 の許可がない）', false) },
       ],
       callouts: [{ node: 'nacl', text: '戻りがブロック', tone: '#f3b7b0' }],
       chips: [SG('443のみ許可'), NACL('アウトバウンド不足', 'bad'), ATK('遮断', 'good')],
@@ -155,9 +163,9 @@ export const sgNaclLesson: Lesson = {
       changes: [],
       focus: 'all',
       flows: [
-        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req' },
-        { path: ['ec2', 'nacl', 'igw', 'user'], color: 'res', delay: 0.45 },
-        { path: ['attacker', 'igw', 'nacl'], color: 'atk', fail: true, delay: 0.2 },
+        { path: ['user', 'igw', 'nacl', 'ec2'], color: 'req', packet: REQ('許可（NACL 100 → SG 443）') },
+        { path: ['ec2', 'nacl', 'igw', 'user'], color: 'res', delay: 0.45, packet: RES('許可（NACL アウトバウンド 1024-65535）', true) },
+        { path: ['attacker', 'igw', 'nacl'], color: 'atk', fail: true, delay: 0.2, packet: ATK443('拒否（NACL ルール 90）', false) },
       ],
       callouts: [{ node: 'nacl', text: '拒否はここで', tone: '#f6e2a4' }],
       chips: [SG('443のみ許可', 'good'), NACL('拒否＋戻りを許可', 'good'), ATK('遮断', 'good')],

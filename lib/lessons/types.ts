@@ -54,6 +54,22 @@ export interface Flow {
   delay?: number
   /** 最後のノードで × を出して止まる */
   fail?: boolean
+  /** パケットの流れ表に出す中身（省略すると表に出ない） */
+  packet?: Packet
+}
+
+/** パケットの流れ表の1行 */
+export interface Packet {
+  /** 送信元（例：198.51.100.7:52344） */
+  src: string
+  /** 宛先（例：10.0.1.10:443） */
+  dst: string
+  /** 種類（例：TCP SYN、HTTPS） */
+  proto: string
+  /** 判定とその理由（例：許可（sg-web 443）） */
+  result: string
+  /** 通ったか */
+  ok: boolean
 }
 
 export interface Callout {
