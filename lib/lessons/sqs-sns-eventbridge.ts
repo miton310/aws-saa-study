@@ -219,5 +219,5 @@ export const sqsSnsEventBridgeLesson: Lesson = {
     { text: 'EventBridge のルール', atStep: 6 },
   ],
   prev: { title: 'IAMポリシーとロール', href: '/learn/iam-basics' },
-  next: { title: '購入オプションの選び方' },
+  next: { title: 'EC2の購入オプションの選び方', href: '/learn/ec2-purchasing' },
 }

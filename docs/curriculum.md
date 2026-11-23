@@ -31,7 +31,7 @@ SAA-C03 の公式「対象サービス一覧」（In-Scope AWS Services）と突
 | 01 VPC・ネットワーク | VPCとNATゲートウェイ / SGとNACL / ピアリングとTransit Gateway / VPCエンドポイント | VPN と Direct Connect |
 | 02 Route 53・DNS | DNSの仕組みとRoute 53 | Route 53 Resolver（ハイブリッドDNS）/ ヘルスチェックの詳細 |
 | 03 ELB・Auto Scaling | ELBとAuto Scaling | — |
-| 04 EC2・コンピュート | — | 購入オプションの選び方 |
+| 04 EC2・コンピュート | EC2の購入オプションの選び方 | プレイスメントグループ / EC2 のストレージ |
 | 05 ストレージ | ストレージクラスとライフサイクル | EBS・EFS・FSx の使い分け |
 | 06 データベース | Multi-AZとリードレプリカ | DynamoDB / Aurora・ElastiCache |
 | 07 疎結合・サーバーレス | SQS・SNS・EventBridge | Lambda と API Gateway / Step Functions |
