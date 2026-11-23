@@ -36,6 +36,7 @@ SAA-C03 の公式「対象サービス一覧」（In-Scope AWS Services）と突
 | 06 データベース | Multi-AZとリードレプリカ | DynamoDB / Aurora・ElastiCache |
 | 07 疎結合・サーバーレス | SQS・SNS・EventBridge | Lambda と API Gateway / Step Functions |
 | 08 セキュリティ・ID | IAMポリシーとロール | KMS / Organizations と SCP |
-| 09〜13 | — | 重要度の高い章のあとで着手 |
+| 09 CDN・グローバル配信 | CloudFront とキャッシュ | Route 53 との組み合わせ / AWS WAF |
+| 10〜13 | — | 重要度の高い章のあとで着手 |
 
 作る順番：重要度★★★の章から（Route 53 は公開済み）。

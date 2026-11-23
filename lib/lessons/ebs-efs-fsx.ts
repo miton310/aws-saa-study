@@ -194,5 +194,5 @@ export const ebsEfsFsxLesson: Lesson = {
     { text: 'FSx for Windows と FSx for Lustre', atStep: 5 },
   ],
   prev: { title: 'EC2の購入オプションの選び方', href: '/learn/ec2-purchasing' },
-  next: { title: 'CloudFront とキャッシュ' },
+  next: { title: 'CloudFront とキャッシュ', href: '/learn/cloudfront-cache' },
 }

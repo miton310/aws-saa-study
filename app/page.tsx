@@ -7,8 +7,8 @@ import './home.css'
 
 // 公開予定のレッスン（実装したら lib/lessons に移し、ここから消す）
 const UPCOMING: { category: CategorySlug; title: string }[] = [
-  { category: 'cloudfront', title: 'CloudFront とキャッシュ' },
   { category: 'rds', title: 'DynamoDB の基本' },
+  { category: 'monitoring', title: 'CloudWatch と CloudTrail' },
 ]
 
 
