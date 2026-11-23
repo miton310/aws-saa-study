@@ -187,5 +187,5 @@ export const s3StorageLesson: Lesson = {
     { text: 'Intelligent-Tiering の使いどころ', atStep: 5 },
   ],
   prev: { title: 'ELBとAuto Scaling', href: '/learn/elb-asg' },
-  next: { title: 'Multi-AZとリードレプリカ' },
+  next: { title: 'Multi-AZとリードレプリカ', href: '/learn/rds-multiaz' },
 }

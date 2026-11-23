@@ -33,7 +33,7 @@ SAA-C03 の公式「対象サービス一覧」（In-Scope AWS Services）と突
 | 03 ELB・Auto Scaling | ELBとAuto Scaling | — |
 | 04 EC2・コンピュート | — | 購入オプションの選び方 |
 | 05 ストレージ | ストレージクラスとライフサイクル | EBS・EFS・FSx の使い分け |
-| 06 データベース | — | Multi-AZとリードレプリカ / DynamoDB |
+| 06 データベース | Multi-AZとリードレプリカ | DynamoDB / Aurora・ElastiCache |
 | 07 疎結合・サーバーレス | — | SQS・SNS・EventBridge |
 | 08 セキュリティ・ID | — | IAMポリシーとロール / KMS |
 | 09〜13 | — | 重要度の高い章のあとで着手 |
