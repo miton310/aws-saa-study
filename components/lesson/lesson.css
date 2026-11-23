@@ -172,7 +172,10 @@ a.lp-btn { text-decoration: none; color: inherit; display: inline-flex; align-it
   .lp-head, .lp-stepper { flex: none; }
   .lp-stage { flex: 1; min-height: 240px; }
   .lp-scene { flex: 1 1 0; min-height: 0; height: auto; }
-  .lp-panel { flex: 1; min-height: 0; overflow: auto; }
+  .lp-panel { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .lp-panel > * { flex: none; }
+  .lp-panel > .lp-scroll { flex: 1 1 auto; min-height: 90px; overflow-y: auto; overscroll-behavior: contain; margin-right: -8px; padding: 0 8px 18px 0; mask-image: linear-gradient(to bottom, #000 calc(100% - 22px), transparent); }
+  .lp-panel .lp-infocard { margin: 10px 0 4px; }
   .lp-learn { flex: none; max-height: 35%; overflow: auto; }
 }
 @media (min-width: 900px) and (max-height: 760px) {

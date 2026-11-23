@@ -21,7 +21,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - PC（幅900px以上）では画面の高さに収め、ステッパーと「次へ」ボタンが常に見える状態を保つ。
 - レッスンを追加・変更したら、2つの確認を通す。
   - データの検証：`lib/lessons/validate.ts`。ノードID・用語IDの打ち間違い、非表示ノードを通る経路などを検出し、`npm run build` と開発中のレッスン表示をエラーで止める。
-  - 表示の確認：`npm run dev` を起動した状態で `npm run check:lessons`。全レッスン・全ステップを3つの画面サイズで開き、吹き出しの重なり・はみ出し、ゾーン名の隠れ、図形の名前のはみ出し、図形の下の文字の重なり、ステップ欄のはみ出しを検出する（初回のみ `npx playwright install chromium`）。
+  - 表示の確認：`npm run dev` を起動した状態で `npm run check:lessons`。全レッスン・全ステップを3つの画面サイズで開き、吹き出しの重なり・はみ出し、ゾーン名の隠れ、図形の名前のはみ出し、図形の下の文字の重なり、ステップ欄のはみ出し、右の欄の設定カードの隠れを検出する（初回のみ `npx playwright install chromium`）。
 
 ## デザインの統一（移行中）
 

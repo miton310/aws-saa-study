@@ -2,7 +2,7 @@
 
 // ステップ再生式レッスン（図解キャンバス＋ステッパー＋解説パネル）
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import type { Block, Lesson } from '@/lib/lessons/types'
 import IsoScene, { FLOW_COLORS } from './IsoScene'
@@ -41,6 +41,12 @@ export default function LessonPlayer({ lesson }: { lesson: Lesson }) {
     announceStep({ slug: lesson.slug, index: cur })
   }, [lesson.slug, cur])
   useEffect(() => onStepRequest((d) => d.slug === lesson.slug && go(d.index)), [lesson.slug, go])
+
+  // ステップが変わったら、説明欄を先頭に戻す
+  const scrollRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 })
+  }, [cur])
 
   const replay = useCallback(() => {
     setReplayKey((k) => k + 1)
@@ -166,10 +172,51 @@ export default function LessonPlayer({ lesson }: { lesson: Lesson }) {
             <span className="lp-tag">{step.tag}</span>
           </div>
           <h2>{step.title}</h2>
-          <div className="lp-body">
-            {step.body.map((b, i) => (
-              <BodyBlock key={i} block={b} />
-            ))}
+          {/* PC では説明欄だけがスクロールし、設定カードと「次へ」は常に見える */}
+          <div className="lp-scroll" ref={scrollRef}>
+            <div className="lp-body">
+              {step.body.map((b, i) => (
+                <BodyBlock key={i} block={b} />
+              ))}
+            </div>
+
+            {step.note && (
+              <div className="lp-note">
+                <span className="lp-note-ic">!</span>
+                <div>
+                  <b>注意</b>
+                  <br />
+                  <RichText text={step.note} />
+                </div>
+              </div>
+            )}
+
+            {step.changes.length > 0 && (
+              <div className="lp-changes">
+                <h5>変わったこと</h5>
+                {step.changes.map((c, i) => (
+                  <div key={i}>
+                    <span className={`lp-m ${c.kind}`}>{c.kind === 'add' ? '+' : '~'}</span>
+                    <span><RichText text={c.text} /></span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {step.quiz && (
+              <div className="lp-quiz">
+                <p>Q. {step.quiz.question}</p>
+                {step.quiz.options.map((o, i) => {
+                  const cls = picked === null ? '' : i === step.quiz!.answer ? 'ok' : i === picked ? 'ng' : ''
+                  return (
+                    <button type="button" key={o} className={cls} onClick={() => setPicked(i)}>
+                      {'ABCD'[i]}. {o}
+                    </button>
+                  )
+                })}
+                {picked !== null && <div className="lp-exp">{step.quiz.explanation}</div>}
+              </div>
+            )}
           </div>
 
           <div className="lp-infocard">
@@ -178,44 +225,6 @@ export default function LessonPlayer({ lesson }: { lesson: Lesson }) {
               <div key={l} className={`lp-ln${i === step.card.highlight ? ' hl' : ''}`}>{l}</div>
             ))}
           </div>
-
-          {step.note && (
-            <div className="lp-note">
-              <span className="lp-note-ic">!</span>
-              <div>
-                <b>注意</b>
-                <br />
-                <RichText text={step.note} />
-              </div>
-            </div>
-          )}
-
-          {step.changes.length > 0 && (
-            <div className="lp-changes">
-              <h5>変わったこと</h5>
-              {step.changes.map((c, i) => (
-                <div key={i}>
-                  <span className={`lp-m ${c.kind}`}>{c.kind === 'add' ? '+' : '~'}</span>
-                  <span><RichText text={c.text} /></span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {step.quiz && (
-            <div className="lp-quiz">
-              <p>Q. {step.quiz.question}</p>
-              {step.quiz.options.map((o, i) => {
-                const cls = picked === null ? '' : i === step.quiz!.answer ? 'ok' : i === picked ? 'ng' : ''
-                return (
-                  <button type="button" key={o} className={cls} onClick={() => setPicked(i)}>
-                    {'ABCD'[i]}. {o}
-                  </button>
-                )
-              })}
-              {picked !== null && <div className="lp-exp">{step.quiz.explanation}</div>}
-            </div>
-          )}
 
           <div className="lp-foot">
             <div className="lp-nav">

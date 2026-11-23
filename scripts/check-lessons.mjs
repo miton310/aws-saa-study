@@ -13,7 +13,7 @@
 //   - ゾーン名（VPC・AZ・サブネット）が図形に隠れていない
 //   - 図形の名前が図形の幅からはみ出していない
 //   - 図形の下の文字（IPアドレスなど）がほかの図形に重なっていない／はみ出していない
-//   - PCでは、ステップ欄が画面内に収まっている
+//   - PCでは、ステップ欄・右の欄の設定カード・「次へ」が画面内に収まっている
 //   - ページでエラーが起きていない
 
 import { chromium } from 'playwright'
@@ -103,6 +103,9 @@ function inspect() {
     if (st && st.bottom > window.innerHeight + 1) out.push('ステップ欄が画面の下にはみ出しています')
     const nav = document.querySelector('.lp-nav')?.getBoundingClientRect()
     if (nav && nav.bottom > window.innerHeight + 1) out.push('「次へ」ボタンが画面の下にはみ出しています')
+    const card = document.querySelector('.lp-panel .lp-infocard')?.getBoundingClientRect()
+    const foot = document.querySelector('.lp-panel .lp-foot')?.getBoundingClientRect()
+    if (card && foot && (card.bottom > foot.top + 1 || card.bottom > window.innerHeight + 1)) out.push('右の欄の設定カードが隠れています')
   }
   return out
 }
