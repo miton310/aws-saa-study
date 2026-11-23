@@ -26,15 +26,15 @@ export const peeringTgwLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'a', x: 1.3, y: 1.3, s: 0.5, h: 34, fill: '#f6c191', label: 'EC2 (A)', fontSize: 12, term: 'ec2', ip: '10.0.0.10' },
-    { id: 'b', x: 5.7, y: 1.3, s: 0.5, h: 34, fill: '#f6c191', label: 'EC2 (B)', fontSize: 12, term: 'ec2', ip: '10.1.0.10' },
-    { id: 'c', x: 10.1, y: 1.3, s: 0.5, h: 34, fill: '#f6c191', label: 'EC2 (C)', fontSize: 12, term: 'ec2', ip: '10.2.0.10' },
+    { id: 'a', x: 1.3, y: 1.3, s: 0.5, h: 34, fill: '#f6c191', label: 'EC2 (A)', fontSize: 12, term: 'ec2', sub: '10.0.0.10' },
+    { id: 'b', x: 5.7, y: 1.3, s: 0.5, h: 34, fill: '#f6c191', label: 'EC2 (B)', fontSize: 12, term: 'ec2', sub: '10.1.0.10' },
+    { id: 'c', x: 10.1, y: 1.3, s: 0.5, h: 34, fill: '#f6c191', label: 'EC2 (C)', fontSize: 12, term: 'ec2', sub: '10.2.0.10' },
     { id: 'pcxab', x: 3.5, y: 1.3, s: 0.36, h: 20, fill: '#d9cdf2', label: 'pcx', fontSize: 11, term: 'peering' },
     { id: 'pcxbc', x: 7.9, y: 1.3, s: 0.36, h: 20, fill: '#d9cdf2', label: 'pcx', fontSize: 11, term: 'peering' },
     // pcx-ac と TGW は同じ位置。同時には表示しない（各ステップの hide で出し分け）
     { id: 'pcxac', x: 5.7, y: 4.4, s: 0.36, h: 20, fill: '#d9cdf2', label: 'pcx', fontSize: 11, term: 'peering' },
     { id: 'tgw', x: 5.7, y: 4.4, s: 0.62, h: 32, fill: '#f6e2a4', label: 'TGW', term: 'tgw' },
-    { id: 'onprem', x: 1.0, y: 6.6, s: 0.55, h: 26, fill: '#e9e4da', label: 'オンプレミス', fontSize: 10.5, term: 'onprem', ip: '192.168.10.5' },
+    { id: 'onprem', x: 1.0, y: 6.6, s: 0.55, h: 26, fill: '#e9e4da', label: 'オンプレミス', fontSize: 10.5, term: 'onprem', sub: '192.168.10.5' },
   ],
   zones: [
     { x0: 0, y0: 0, x1: 2.6, y1: 2.6, fill: 'rgba(207,232,184,.45)', dash: '8 6', label: 'VPC A 10.0.0.0/16', labelAt: 'top', term: 'vpc' },

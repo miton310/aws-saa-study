@@ -106,7 +106,7 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
     // ゾーン名（回転した文字もあるので、画面上の矩形をSVG座標に戻して使う）
     const inv = svg.getScreenCTM()?.inverse()
     if (inv) {
-      svg.querySelectorAll('[data-zone-label], [data-ip-label]:not(.is-hidden)').forEach((el) => {
+      svg.querySelectorAll('[data-zone-label], [data-sub-label]:not(.is-hidden)').forEach((el) => {
         const r = el.getBoundingClientRect()
         const p1 = new DOMPoint(r.left, r.top).matrixTransform(inv)
         const p2 = new DOMPoint(r.right, r.bottom).matrixTransform(inv)
@@ -298,22 +298,22 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
           ))}
         </g>
 
-        {/* IPアドレス（図形の真下。ノードより上の層なので隠れない） */}
+        {/* 図形の下の文字（IPアドレスなど。ノードより上の層なので隠れない） */}
         <g>
           {nodes
-            .filter((n) => n.ip)
+            .filter((n) => n.sub)
             .map((n) => {
-              const [x, y] = ipAnchor(n)
+              const [x, y] = subAnchor(n)
               return (
                 <text
                   key={n.id}
                   x={x}
                   y={y}
                   textAnchor="middle"
-                  className={`lp-ip${!focused(n.id) ? ' dim' : ''}${isHidden(n.id) ? ' is-hidden' : ''}`}
-                  data-ip-label={n.id}
+                  className={`lp-sub${!focused(n.id) ? ' dim' : ''}${isHidden(n.id) ? ' is-hidden' : ''}`}
+                  data-sub-label={n.id}
                 >
-                  {n.ip}
+                  {n.sub}
                 </text>
               )
             })}
@@ -325,8 +325,8 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
   )
 }
 
-/** IPアドレスを置く位置：図形のいちばん手前（下）の点のすぐ下 */
-function ipAnchor(n: IsoNode): Pt {
+/** 図形の下の文字を置く位置：図形のいちばん手前（下）の点のすぐ下 */
+function subAnchor(n: IsoNode): Pt {
   if (n.kind === 'cyl') {
     const [gx, gy] = P(n.x, n.y)
     return [gx, gy + Math.SQRT2 * n.s * 0.95 * ISO_H + 14]

@@ -11,7 +11,7 @@
 // PC・小さめのPC・スマホの3サイズで開いて、次を確かめます。
 //   - 吹き出しが図形・ほかの吹き出しに重なっていない／図の枠からはみ出していない
 //   - ゾーン名（VPC・AZ・サブネット）が図形に隠れていない
-//   - IPアドレスがほかの図形に重なっていない／はみ出していない
+//   - 図形の下の文字（IPアドレスなど）がほかの図形に重なっていない／はみ出していない
 //   - PCでは、ステップ欄が画面内に収まっている
 //   - ページでエラーが起きていない
 
@@ -64,12 +64,12 @@ function inspect() {
     }
   })
 
-  // IPアドレス：ほかの図形に重なっていないか／図の枠からはみ出していないか
-  svg.querySelectorAll('[data-ip-label]:not(.is-hidden)').forEach((t) => {
-    const own = t.getAttribute('data-ip-label')
+  // 図形の下の文字（IPアドレスなど）：ほかの図形に重なっていないか／図の枠からはみ出していないか
+  svg.querySelectorAll('[data-sub-label]:not(.is-hidden)').forEach((t) => {
+    const own = t.getAttribute('data-sub-label')
     const b = box(t.getBBox())
     if (b.x0 < vb.x || b.y0 < vb.y || b.x1 > vb.x + vb.width || b.y1 > vb.y + vb.height) {
-      out.push(`IPアドレス「${t.textContent}」が図の枠からはみ出しています`)
+      out.push(`図形の下の文字「${t.textContent}」が図の枠からはみ出しています`)
     }
     const m = t.getScreenCTM()
     for (let i = 0; i < t.getNumberOfChars(); i += 2) {
@@ -80,7 +80,7 @@ function inspect() {
         return g && !g.classList.contains('is-hidden') && g.getAttribute('data-node') !== own
       })
       if (other) {
-        out.push(`IPアドレス「${t.textContent}」が図形 ${other.closest('[data-node]').getAttribute('data-node')} に重なっています`)
+        out.push(`図形の下の文字「${t.textContent}」が図形 ${other.closest('[data-node]').getAttribute('data-node')} に重なっています`)
         break
       }
     }

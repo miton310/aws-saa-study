@@ -28,8 +28,8 @@ export const vpcEndpointLesson: Lesson = {
     { id: 'igw', x: 0, y: 1.2, s: 0.4, h: 26, fill: '#cfe8b8', label: 'IGW', term: 'igw' },
     { id: 'gwep', x: 0, y: 2.8, s: 0.4, h: 26, fill: '#b9e3dc', label: 'GW EP', fontSize: 10.5, term: 'gwep' },
     { id: 'nat', x: 2.1, y: 1.9, s: 0.5, h: 28, fill: '#f6e2a4', label: 'NAT GW', term: 'nat' },
-    { id: 'ec2', x: 5.3, y: 1.8, s: 0.58, h: 40, fill: '#f6c191', label: 'EC2', term: 'ec2', ip: '10.0.2.10' },
-    { id: 'ifep', x: 5.2, y: 4.1, s: 0.4, h: 22, fill: '#d9cdf2', label: 'ENI', fontSize: 11, term: 'ifep', ip: '10.0.2.25' },
+    { id: 'ec2', x: 5.3, y: 1.8, s: 0.58, h: 40, fill: '#f6c191', label: 'EC2', term: 'ec2', sub: '10.0.2.10' },
+    { id: 'ifep', x: 5.2, y: 4.1, s: 0.4, h: 22, fill: '#d9cdf2', label: 'ENI', fontSize: 11, term: 'ifep', sub: '10.0.2.25' },
   ],
   zones: [
     { x0: -4.0, y0: 0, x1: -1.6, y1: 5.4, fill: 'rgba(233,228,218,.55)', dash: '4 4', label: 'AWSのサービス（VPCの外）', labelAt: 'top' },
