@@ -1,12 +1,17 @@
 import type { Metadata } from 'next'
-import { Geist } from 'next/font/google'
-import Image from 'next/image'
+import { Geist, IBM_Plex_Sans_JP, JetBrains_Mono } from 'next/font/google'
 import Link from 'next/link'
-import AwsServiceIcon from '@/components/AwsServiceIcon'
-import { CATEGORIES } from '@/lib/categories'
+import SiteHeader from '@/components/site/SiteHeader'
+import SiteSidebar, { type SidebarChapter } from '@/components/site/SiteSidebar'
+import { CATEGORIES, DIFFICULTIES, type CategorySlug } from '@/lib/categories'
+import { getContent } from '@/lib/content'
+import { LESSONS } from '@/lib/lessons'
 import './globals.css'
+import '@/components/site/site.css'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
+const sans = IBM_Plex_Sans_JP({ weight: ['400', '500', '700'], subsets: ['latin'], variable: '--lp-font-sans', preload: false })
+const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--lp-font-mono' })
 
 export const metadata: Metadata = {
   title: 'AWS SAA 学習サイト | 図解で学ぶ Solutions Architect Associate',
@@ -14,64 +19,45 @@ export const metadata: Metadata = {
     'AWS認定ソリューションアーキテクト-アソシエイト（SAA）を図解アニメーションで楽しく学べる無料学習サイト。VPC、EC2、S3、IAM、RDS、Lambdaなど全サービスを初級・中級・上級の3段階で解説。',
 }
 
+// サイドナビの章の色
+const CHAPTER_COLORS: Record<CategorySlug, string> = {
+  vpc: '#cfe8b8',
+  ec2: '#f6c191',
+  s3: '#bcd4f0',
+  iam: '#f3b7b0',
+  rds: '#d9cdf2',
+  lambda: '#f6e2a4',
+  elb: '#b9e3dc',
+  cloudfront: '#c9d2f2',
+}
+// app/ 直下に静的ページがあるカテゴリ（content が無くても難易度別ページが開ける）
+const STATIC_LEVEL_PAGES: CategorySlug[] = ['vpc', 'ec2', 's3']
+
+const CHAPTERS: SidebarChapter[] = CATEGORIES.map((cat) => ({
+  slug: cat.slug,
+  name: cat.name,
+  color: CHAPTER_COLORS[cat.slug],
+  items: [
+    { href: `/${cat.slug}`, label: '概要', kind: 'overview' as const },
+    ...LESSONS.filter((l) => l.category === cat.slug).map((l) => ({ href: `/learn/${l.slug}`, label: l.title, kind: 'lesson' as const })),
+    ...DIFFICULTIES.filter((d) => STATIC_LEVEL_PAGES.includes(cat.slug) || getContent(cat.slug, d.slug)).map((d) => ({
+      href: `/${cat.slug}/${d.slug}`,
+      label: `${d.label}編`,
+      kind: 'level' as const,
+    })),
+  ],
+}))
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" className={geist.variable}>
-      <body className="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 font-bold text-xl text-aws-orange hover:opacity-80 transition-opacity">
-                <Image src="/images/logo.png" alt="AWS SAA 学習サイト ロゴ" width={30} height={30} />
-              <span>AWS SAA 学習サイト</span>
-            </Link>
-            <nav className="flex items-center gap-6 text-sm font-medium">
-              <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
-                ホーム
-              </Link>
-              <Link
-                href="/#categories"
-                className="bg-orange-500 text-white px-4 py-2 rounded-full hover:bg-orange-600 transition-colors"
-              >
-                学習を始める
-              </Link>
-            </nav>
-          </div>
-        </header>
+    <html lang="ja" className={`${geist.variable} ${sans.variable} ${mono.variable}`}>
+      <body className="site-body min-h-screen flex flex-col">
+        <SiteHeader />
 
-        <main className="flex-1 bg-white">
-          <div className="mx-auto w-full max-w-[1400px] lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
-            <aside className="hidden lg:block border-r border-gray-200 bg-gray-50">
-              <div className="sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto px-4 py-6">
-                <p className="text-[11px] tracking-[0.16em] font-semibold text-orange-400 mb-4 uppercase">Study Navigation</p>
-                <nav className="space-y-2 mb-6">
-                  <Link
-                    href="/"
-                    className="block rounded px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-                  >
-                    ホーム
-                  </Link>
-                  <Link
-                    href="/#categories"
-                    className="block rounded px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-                  >
-                    カテゴリ一覧
-                  </Link>
-                </nav>
-
-                <p className="text-xs font-semibold text-gray-500 mb-3">主要カテゴリ</p>
-                <nav className="space-y-1">
-                  {CATEGORIES.map((cat) => (
-                    <Link
-                      key={cat.slug}
-                      href={`/${cat.slug}`}
-                      className="group flex items-center gap-2 rounded px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-                    >
-                      <AwsServiceIcon service={cat.slug} size={20} />
-                      <span>{cat.name}</span>
-                    </Link>
-                  ))}
-                </nav>
-              </div>
+        <main className="flex-1">
+          <div className="mx-auto w-full max-w-[1600px] lg:grid lg:grid-cols-[270px_minmax(0,1fr)]">
+            <aside className="hidden lg:block site-side-wrap">
+              <SiteSidebar chapters={CHAPTERS} />
             </aside>
             <div className="min-w-0">{children}</div>
           </div>

@@ -6,6 +6,7 @@ const ATK = (v: string, tone?: Chip['tone']): Chip => ({ label: '攻撃者 203.0
 
 export const sgNaclLesson: Lesson = {
   slug: 'sg-nacl',
+  category: 'vpc',
   chapter: '02. VPC・ネットワーク',
   lessonLabel: 'レッスン 2 / 4',
   title: 'セキュリティグループとネットワークACL',

@@ -5,6 +5,8 @@
 //   {{alb:ロードバランサー}} → 表示文字だけ変える
 //   **強調**          → 太字
 
+import type { CategorySlug } from '@/lib/categories'
+
 export type Rich = string
 
 /** 本文ブロック。文字列は段落、{ list } は箇条書き */
@@ -96,6 +98,8 @@ export interface LessonStep {
 
 export interface Lesson {
   slug: string
+  /** サイドナビで所属する章 */
+  category: CategorySlug
   chapter: string
   lessonLabel: string
   title: string
