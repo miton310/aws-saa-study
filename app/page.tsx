@@ -7,8 +7,9 @@ import './home.css'
 
 // 公開予定のレッスン（実装したら lib/lessons に移し、ここから消す）
 const UPCOMING: { category: CategorySlug; title: string }[] = [
-  { category: 'elb', title: 'ELBとAuto Scaling' },
   { category: 's3', title: 'ストレージクラスとライフサイクル' },
+  { category: 'rds', title: 'Multi-AZとリードレプリカ' },
+  { category: 'iam', title: 'IAMポリシーとロール' },
 ]
 
 /** サイドナビと同じ「01. VPC・ネットワーク」形式の章名 */

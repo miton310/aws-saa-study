@@ -238,26 +238,19 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
   return (
     <svg ref={svgRef} className="lp-scene" viewBox={viewBox} preserveAspectRatio="xMidYMid meet" role="img" aria-label={ariaLabel}>
       <g ref={staticRef}>
-        {/* ゾーン */}
+        {/* ゾーン（面） */}
         <g>
-          {zones.map((z, i) => {
-            const poly = pts([P(z.x0, z.y0), P(z.x1, z.y0), P(z.x1, z.y1), P(z.x0, z.y1)])
-            const [lx, ly] = z.labelAt === 'top' ? P(z.x0, z.y0) : P((z.x0 + z.x1) / 2, z.y1 + 0.3)
-            return (
-              <g key={i}>
-                <polygon points={poly} fill={z.fill} stroke={INK} strokeWidth={z.dash ? 2 : 1.5} strokeDasharray={z.dash} strokeOpacity={z.dash ? 0.7 : 0.35} />
-                {z.labelAt === 'top' ? (
-                  <text x={lx} y={ly - 12} textAnchor="middle" fontSize={12} fontWeight={700} fill={MUTED} data-term={z.term} data-zone-label>
-                    {z.label}
-                  </text>
-                ) : (
-                  <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize={11} fontWeight={700} fill={MUTED} transform={`rotate(30 ${lx} ${ly})`} data-term={z.term} data-zone-label>
-                    {z.label}
-                  </text>
-                )}
-              </g>
-            )
-          })}
+          {zones.map((z, i) => (
+            <polygon
+              key={i}
+              points={pts([P(z.x0, z.y0), P(z.x1, z.y0), P(z.x1, z.y1), P(z.x0, z.y1)])}
+              fill={z.fill}
+              stroke={INK}
+              strokeWidth={z.dash ? 2 : 1.5}
+              strokeDasharray={z.dash}
+              strokeOpacity={z.dash ? 0.7 : 0.35}
+            />
+          ))}
         </g>
 
         {/* 接続線 */}
@@ -265,6 +258,23 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
           {edges.map((e) => (
             <line key={e.key} x1={e.a[0]} y1={e.a[1]} x2={e.b[0]} y2={e.b[1]} className={`lp-edge${e.fail ? ' fail' : ''}`} />
           ))}
+        </g>
+
+        {/* ゾーン名（接続線より上、ノードより下） */}
+        <g>
+          {zones.map((z, i) => {
+            const [lx, ly] = z.labelAt === 'top' ? P(z.x0, z.y0) : P((z.x0 + z.x1) / 2, z.y1 + 0.3)
+            const common = { textAnchor: 'middle' as const, fontWeight: 700, fill: MUTED, stroke: '#fbf5ec', strokeWidth: 3, paintOrder: 'stroke' as const, strokeLinejoin: 'round' as const, 'data-term': z.term, 'data-zone-label': true }
+            return z.labelAt === 'top' ? (
+              <text key={i} x={lx} y={ly - 12} fontSize={12} {...common}>
+                {z.label}
+              </text>
+            ) : (
+              <text key={i} x={lx} y={ly} fontSize={11} dominantBaseline="middle" transform={`rotate(30 ${lx} ${ly})`} {...common}>
+                {z.label}
+              </text>
+            )
+          })}
         </g>
 
         {/* ノード（奥から手前の順） */}

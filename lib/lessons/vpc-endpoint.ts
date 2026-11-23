@@ -149,5 +149,5 @@ export const vpcEndpointLesson: Lesson = {
     { text: '2種類の使い分け', atStep: 4 },
   ],
   prev: { title: 'ピアリングとTransit Gateway', href: '/learn/peering-tgw' },
-  next: { title: 'ELBとAuto Scaling' },
+  next: { title: 'ELBとAuto Scaling', href: '/learn/elb-asg' },
 }
