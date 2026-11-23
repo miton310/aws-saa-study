@@ -18,6 +18,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - 用語：本文中の専門用語は `{{id}}` / `{{id:表示}}` で書き、定義は `lib/terms.ts` に1か所で持つ。定義は「一言説明＋たとえ」。`**強調**` で太字。
 - 重なり禁止：図形と文字、図とカード・バッジが重ならないこと。情報バッジ・凡例・カードは図の上下の段に置き、図の上に浮かせない。
 - PC（幅900px以上）では画面の高さに収め、ステッパーと「次へ」ボタンが常に見える状態を保つ。
+- レッスンを追加・変更したら、2つの確認を通す。
+  - データの検証：`lib/lessons/validate.ts`。ノードID・用語IDの打ち間違い、非表示ノードを通る経路などを検出し、`npm run build` と開発中のレッスン表示をエラーで止める。
+  - 表示の確認：`npm run dev` を起動した状態で `npm run check:lessons`。全レッスン・全ステップを3つの画面サイズで開き、吹き出しの重なり・はみ出し、ゾーン名の隠れ、ステップ欄のはみ出しを検出する（初回のみ `npx playwright install chromium`）。
 
 ## Project UI Conventions
 

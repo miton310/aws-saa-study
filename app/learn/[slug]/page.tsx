@@ -2,12 +2,15 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import LessonPlayer from '@/components/lesson/LessonPlayer'
 import { LESSONS, getLesson } from '@/lib/lessons'
+import { validateLessons } from '@/lib/lessons/validate'
 
 type Props = { params: Promise<{ slug: string }> }
 
 export const dynamicParams = false
 
 export function generateStaticParams() {
+  // データの書き間違いがあれば、ビルド（と開発中の表示）をここで止める
+  validateLessons(LESSONS)
   return LESSONS.map((l) => ({ slug: l.slug }))
 }
 
