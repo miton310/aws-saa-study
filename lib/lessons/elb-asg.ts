@@ -175,6 +175,6 @@ export const elbAsgLesson: Lesson = {
     { text: 'Auto Scalingとターゲット追跡', atStep: 3 },
     { text: 'ALB・NLB・GWLBの使い分け', atStep: 4 },
   ],
-  prev: { title: 'VPCエンドポイント', href: '/learn/vpc-endpoint' },
+  prev: { title: 'DNSの仕組みとRoute 53', href: '/learn/route53-basics' },
   next: { title: 'ストレージクラスとライフサイクル', href: '/learn/s3-storage' },
 }

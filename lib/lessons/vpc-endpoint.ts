@@ -153,5 +153,5 @@ export const vpcEndpointLesson: Lesson = {
     { text: '2種類の使い分け', atStep: 4 },
   ],
   prev: { title: 'ピアリングとTransit Gateway', href: '/learn/peering-tgw' },
-  next: { title: 'ELBとAuto Scaling', href: '/learn/elb-asg' },
+  next: { title: 'DNSの仕組みとRoute 53', href: '/learn/route53-basics' },
 }
