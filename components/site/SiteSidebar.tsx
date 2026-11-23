@@ -13,17 +13,14 @@ export type SidebarChapter = { slug: string; name: string; color: string; items:
 export default function SiteSidebar({ chapters }: { chapters: SidebarChapter[] }) {
   const pathname = usePathname() ?? '/'
   const current = chapters.find((c) => c.items.some((i) => i.href === pathname))
-  const [open, setOpen] = useState<Set<string>>(() => new Set(current ? [current.slug] : []))
+  // 今いるページの章は常に開く。それ以外は、最後に選んだ章を1つだけ開く（別の章を選ぶと前の章は閉じる）。
+  // 選んだ章はページを移動したら解除する（移動先の章が「今いる章」として開く）。
+  const [pick, setPick] = useState<{ path: string; slug: string } | null>(null)
+  const picked = pick?.path === pathname ? pick.slug : null
   const [step, setStep] = useState<StepDetail | null>(null)
   useEffect(() => onStep(setStep), [])
 
-  const toggle = (slug: string) =>
-    setOpen((prev) => {
-      const next = new Set(prev)
-      if (next.has(slug)) next.delete(slug)
-      else next.add(slug)
-      return next
-    })
+  const toggle = (slug: string) => setPick(picked === slug ? null : { path: pathname, slug })
 
   const lessonCount = chapters.reduce((n, c) => n + c.items.filter((i) => i.kind === 'lesson').length, 0)
 
@@ -35,7 +32,7 @@ export default function SiteSidebar({ chapters }: { chapters: SidebarChapter[] }
       </div>
 
       {chapters.map((c, idx) => {
-        const isOpen = open.has(c.slug) || current?.slug === c.slug
+        const isOpen = picked === c.slug || current?.slug === c.slug
         return (
           <div key={c.slug}>
             <button type="button" className="site-chap" onClick={() => toggle(c.slug)} aria-expanded={isOpen}>
