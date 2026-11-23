@@ -13,7 +13,8 @@ import { sqsSnsEventBridgeLesson } from './sqs-sns-eventbridge'
 import { ec2PurchasingLesson } from './ec2-purchasing'
 import { ebsEfsFsxLesson } from './ebs-efs-fsx'
 import { cloudfrontCacheLesson } from './cloudfront-cache'
+import { dynamodbBasicsLesson } from './dynamodb-basics'
 
-export const LESSONS: Lesson[] = [vpcNatLesson, sgNaclLesson, peeringTgwLesson, vpcEndpointLesson, route53BasicsLesson, elbAsgLesson, s3StorageLesson, rdsMultiAzLesson, iamBasicsLesson, sqsSnsEventBridgeLesson, ec2PurchasingLesson, ebsEfsFsxLesson, cloudfrontCacheLesson]
+export const LESSONS: Lesson[] = [vpcNatLesson, sgNaclLesson, peeringTgwLesson, vpcEndpointLesson, route53BasicsLesson, elbAsgLesson, s3StorageLesson, rdsMultiAzLesson, iamBasicsLesson, sqsSnsEventBridgeLesson, ec2PurchasingLesson, ebsEfsFsxLesson, cloudfrontCacheLesson, dynamodbBasicsLesson]
 
 export const getLesson = (slug: string) => LESSONS.find((l) => l.slug === slug)

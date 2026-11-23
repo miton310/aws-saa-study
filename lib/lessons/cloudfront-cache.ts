@@ -225,5 +225,5 @@ export const cloudfrontCacheLesson: Lesson = {
     { text: 'Global Accelerator との違い', atStep: 6 },
   ],
   prev: { title: 'EBS・EFS・FSx の使い分け', href: '/learn/ebs-efs-fsx' },
-  next: { title: 'DynamoDB の基本' },
+  next: { title: 'DynamoDB の基本', href: '/learn/dynamodb-basics' },
 }
