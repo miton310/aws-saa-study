@@ -32,18 +32,18 @@ export const elbAsgLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'user', x: -2.6, y: 3.0, s: 0.5, h: 22, fill: '#f4efe6', label: 'ユーザー' },
+    { id: 'user', x: -2.6, y: 3.0, s: 0.5, h: 22, fill: '#f4efe6', label: 'ユーザー', ip: '198.51.100.7' },
     { id: 'igw', x: 0, y: 3.0, s: 0.4, h: 26, fill: '#cfe8b8', label: 'IGW', term: 'igw' },
-    { id: 'alb', x: 2.4, y: 3.0, s: 0.45, sy: 1.2, h: 34, fill: '#bcd4f0', label: 'ALB', term: 'alb' },
-    { id: 'a1', x: 5.1, y: 1.25, s: 0.46, h: 36, fill: '#f6c191', label: 'EC2', term: 'ec2' },
-    { id: 'a2', x: 7.0, y: 2.1, s: 0.46, h: 36, fill: '#f6c191', label: 'EC2', term: 'ec2' },
-    { id: 'c1', x: 5.0, y: 4.85, s: 0.46, h: 36, fill: '#f6c191', label: 'EC2', term: 'ec2' },
-    { id: 'c2', x: 7.0, y: 3.95, s: 0.46, h: 36, fill: '#f6c191', label: 'EC2', term: 'ec2' },
+    { id: 'alb', x: 2.4, y: 3.0, s: 0.45, sy: 1.2, h: 34, fill: '#bcd4f0', label: 'ALB', term: 'alb', ip: '10.0.0.20' },
+    { id: 'a1', x: 5.0, y: 1.1, s: 0.46, h: 36, fill: '#f6c191', label: 'EC2', term: 'ec2', ip: '10.0.1.11' },
+    { id: 'a2', x: 7.4, y: 2.4, s: 0.46, h: 36, fill: '#f6c191', label: 'EC2', term: 'ec2', ip: '10.0.1.12' },
+    { id: 'c1', x: 5.0, y: 4.85, s: 0.46, h: 36, fill: '#f6c191', label: 'EC2', term: 'ec2', ip: '10.0.3.11' },
+    { id: 'c2', x: 7.0, y: 3.95, s: 0.46, h: 36, fill: '#f6c191', label: 'EC2', term: 'ec2', ip: '10.0.3.12' },
   ],
   zones: [
-    { x0: 0, y0: 0, x1: 8.4, y1: 6, fill: 'rgba(255,255,255,.35)', dash: '8 6', label: 'VPC 10.0.0.0/16', labelAt: 'top', term: 'vpc' },
-    { x0: 3.6, y0: 0.4, x1: 7.8, y1: 2.7, fill: 'rgba(207,232,184,.45)', label: 'AZ-a', labelAt: 'top', term: 'az' },
-    { x0: 3.6, y0: 3.3, x1: 7.8, y1: 5.6, fill: 'rgba(188,212,240,.45)', label: 'AZ-c', labelAt: 'top', term: 'az' },
+    { x0: 0, y0: 0, x1: 8.5, y1: 6, fill: 'rgba(255,255,255,.35)', dash: '8 6', label: 'VPC 10.0.0.0/16', labelAt: 'top', term: 'vpc' },
+    { x0: 3.6, y0: 0.4, x1: 7.9, y1: 2.95, fill: 'rgba(207,232,184,.45)', label: 'AZ-a', labelAt: 'top', term: 'az' },
+    { x0: 3.6, y0: 3.35, x1: 7.9, y1: 5.6, fill: 'rgba(188,212,240,.45)', label: 'AZ-c', labelAt: 'top', term: 'az' },
   ],
 
   steps: [

@@ -25,11 +25,11 @@ export const sgNaclLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'user', x: -2.6, y: 1.4, s: 0.5, h: 22, fill: '#f4efe6', label: 'ユーザー' },
-    { id: 'attacker', x: -2.6, y: 4.2, s: 0.5, h: 22, fill: '#f3b7b0', label: '攻撃者' },
+    { id: 'user', x: -2.6, y: 1.4, s: 0.5, h: 22, fill: '#f4efe6', label: 'ユーザー', ip: '198.51.100.7' },
+    { id: 'attacker', x: -2.6, y: 4.2, s: 0.5, h: 22, fill: '#f3b7b0', label: '攻撃者', ip: '203.0.113.9' },
     { id: 'igw', x: 0, y: 2.8, s: 0.42, h: 28, fill: '#cfe8b8', label: 'IGW', term: 'igw' },
     { id: 'nacl', x: 1.8, y: 2.8, s: 0.16, sy: 1.2, h: 36, fill: '#f6e2a4', label: 'NACL', term: 'nacl' },
-    { id: 'ec2', x: 5, y: 2.8, s: 0.62, h: 42, fill: '#f6c191', label: 'EC2', term: 'ec2' },
+    { id: 'ec2', x: 5, y: 2.8, s: 0.62, h: 42, fill: '#f6c191', label: 'EC2', term: 'ec2', ip: '10.0.1.10' },
   ],
   zones: [
     { x0: 0, y0: 0, x1: 7, y1: 5.6, fill: 'rgba(255,255,255,.35)', dash: '8 6', label: 'VPC 10.0.0.0/16', labelAt: 'top', term: 'vpc' },

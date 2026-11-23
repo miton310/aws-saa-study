@@ -26,14 +26,14 @@ export const vpcNatLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'user', x: -2.6, y: 1.2, s: 0.5, h: 22, fill: '#f4efe6', label: 'ユーザー' },
-    { id: 'attacker', x: -2.6, y: 3.4, s: 0.5, h: 22, fill: '#f3b7b0', label: '攻撃者' },
-    { id: 'repo', x: -2.6, y: 5.6, s: 0.55, h: 22, fill: '#e9e4da', label: '外部リポジトリ', fontSize: 10.5 },
+    { id: 'user', x: -2.6, y: 1.2, s: 0.5, h: 22, fill: '#f4efe6', label: 'ユーザー', ip: '198.51.100.7' },
+    { id: 'attacker', x: -2.6, y: 3.4, s: 0.5, h: 22, fill: '#f3b7b0', label: '攻撃者', ip: '203.0.113.9' },
+    { id: 'repo', x: -2.6, y: 5.6, s: 0.55, h: 22, fill: '#e9e4da', label: '外部リポジトリ', fontSize: 10.5, ip: '192.0.2.80' },
     { id: 'igw', x: 0, y: 3, s: 0.42, h: 28, fill: '#cfe8b8', label: 'IGW', term: 'igw' },
-    { id: 'alb', x: 2.1, y: 1.9, s: 0.6, h: 34, fill: '#bcd4f0', label: 'ALB', term: 'alb' },
+    { id: 'alb', x: 2.1, y: 1.9, s: 0.6, h: 34, fill: '#bcd4f0', label: 'ALB', term: 'alb', ip: '10.0.1.20' },
     { id: 'nat', x: 2.1, y: 4.2, s: 0.55, h: 30, fill: '#f6e2a4', label: 'NAT GW', term: 'nat' },
-    { id: 'ec2', x: 5.6, y: 1.9, s: 0.62, h: 42, fill: '#f6c191', label: 'EC2', term: 'ec2' },
-    { id: 'rds', x: 8.6, y: 2.2, s: 0.62, h: 46, fill: '#d9cdf2', label: 'RDS', kind: 'cyl', term: 'rds' },
+    { id: 'ec2', x: 5.6, y: 1.9, s: 0.62, h: 42, fill: '#f6c191', label: 'EC2', term: 'ec2', ip: '10.0.2.10' },
+    { id: 'rds', x: 8.6, y: 2.2, s: 0.62, h: 46, fill: '#d9cdf2', label: 'RDS', kind: 'cyl', term: 'rds', ip: '10.0.3.10' },
   ],
   zones: [
     { x0: 0, y0: 0, x1: 10, y1: 6, fill: 'rgba(255,255,255,.35)', dash: '8 6', label: 'VPC 10.0.0.0/16', labelAt: 'top', term: 'vpc' },

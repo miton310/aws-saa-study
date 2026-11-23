@@ -29,6 +29,8 @@ export interface IsoNode {
   kind?: 'cube' | 'cyl'
   /** ホバーで出す用語（lib/terms.ts のキー） */
   term?: string
+  /** 図形の下に小さく添えるIPアドレス（パケットの流れ表と対応させる） */
+  ip?: string
 }
 
 export interface IsoZone {
