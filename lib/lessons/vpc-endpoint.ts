@@ -22,7 +22,7 @@ export const vpcEndpointLesson: Lesson = {
 
   nodes: [
     { id: 's3', x: -2.8, y: 0.9, s: 0.55, h: 40, fill: '#bcd4f0', label: 'S3', kind: 'cyl', term: 's3' },
-    { id: 'other', x: -2.8, y: 2.65, s: 0.42, h: 28, fill: '#e9e4da', label: '別のバケット', fontSize: 10, kind: 'cyl', term: 's3' },
+    { id: 'other', x: -2.8, y: 2.65, s: 0.5, h: 28, fill: '#e9e4da', label: '別のバケット', fontSize: 9.5, kind: 'cyl', term: 's3' },
     { id: 'sqs', x: -2.8, y: 4.4, s: 0.5, h: 26, fill: '#f6c191', label: 'SQS', term: 'sqs' },
     { id: 'igw', x: 0, y: 1.2, s: 0.4, h: 26, fill: '#cfe8b8', label: 'IGW', term: 'igw' },
     { id: 'gwep', x: 0, y: 2.8, s: 0.4, h: 26, fill: '#b9e3dc', label: 'GW EP', fontSize: 10.5, term: 'gwep' },

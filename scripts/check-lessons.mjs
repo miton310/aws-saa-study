@@ -11,6 +11,7 @@
 // PC・小さめのPC・スマホの3サイズで開いて、次を確かめます。
 //   - 吹き出しが図形・ほかの吹き出しに重なっていない／図の枠からはみ出していない
 //   - ゾーン名（VPC・AZ・サブネット）が図形に隠れていない
+//   - 図形の名前が図形の幅からはみ出していない
 //   - 図形の下の文字（IPアドレスなど）がほかの図形に重なっていない／はみ出していない
 //   - PCでは、ステップ欄が画面内に収まっている
 //   - ページでエラーが起きていない
@@ -38,6 +39,16 @@ function inspect() {
     const parts = [...g.children].slice(1).map((c) => box(c.getBBox()))
     const b = parts.reduce((a, c) => ({ x0: Math.min(a.x0, c.x0), y0: Math.min(a.y0, c.y0), x1: Math.max(a.x1, c.x1), y1: Math.max(a.y1, c.y1) }))
     return { id: g.dataset.node, b }
+  })
+
+  // 図形の名前：上の面（立方体はひし形、円柱は楕円）の幅に収まっているか
+  svg.querySelectorAll('[data-node]:not(.is-hidden)').forEach((g) => {
+    const label = [...g.children].find((c) => c.tagName === 'text')
+    const shapes = [...g.children].slice(1)
+    const top = shapes.find((c) => c.tagName === 'ellipse') ?? shapes.filter((c) => c.tagName === 'polygon').at(-1)
+    if (!label || !top) return
+    const over = label.getBBox().width - top.getBBox().width
+    if (over > 2) out.push(`図形 ${g.dataset.node} の名前「${label.textContent}」が図形の幅からはみ出しています（${Math.round(over)}px）`)
   })
 
   // 吹き出し
