@@ -202,5 +202,5 @@ export const ec2PurchasingLesson: Lesson = {
     { text: '専有ホストと専有インスタンス', atStep: 5 },
   ],
   prev: { title: 'SQS・SNS・EventBridge', href: '/learn/sqs-sns-eventbridge' },
-  next: { title: 'EBS・EFS・FSx の使い分け' },
+  next: { title: 'EBS・EFS・FSx の使い分け', href: '/learn/ebs-efs-fsx' },
 }

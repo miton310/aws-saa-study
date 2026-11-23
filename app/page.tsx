@@ -7,8 +7,8 @@ import './home.css'
 
 // 公開予定のレッスン（実装したら lib/lessons に移し、ここから消す）
 const UPCOMING: { category: CategorySlug; title: string }[] = [
-  { category: 's3', title: 'EBS・EFS・FSx の使い分け' },
   { category: 'cloudfront', title: 'CloudFront とキャッシュ' },
+  { category: 'rds', title: 'DynamoDB の基本' },
 ]
 
 
