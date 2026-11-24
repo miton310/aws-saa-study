@@ -32,7 +32,7 @@ export const route53BasicsLesson: Lesson = {
     { id: 'r53', x: 0.6, y: 0.2, s: 0.62, h: 40, fill: '#a8dcc5', label: 'Route 53', fontSize: 12, term: 'route53', sub: 'ホストゾーン example.com' },
     { id: 'albtk', x: 5.8, y: 1.2, s: 0.55, h: 34, fill: '#bcd4f0', label: 'ALB（東京）', fontSize: 10.5, term: 'alb', sub: TOKYO },
     { id: 'albos', x: 5.8, y: 4.4, s: 0.55, h: 34, fill: '#bcd4f0', label: 'ALB（大阪）', fontSize: 10.5, term: 'alb', sub: OSAKA },
-    { id: 'app', x: 5.0, y: 0.9, s: 0.5, h: 34, fill: '#f6c191', label: 'EC2', term: 'ec2', sub: '10.0.2.10' },
+    { id: 'app', x: 5.0, y: 0.9, s: 0.5, h: 34, fill: '#f6c191', label: 'EC2', kind: 'server', term: 'ec2', sub: '10.0.2.10' },
     { id: 'db', x: 7.4, y: 1.4, s: 0.55, h: 40, fill: '#d9cdf2', label: 'RDS', kind: 'cyl', term: 'rds', sub: 'db.corp.internal' },
   ],
   zones: [

@@ -31,7 +31,7 @@ export const vpcNatLesson: Lesson = {
     { id: 'igw', x: 0, y: 3, s: 0.42, h: 28, fill: '#cfe8b8', label: 'IGW', term: 'igw' },
     { id: 'alb', x: 2.1, y: 1.9, s: 0.6, h: 34, fill: '#bcd4f0', label: 'ALB', term: 'alb', sub: '10.0.1.20' },
     { id: 'nat', x: 2.1, y: 4.2, s: 0.55, h: 30, fill: '#f6e2a4', label: 'NAT GW', term: 'nat' },
-    { id: 'ec2', x: 5.6, y: 1.9, s: 0.62, h: 42, fill: '#f6c191', label: 'EC2', term: 'ec2', sub: '10.0.2.10' },
+    { id: 'ec2', x: 5.6, y: 1.9, s: 0.62, h: 42, fill: '#f6c191', label: 'EC2', kind: 'server', term: 'ec2', sub: '10.0.2.10' },
     { id: 'rds', x: 8.6, y: 2.2, s: 0.62, h: 46, fill: '#d9cdf2', label: 'RDS', kind: 'cyl', term: 'rds', sub: '10.0.3.10' },
   ],
   zones: [

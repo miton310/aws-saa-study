@@ -23,7 +23,7 @@ export const s3StorageLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'app', x: 0.2, y: 7.2, s: 0.5, h: 34, fill: '#f6c191', label: 'アプリ', fontSize: 12, term: 'ec2', sub: '10.0.2.10' },
+    { id: 'app', x: 0.2, y: 7.2, s: 0.5, h: 34, fill: '#f6c191', label: 'アプリ', fontSize: 12, kind: 'server', term: 'ec2', sub: '10.0.2.10' },
     { id: 'std', x: 1.6, y: 1.0, s: 0.55, h: 46, fill: '#cfe8b8', label: 'Standard', fontSize: 11, kind: 'cyl', term: 'storageclass', sub: 'ms・3AZ以上' },
     { id: 'ia', x: 4.0, y: 1.0, s: 0.55, h: 40, fill: '#bcd4f0', label: 'Standard-IA', fontSize: 10, kind: 'cyl', term: 'standardia', sub: 'ms・取り出し課金' },
     { id: 'oz', x: 6.4, y: 1.0, s: 0.55, h: 34, fill: '#e9e4da', label: 'One Zone-IA', fontSize: 10, kind: 'cyl', term: 'onezoneia', sub: 'ms・1AZのみ' },

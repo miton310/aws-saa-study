@@ -21,10 +21,10 @@ export const ebsEfsFsxLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'ec2a', x: 1.0, y: 0.6, s: 0.55, h: 38, fill: '#f6c191', label: 'EC2', term: 'ec2', sub: EA },
+    { id: 'ec2a', x: 1.0, y: 0.6, s: 0.55, h: 38, fill: '#f6c191', label: 'EC2', kind: 'server', term: 'ec2', sub: EA },
     { id: 'ebs', x: 3.4, y: 0.6, s: 0.55, h: 40, fill: '#bcd4f0', label: 'EBS', kind: 'cyl', term: 'ebs', sub: 'gp3 100GiB' },
     { id: 'istore', x: 1.2, y: -1.2, s: 0.45, h: 22, fill: '#e9e4da', label: '一時', fontSize: 11, term: 'instancestore', sub: '一時ディスク' },
-    { id: 'ec2c', x: 1.0, y: 4.4, s: 0.55, h: 38, fill: '#f6c191', label: 'EC2', term: 'ec2', sub: EC },
+    { id: 'ec2c', x: 1.0, y: 4.4, s: 0.55, h: 38, fill: '#f6c191', label: 'EC2', kind: 'server', term: 'ec2', sub: EC },
     { id: 'ebs2', x: 3.4, y: 4.4, s: 0.55, h: 40, fill: '#bcd4f0', label: 'EBS', kind: 'cyl', term: 'ebs', sub: 'スナップショットから復元' },
     { id: 'snap', x: 6.4, y: 0.6, s: 0.55, h: 34, fill: '#cfe8b8', label: 'スナップ', fontSize: 10.5, kind: 'cyl', term: 'snapshot', sub: 'リージョンに保存' },
     { id: 'efs', x: 6.4, y: 3.6, s: 0.62, h: 40, fill: '#f6e2a4', label: 'EFS', term: 'efs', sub: '共有ファイル（NFS）' },

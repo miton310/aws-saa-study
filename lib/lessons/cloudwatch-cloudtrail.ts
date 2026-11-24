@@ -22,7 +22,7 @@ export const cloudwatchCloudtrailLesson: Lesson = {
 
   nodes: [
     { id: 'admin', x: -3.2, y: 0.6, s: 0.5, h: 26, fill: '#f4efe6', label: '管理者', kind: 'person', term: 'iamuser', sub: 'alice' },
-    { id: 'ec2', x: 0.4, y: 0.6, s: 0.55, h: 38, fill: '#f6c191', label: 'EC2', term: 'ec2', sub: '10.0.2.10' },
+    { id: 'ec2', x: 0.4, y: 0.6, s: 0.55, h: 38, fill: '#f6c191', label: 'EC2', kind: 'server', term: 'ec2', sub: '10.0.2.10' },
     { id: 'cw', x: 3.6, y: 0.6, s: 0.62, h: 40, fill: '#cfe8b8', label: 'CloudWatch', fontSize: 9, term: 'cloudwatch', sub: 'メトリクス・ログ' },
     { id: 'sns', x: 6.6, y: 0.6, s: 0.5, h: 30, fill: '#d9cdf2', label: 'SNS', term: 'sns', sub: 'メールで通知' },
     { id: 'ct', x: 0.4, y: 4.0, s: 0.6, h: 36, fill: '#f6e2a4', label: 'CloudTrail', fontSize: 9, term: 'cloudtrail', sub: 'API の記録' },

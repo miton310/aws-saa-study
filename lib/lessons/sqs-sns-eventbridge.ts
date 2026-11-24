@@ -22,9 +22,9 @@ export const sqsSnsEventBridgeLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'web', x: -1.4, y: 2.4, s: 0.58, h: 38, fill: '#f6c191', label: '注文受付', fontSize: 11, term: 'ec2', sub: 'EC2' },
+    { id: 'web', x: -1.4, y: 2.4, s: 0.58, h: 38, fill: '#f6c191', label: '注文受付', fontSize: 11, kind: 'server', term: 'ec2', sub: 'EC2' },
     { id: 'queue', x: 2.0, y: 2.4, s: 0.62, h: 30, fill: '#f6e2a4', label: 'SQS', term: 'sqs', sub: 'orders キュー' },
-    { id: 'worker', x: 5.4, y: 2.4, s: 0.58, h: 38, fill: '#f6c191', label: '注文処理', fontSize: 11, term: 'ec2', sub: 'EC2' },
+    { id: 'worker', x: 5.4, y: 2.4, s: 0.58, h: 38, fill: '#f6c191', label: '注文処理', fontSize: 11, kind: 'server', term: 'ec2', sub: 'EC2' },
     { id: 'dlq', x: 5.4, y: 5.2, s: 0.5, h: 26, fill: '#f3b7b0', label: 'DLQ', term: 'dlq', sub: 'orders-dlq' },
     { id: 'sns', x: 2.0, y: -0.8, s: 0.58, h: 34, fill: '#d9cdf2', label: 'SNS', term: 'sns', sub: '注文トピック' },
     { id: 'eb', x: 2.0, y: -0.8, s: 0.62, h: 34, fill: '#bcd4f0', label: 'EventBridge', fontSize: 9.5, term: 'eventbridge', sub: 'イベントバス' },

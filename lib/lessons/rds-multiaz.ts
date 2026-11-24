@@ -26,7 +26,7 @@ export const rdsMultiAzLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'app', x: 0.6, y: 2.5, s: 0.55, h: 36, fill: '#f6c191', label: 'EC2（アプリ）', fontSize: 10.5, term: 'ec2', sub: APP },
+    { id: 'app', x: 0.6, y: 2.5, s: 0.55, h: 36, fill: '#f6c191', label: 'EC2（アプリ）', fontSize: 10.5, kind: 'server', term: 'ec2', sub: APP },
     { id: 'primary', x: 4.2, y: 1.0, s: 0.62, h: 46, fill: '#d9cdf2', label: 'プライマリ', fontSize: 11, kind: 'cyl', term: 'rds', sub: PRI },
     { id: 'standby', x: 4.2, y: 4.0, s: 0.62, h: 46, fill: '#e9e4da', label: 'スタンバイ', fontSize: 11, kind: 'cyl', term: 'standby', sub: STB },
     { id: 'replica', x: 7.0, y: 1.0, s: 0.58, h: 42, fill: '#bcd4f0', label: 'レプリカ', fontSize: 11, kind: 'cyl', term: 'readreplica', sub: RR },

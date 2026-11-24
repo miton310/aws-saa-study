@@ -339,6 +339,27 @@ function subAnchor(n: IsoNode): Pt {
   return [x, y + 14]
 }
 
+/** サーバー：側面にラックの仕切り線と、稼働ランプを描く（上面より先に描く） */
+function ServerDetail({ n }: { n: IsoNode }) {
+  const { x, y, s, h } = n
+  const t = n.sy ?? s
+  const units = 3
+  const line = { stroke: shade(n.fill, 0.45), strokeWidth: 1.4 }
+  const out: ReactNode[] = []
+  for (let i = 1; i < units; i++) {
+    const z = (h * i) / units
+    const [a1, a2] = [P(x - s, y + t, z), P(x + s, y + t, z)]
+    const [b1, b2] = [P(x + s, y - t, z), P(x + s, y + t, z)]
+    out.push(<line key={`l${i}`} x1={a1[0]} y1={a1[1]} x2={a2[0]} y2={a2[1]} {...line} />)
+    out.push(<line key={`r${i}`} x1={b1[0]} y1={b1[1]} x2={b2[0]} y2={b2[1]} {...line} />)
+  }
+  for (let i = 0; i < units; i++) {
+    const [cx, cy] = P(x - s + 2 * s * 0.18, y + t, (h * (i + 0.5)) / units)
+    out.push(<circle key={`d${i}`} cx={cx} cy={cy} r={2.3} fill="#7fbf66" stroke={INK} strokeWidth={0.8} />)
+  }
+  return <>{out}</>
+}
+
 /** 人の形の寸法：胴体（下が楕円、上が丸い肩）と頭 */
 function personDims(n: IsoNode) {
   const rx = Math.SQRT2 * n.s * 0.78 * ISO_W
@@ -384,6 +405,7 @@ function IsoNodeShape({ n, dim, hidden }: { n: IsoNode; dim: boolean; hidden: bo
       <>
         <polygon points={pts([B, C, C0, B0])} fill={shade(n.fill, 0.1)} {...st} />
         <polygon points={pts([D, C, C0, D0])} fill={shade(n.fill, 0.2)} {...st} />
+        {n.kind === 'server' && <ServerDetail n={n} />}
         <polygon points={pts([A, B, C, D])} fill={n.fill} {...st} />
       </>
     )
