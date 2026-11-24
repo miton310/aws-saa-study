@@ -38,6 +38,7 @@ SAA-C03 の公式「対象サービス一覧」（In-Scope AWS Services）と突
 | 08 セキュリティ・ID | IAMポリシーとロール / KMS と暗号化 | Organizations と SCP / WAF・Shield |
 | 09 CDN・グローバル配信 | CloudFront とキャッシュ | Route 53 との組み合わせ / AWS WAF |
 | 11 監視・運用 | CloudWatch と CloudTrail | Systems Manager / Trusted Advisor |
-| 10・12・13 | — | 重要度の高い章のあとで着手 |
+| 10 コンテナ | ECS と Fargate | EKS の基本 |
+| 12・13 | — | 重要度の高い章のあとで着手 |
 
 作る順番：重要度★★★の章から（Route 53 は公開済み）。

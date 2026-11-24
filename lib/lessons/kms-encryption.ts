@@ -196,5 +196,5 @@ export const kmsEncryptionLesson: Lesson = {
     { text: '暗号化方式の選び方', atStep: 5 },
   ],
   prev: { title: 'CloudWatch と CloudTrail', href: '/learn/cloudwatch-cloudtrail' },
-  next: { title: 'ECS と Fargate' },
+  next: { title: 'ECS と Fargate', href: '/learn/ecs-fargate' },
 }
