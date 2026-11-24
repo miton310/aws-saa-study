@@ -35,7 +35,7 @@ SAA-C03 の公式「対象サービス一覧」（In-Scope AWS Services）と突
 | 05 ストレージ | ストレージクラスとライフサイクル / EBS・EFS・FSx の使い分け | Storage Gateway / S3 のセキュリティ |
 | 06 データベース | Multi-AZとリードレプリカ / DynamoDB の基本 | Aurora・ElastiCache |
 | 07 疎結合・サーバーレス | SQS・SNS・EventBridge | Lambda と API Gateway / Step Functions |
-| 08 セキュリティ・ID | IAMポリシーとロール | KMS / Organizations と SCP |
+| 08 セキュリティ・ID | IAMポリシーとロール / KMS と暗号化 | Organizations と SCP / WAF・Shield |
 | 09 CDN・グローバル配信 | CloudFront とキャッシュ | Route 53 との組み合わせ / AWS WAF |
 | 11 監視・運用 | CloudWatch と CloudTrail | Systems Manager / Trusted Advisor |
 | 10・12・13 | — | 重要度の高い章のあとで着手 |

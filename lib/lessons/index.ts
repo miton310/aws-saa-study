@@ -16,7 +16,8 @@ import { ebsEfsFsxLesson } from './ebs-efs-fsx'
 import { cloudfrontCacheLesson } from './cloudfront-cache'
 import { dynamodbBasicsLesson } from './dynamodb-basics'
 import { cloudwatchCloudtrailLesson } from './cloudwatch-cloudtrail'
+import { kmsEncryptionLesson } from './kms-encryption'
 
-export const LESSONS: Lesson[] = [vpcNatLesson, sgNaclLesson, peeringTgwLesson, vpcEndpointLesson, route53BasicsLesson, elbAsgLesson, s3StorageLesson, rdsMultiAzLesson, iamBasicsLesson, sqsSnsEventBridgeLesson, ec2PurchasingLesson, ebsEfsFsxLesson, cloudfrontCacheLesson, dynamodbBasicsLesson, cloudwatchCloudtrailLesson].map(orientNodes)
+export const LESSONS: Lesson[] = [vpcNatLesson, sgNaclLesson, peeringTgwLesson, vpcEndpointLesson, route53BasicsLesson, elbAsgLesson, s3StorageLesson, rdsMultiAzLesson, iamBasicsLesson, sqsSnsEventBridgeLesson, ec2PurchasingLesson, ebsEfsFsxLesson, cloudfrontCacheLesson, dynamodbBasicsLesson, cloudwatchCloudtrailLesson, kmsEncryptionLesson].map(orientNodes)
 
 export const getLesson = (slug: string) => LESSONS.find((l) => l.slug === slug)

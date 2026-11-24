@@ -7,8 +7,8 @@ import './home.css'
 
 // 公開予定のレッスン（実装したら lib/lessons に移し、ここから消す）
 const UPCOMING: { category: CategorySlug; title: string }[] = [
-  { category: 'iam', title: 'KMS と暗号化' },
   { category: 'containers', title: 'ECS と Fargate' },
+  { category: 'vpc', title: 'VPN と Direct Connect' },
 ]
 
 

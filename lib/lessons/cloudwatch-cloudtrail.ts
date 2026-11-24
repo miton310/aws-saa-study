@@ -188,5 +188,5 @@ export const cloudwatchCloudtrailLesson: Lesson = {
     { text: 'AWS Config とルール', atStep: 5 },
   ],
   prev: { title: 'DynamoDB の基本', href: '/learn/dynamodb-basics' },
-  next: { title: 'KMS と暗号化' },
+  next: { title: 'KMS と暗号化', href: '/learn/kms-encryption' },
 }
