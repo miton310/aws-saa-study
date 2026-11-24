@@ -32,7 +32,7 @@ export const ec2PurchasingLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'user', x: -3.6, y: 0.8, s: 0.5, h: 24, fill: '#f4efe6', label: 'ユーザー', sub: USER },
+    { id: 'user', x: -3.6, y: 0.8, s: 0.5, h: 24, fill: '#f4efe6', label: 'ユーザー', kind: 'person', sub: USER },
     { id: 'alb', x: -1.2, y: 0.8, s: 0.58, h: 32, fill: '#bcd4f0', label: 'ALB', term: 'alb' },
     { id: 'w1', x: 1.4, y: 0.8, s: 0.52, h: 36, fill: '#f6c191', label: 'EC2', term: 'ec2', sub: W1 },
     { id: 'w2', x: 3.3, y: 0.8, s: 0.52, h: 36, fill: '#f6c191', label: 'EC2', term: 'ec2', sub: W2 },

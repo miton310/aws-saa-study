@@ -25,8 +25,8 @@ export const vpcNatLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'user', x: -2.6, y: 1.2, s: 0.5, h: 22, fill: '#f4efe6', label: 'ユーザー', sub: '198.51.100.7' },
-    { id: 'attacker', x: -2.6, y: 3.4, s: 0.5, h: 22, fill: '#f3b7b0', label: '攻撃者', sub: '203.0.113.9' },
+    { id: 'user', x: -2.6, y: 1.2, s: 0.5, h: 22, fill: '#f4efe6', label: 'ユーザー', kind: 'person', sub: '198.51.100.7' },
+    { id: 'attacker', x: -2.6, y: 3.4, s: 0.5, h: 22, fill: '#f3b7b0', label: '攻撃者', kind: 'person', sub: '203.0.113.9' },
     { id: 'repo', x: -2.6, y: 5.6, s: 0.55, h: 22, fill: '#e9e4da', label: '外部リポジトリ', fontSize: 10.5, sub: '192.0.2.80' },
     { id: 'igw', x: 0, y: 3, s: 0.42, h: 28, fill: '#cfe8b8', label: 'IGW', term: 'igw' },
     { id: 'alb', x: 2.1, y: 1.9, s: 0.6, h: 34, fill: '#bcd4f0', label: 'ALB', term: 'alb', sub: '10.0.1.20' },

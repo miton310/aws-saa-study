@@ -27,7 +27,7 @@ export const route53BasicsLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'client', x: -3.2, y: 2.6, s: 0.5, h: 24, fill: '#f4efe6', label: 'ユーザー', sub: USER },
+    { id: 'client', x: -3.2, y: 2.6, s: 0.5, h: 24, fill: '#f4efe6', label: 'ユーザー', kind: 'person', sub: USER },
     { id: 'resolver', x: -0.8, y: 4.8, s: 0.5, h: 30, fill: '#e9e4da', label: 'リゾルバー', fontSize: 11, term: 'resolver', sub: '名前解決の代行・キャッシュ' },
     { id: 'r53', x: 0.6, y: 0.2, s: 0.62, h: 40, fill: '#a8dcc5', label: 'Route 53', fontSize: 12, term: 'route53', sub: 'ホストゾーン example.com' },
     { id: 'albtk', x: 5.8, y: 1.2, s: 0.55, h: 34, fill: '#bcd4f0', label: 'ALB（東京）', fontSize: 10.5, term: 'alb', sub: TOKYO },

@@ -25,7 +25,7 @@ export const iamBasicsLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'dev', x: -2.8, y: 1.4, s: 0.5, h: 26, fill: '#f4efe6', label: '開発者', term: 'iamuser', sub: 'alice' },
+    { id: 'dev', x: -2.8, y: 1.4, s: 0.5, h: 26, fill: '#f4efe6', label: '開発者', kind: 'person', term: 'iamuser', sub: 'alice' },
     { id: 'iam', x: 1.4, y: 1.4, s: 0.6, h: 38, fill: '#f3b7b0', label: 'IAM', term: 'iam', sub: '権限を評価' },
     { id: 's3', x: 5.4, y: 1.8, s: 0.6, h: 44, fill: '#cfe8b8', label: 'S3', kind: 'cyl', term: 'bucket', sub: 'reports バケット' },
     { id: 'ec2', x: 1.4, y: 4.6, s: 0.6, h: 40, fill: '#f6c191', label: 'EC2', term: 'ec2', sub: 'ロール：app-role' },

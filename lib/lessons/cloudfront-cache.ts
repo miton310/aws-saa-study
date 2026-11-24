@@ -23,7 +23,7 @@ export const cloudfrontCacheLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'user', x: -3.6, y: 1.0, s: 0.5, h: 24, fill: '#f4efe6', label: 'ユーザー', sub: USER },
+    { id: 'user', x: -3.6, y: 1.0, s: 0.5, h: 24, fill: '#f4efe6', label: 'ユーザー', kind: 'person', sub: USER },
     { id: 'edge', x: -0.8, y: 2.4, s: 0.6, h: 34, fill: '#f3b7b0', label: 'エッジ', fontSize: 11, term: 'edge', sub: 'CloudFront（大阪）' },
     { id: 's3', x: 3.6, y: -0.2, s: 0.58, h: 42, fill: '#cfe8b8', label: 'S3', kind: 'cyl', term: 'origin', sub: 'オリジン：画像' },
     { id: 'alb', x: 3.6, y: 3.0, s: 0.58, h: 32, fill: '#bcd4f0', label: 'ALB', term: 'origin', sub: 'オリジン：API' },

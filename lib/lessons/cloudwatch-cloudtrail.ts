@@ -21,7 +21,7 @@ export const cloudwatchCloudtrailLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'admin', x: -3.2, y: 0.6, s: 0.5, h: 26, fill: '#f4efe6', label: '管理者', term: 'iamuser', sub: 'alice' },
+    { id: 'admin', x: -3.2, y: 0.6, s: 0.5, h: 26, fill: '#f4efe6', label: '管理者', kind: 'person', term: 'iamuser', sub: 'alice' },
     { id: 'ec2', x: 0.4, y: 0.6, s: 0.55, h: 38, fill: '#f6c191', label: 'EC2', term: 'ec2', sub: '10.0.2.10' },
     { id: 'cw', x: 3.6, y: 0.6, s: 0.62, h: 40, fill: '#cfe8b8', label: 'CloudWatch', fontSize: 9, term: 'cloudwatch', sub: 'メトリクス・ログ' },
     { id: 'sns', x: 6.6, y: 0.6, s: 0.5, h: 30, fill: '#d9cdf2', label: 'SNS', term: 'sns', sub: 'メールで通知' },

@@ -327,6 +327,10 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
 
 /** 図形の下の文字を置く位置：図形のいちばん手前（下）の点のすぐ下 */
 function subAnchor(n: IsoNode): Pt {
+  if (n.kind === 'person') {
+    const [gx, gy] = P(n.x, n.y)
+    return [gx, gy + personDims(n).ry + 14]
+  }
   if (n.kind === 'cyl') {
     const [gx, gy] = P(n.x, n.y)
     return [gx, gy + Math.SQRT2 * n.s * 0.95 * ISO_H + 14]
@@ -335,13 +339,33 @@ function subAnchor(n: IsoNode): Pt {
   return [x, y + 14]
 }
 
+/** 人の形の寸法：胴体（下が楕円、上が丸い肩）と頭 */
+function personDims(n: IsoNode) {
+  const rx = Math.SQRT2 * n.s * 0.78 * ISO_W
+  const ry = rx * (ISO_H / ISO_W)
+  const rh = rx * 0.6
+  return { rx, ry, rh, dome: ry * 1.5 }
+}
+
 function IsoNodeShape({ n, dim, hidden }: { n: IsoNode; dim: boolean; hidden: boolean }) {
   const st = { stroke: INK, strokeWidth: 2.4, strokeLinejoin: 'round' as const }
   const [gx, gy] = P(n.x, n.y)
   const [tx, ty] = P(n.x, n.y, n.h)
   let shape: ReactNode
+  let labelY = ty + 4
 
-  if (n.kind === 'cyl') {
+  if (n.kind === 'person') {
+    const { rx, ry, rh, dome } = personDims(n)
+    const headY = ty - dome - rh * 0.75
+    shape = (
+      <>
+        <path d={`M${gx - rx},${gy} L${gx - rx},${ty} A${rx},${dome} 0 0 1 ${gx + rx},${ty} L${gx + rx},${gy} A${rx},${ry} 0 0 1 ${gx - rx},${gy} Z`} fill={n.fill} {...st} />
+        <path d={`M${gx},${ty - dome} L${gx},${gy + ry}`} stroke={shade(n.fill, 0.25)} strokeWidth={1.6} fill="none" />
+        <circle cx={gx} cy={headY} r={rh} fill="#fffaf3" {...st} />
+      </>
+    )
+    labelY = headY - rh - 7
+  } else if (n.kind === 'cyl') {
     const r = n.s * 0.95
     const rx = Math.SQRT2 * r * ISO_W
     const ry = Math.SQRT2 * r * ISO_H
@@ -370,7 +394,7 @@ function IsoNodeShape({ n, dim, hidden }: { n: IsoNode; dim: boolean; hidden: bo
       {/* 影（先頭の子要素。外形計算では除外する） */}
       <ellipse cx={gx + 6} cy={gy + 8} rx={Math.min(n.s, n.sy ?? n.s) * ISO_W * 1.6} ry={Math.min(n.s, n.sy ?? n.s) * ISO_H * 1.6} fill="rgba(31,27,22,.10)" />
       {shape}
-      <text x={tx} y={ty + 4} textAnchor="middle" fontSize={n.fontSize ?? 13} fontWeight={700} fill={INK} stroke="#fffaf3" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">
+      <text x={tx} y={labelY} textAnchor="middle" fontSize={n.fontSize ?? 13} fontWeight={700} fill={INK} stroke="#fffaf3" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">
         {n.label}
       </text>
     </g>

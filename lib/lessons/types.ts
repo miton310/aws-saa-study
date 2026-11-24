@@ -26,7 +26,8 @@ export interface IsoNode {
   fill: string
   label: string
   fontSize?: number
-  kind?: 'cube' | 'cyl'
+  /** 形：箱（初期値）・円柱（DB・ストレージ）・人（利用者・管理者・攻撃者） */
+  kind?: 'cube' | 'cyl' | 'person'
   /** ホバーで出す用語（lib/terms.ts のキー） */
   term?: string
   /** 図形の下に小さく添える短い文字（IPアドレス、取り出し時間など） */

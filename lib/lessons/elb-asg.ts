@@ -31,7 +31,7 @@ export const elbAsgLesson: Lesson = {
   badge: '頻出',
 
   nodes: [
-    { id: 'user', x: -2.6, y: 3.0, s: 0.5, h: 22, fill: '#f4efe6', label: 'ユーザー', sub: '198.51.100.7' },
+    { id: 'user', x: -2.6, y: 3.0, s: 0.5, h: 22, fill: '#f4efe6', label: 'ユーザー', kind: 'person', sub: '198.51.100.7' },
     { id: 'igw', x: 0, y: 3.0, s: 0.4, h: 26, fill: '#cfe8b8', label: 'IGW', term: 'igw' },
     { id: 'alb', x: 2.4, y: 3.0, s: 0.45, sy: 1.2, h: 34, fill: '#bcd4f0', label: 'ALB', term: 'alb', sub: '10.0.0.20' },
     { id: 'a1', x: 5.0, y: 1.1, s: 0.46, h: 36, fill: '#f6c191', label: 'EC2', term: 'ec2', sub: '10.0.1.11' },
