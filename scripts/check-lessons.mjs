@@ -45,9 +45,11 @@ function inspect() {
   svg.querySelectorAll('[data-node]:not(.is-hidden)').forEach((g) => {
     const label = [...g.children].find((c) => c.tagName === 'text')
     const shapes = [...g.children].slice(1)
-    const top = shapes.find((c) => c.tagName === 'ellipse') ?? shapes.filter((c) => c.tagName === 'polygon').at(-1)
-    if (!label || !top) return
-    const over = label.getBBox().width - top.getBBox().width
+    // いちばん幅の広い面（箱の上面・円柱の上面・門の笠木など）と比べる
+    const faces = shapes.flatMap((c) => (c.matches('polygon, ellipse') ? [c] : [...c.querySelectorAll('polygon, ellipse')]))
+    if (!label || faces.length === 0) return
+    const topW = Math.max(...faces.map((f) => f.getBBox().width))
+    const over = label.getBBox().width - topW
     if (over > 2) out.push(`図形 ${g.dataset.node} の名前「${label.textContent}」が図形の幅からはみ出しています（${Math.round(over)}px）`)
   })
 

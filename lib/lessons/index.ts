@@ -1,5 +1,6 @@
 // レッスンの登録簿。新しいレッスンはここに追加するだけで /learn/<slug> が生える。
 import type { Lesson } from './types'
+import { orientNodes } from './orient'
 import { vpcNatLesson } from './vpc-nat'
 import { sgNaclLesson } from './sg-nacl'
 import { peeringTgwLesson } from './peering-tgw'
@@ -16,6 +17,6 @@ import { cloudfrontCacheLesson } from './cloudfront-cache'
 import { dynamodbBasicsLesson } from './dynamodb-basics'
 import { cloudwatchCloudtrailLesson } from './cloudwatch-cloudtrail'
 
-export const LESSONS: Lesson[] = [vpcNatLesson, sgNaclLesson, peeringTgwLesson, vpcEndpointLesson, route53BasicsLesson, elbAsgLesson, s3StorageLesson, rdsMultiAzLesson, iamBasicsLesson, sqsSnsEventBridgeLesson, ec2PurchasingLesson, ebsEfsFsxLesson, cloudfrontCacheLesson, dynamodbBasicsLesson, cloudwatchCloudtrailLesson]
+export const LESSONS: Lesson[] = [vpcNatLesson, sgNaclLesson, peeringTgwLesson, vpcEndpointLesson, route53BasicsLesson, elbAsgLesson, s3StorageLesson, rdsMultiAzLesson, iamBasicsLesson, sqsSnsEventBridgeLesson, ec2PurchasingLesson, ebsEfsFsxLesson, cloudfrontCacheLesson, dynamodbBasicsLesson, cloudwatchCloudtrailLesson].map(orientNodes)
 
 export const getLesson = (slug: string) => LESSONS.find((l) => l.slug === slug)

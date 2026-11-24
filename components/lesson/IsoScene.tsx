@@ -7,7 +7,8 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { FlowColor, IsoNode, IsoZone, LessonStep } from '@/lib/lessons/types'
-import { ISO_H, ISO_W, P, anchorOf, pts, shade, type Pt } from './iso'
+import { ISO_H, ISO_W, P, pts, shade, type Pt } from './iso'
+import { anchorOf, isSpecial, specialShape, specialSubAnchor } from './shapes'
 
 export const FLOW_COLORS: Record<FlowColor, string> = {
   req: '#a58be0',
@@ -327,6 +328,7 @@ export default function IsoScene({ nodes, zones, step, playing, replayKey, ariaL
 
 /** 図形の下の文字を置く位置：図形のいちばん手前（下）の点のすぐ下 */
 function subAnchor(n: IsoNode): Pt {
+  if (isSpecial(n)) return specialSubAnchor(n)
   if (n.kind === 'person') {
     const [gx, gy] = P(n.x, n.y)
     return [gx, gy + personDims(n).ry + 14]
@@ -375,7 +377,11 @@ function IsoNodeShape({ n, dim, hidden }: { n: IsoNode; dim: boolean; hidden: bo
   let shape: ReactNode
   let labelY = ty + 4
 
-  if (n.kind === 'person') {
+  if (isSpecial(n)) {
+    const sp = specialShape(n)
+    shape = sp.shape
+    labelY = sp.labelY
+  } else if (n.kind === 'person') {
     const { rx, ry, rh, dome } = personDims(n)
     const headY = ty - dome - rh * 0.75
     shape = (

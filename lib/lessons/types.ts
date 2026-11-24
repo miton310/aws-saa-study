@@ -26,8 +26,14 @@ export interface IsoNode {
   fill: string
   label: string
   fontSize?: number
-  /** 形：箱（初期値）・円柱（DB・ストレージ）・人（利用者・管理者・攻撃者）・サーバー（EC2） */
-  kind?: 'cube' | 'cyl' | 'person' | 'server'
+  /**
+   * 形：箱（初期値）・円柱（DB・ストレージ）・人（利用者・管理者・攻撃者）・サーバー（EC2）・
+   * ロードバランサー（台座から3方向の矢印）・ゲートウェイ（鳥居。線とパケットが柱の間をくぐる）・
+   * NATゲートウェイ（鳥居＋片開きの扉）・キュー（トレイに封筒が並ぶ）
+   */
+  kind?: 'cube' | 'cyl' | 'person' | 'server' | 'lb' | 'gateway' | 'nat' | 'queue'
+  /** 門・キューの通る向き。省略時は flows のつながりから自動で決まる（lib/lessons/orient.ts） */
+  axis?: 'x' | 'y'
   /** ホバーで出す用語（lib/terms.ts のキー） */
   term?: string
   /** 図形の下に小さく添える短い文字（IPアドレス、取り出し時間など） */

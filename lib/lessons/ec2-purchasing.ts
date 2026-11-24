@@ -33,11 +33,11 @@ export const ec2PurchasingLesson: Lesson = {
 
   nodes: [
     { id: 'user', x: -3.6, y: 0.8, s: 0.5, h: 24, fill: '#f4efe6', label: 'ユーザー', kind: 'person', sub: USER },
-    { id: 'alb', x: -1.2, y: 0.8, s: 0.58, h: 32, fill: '#bcd4f0', label: 'ALB', term: 'alb' },
+    { id: 'alb', x: -1.2, y: 0.8, s: 0.58, h: 32, fill: '#bcd4f0', label: 'ALB', kind: 'lb', term: 'alb' },
     { id: 'w1', x: 1.4, y: 0.8, s: 0.52, h: 36, fill: '#f6c191', label: 'EC2', kind: 'server', term: 'ec2', sub: W1 },
     { id: 'w2', x: 3.3, y: 0.8, s: 0.52, h: 36, fill: '#f6c191', label: 'EC2', kind: 'server', term: 'ec2', sub: W2 },
     { id: 'w3', x: 5.4, y: 0.8, s: 0.52, h: 36, fill: '#f6c191', label: 'EC2', kind: 'server', term: 'ec2', sub: W3 },
-    { id: 'jobs', x: -1.2, y: 4.0, s: 0.55, h: 28, fill: '#f6e2a4', label: 'SQS', term: 'sqs', sub: 'ジョブのキュー' },
+    { id: 'jobs', x: -1.2, y: 4.0, s: 0.55, h: 28, fill: '#f6e2a4', label: 'SQS', kind: 'queue', term: 'sqs', sub: 'ジョブのキュー' },
     { id: 's1', x: 1.6, y: 4.0, s: 0.52, h: 36, fill: '#cfe8b8', label: 'EC2', kind: 'server', term: 'ec2', sub: B1 },
     { id: 's2', x: 3.3, y: 4.0, s: 0.52, h: 36, fill: '#cfe8b8', label: 'EC2', kind: 'server', term: 'ec2', sub: B2 },
     { id: 'dh', x: 7.0, y: 4.5, s: 0.55, h: 38, fill: '#d9cdf2', label: 'EC2', kind: 'server', term: 'ec2', sub: '専有ホスト上' },
